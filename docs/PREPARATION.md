@@ -1,0 +1,33 @@
+# Preparation methods and boundaries
+
+## Source inputs and linkage
+
+M01 retains source rows and numeric Stata category codes, recording value labels separately. Identifier normalization rejects missing, ambiguous or colliding keys. Declared date formats are explicit; malformed nonempty values cannot silently become missing. CSV width, encoding, required fields and declared child-level uniqueness are checked before linkage. The optional wheeze CSV companion is aligned by identifier and compared across every substantive field, including dates and event names. Numeric tolerance accommodates export precision; categorical values, missingness and dates must agree.
+
+Shared preparation constructs first/recurrent TB histories and measurement-specific before/after states, including same-day diagnosis in post-TB observations. It preserves original source codes and adds canonical visit labels. Pre/post-bronchodilator GLI scores, selected South African oscillometry reference scores and paired columns are recalculated from source measurements. Unsupported reference ranges and nonpositive measurements do not receive unsupported scores.
+
+The selected GLI Global lookup is `GLIgl_lookup` from rspiro version 0.5; its supplied DESCRIPTION records GPL (>= 2). The lookup is supplied separately and identified by checksum. Python `rdata` reads it; no R fitting is required. Lookup redistribution terms remain distinct from the repository's eventual reuse license.
+
+Baseline and PFT sex have different explicit encodings. Baseline-wide covariate standardization and respiratory-cohort birthweight standardization retain their separate original scaling samples. M02 calls the shared deterministic linkage/scoring utilities; M03 then exports final model-specific contracts without depending on archived derived files.
+
+## Cohorts and descriptive rules
+
+The joint population comprises children represented in the PFT source. The descriptive population is the union of selected eligible outcome samples with the selected timing restrictions. Each later analytical sample remains separately defined. Source PFT representation does not mean contribution to every modeled outcome.
+
+Table 1 uses explicit fields, denominators and summary rules; parity uses median/quartiles. Verified inherited binary recodes for sex, site, ethnicity, prematurity, HIV exposure, child HIV and low birthweight use equality to the specified positive code. A missing source value therefore enters the reference category for those fields only. Original values and missing-to-reference counts remain available in the private audit. Smoking/alcohol direct indicators retain missing denominators. Small aggregate counts are not suppressed.
+
+Child flow and maternal livebirth/plurality counts are derived from supplied child records. Antenatal enrollment, antenatal loss to follow-up, pregnancy loss and total antenatal exclusions require an earlier recruitment/disposition source. Those four nodes remain missing with `not_reconstructable_from_supplied_inputs` status; values from the manuscript are not substituted. The modality schedule records observed valid measurements by modality and nominal visit.
+
+## Model preparation
+
+There are 75 PFT contracts covering primary continuous spirometry, binary patterns, trajectories, individual mechanics, covariate/window sensitivities, unpaired/paired/change MMEF, X6 and 17 pre-TB Cox outcomes. Shared-factor summaries will use primary posterior draws later. Every contract retains its selected dates, age rules, pairing, nuisance design, scale, follow-up arrays and child weights. Nominal visits and exact-age windows are separate rules.
+
+Primary nuisance trends are estimated on pre/no-TB observations using the selected visit, height and sex specification. These deterministic preparation calculations do not refit later joint outcome models. Cox measurement carry-forward ends at the earliest next eligible measurement, two-year ceiling, first TB or selected censor. M09 must still verify Cox estimation and robust covariance.
+
+Respiratory preparation uses the fixed descriptive cohort. Calendar age ten years six months, formal exit and the configured administrative endpoint define censoring, with measurements strictly before censor and exact age below 10.5. Scheduled wheeze and participant-initiated episodes are separate processes. Consecutive qualifying contacts at most 30 days apart form one episode; there is no post-diagnosis lag. Risk time is split at age boundaries and exact TB timing. Primary and adjusted scenarios have separate complete-case samples.
+
+Main FeNO retains the nominal 12-month exception: early attendance is eligible, while eventual infancy-TB cases cannot contribute their prediagnosis measurements to that comparison. Other main visits use the selected exact-age and censoring rules. Supplementary FeNO retains its distinct future/post/never-TB comparator and does not inherit the main cohort restriction. Supplementary age/height scaling precedes complete-case filtering; main scaling follows it. Dedicated FeNO labels take priority on duplicate dates. No exposure contrast yields an explicit nonestimable status and no target coefficient.
+
+## Validation scope
+
+Preparation comparisons check membership, original values, scores, matrices, transformations and saved aggregate evidence. Synthetic tests cover malformed imports, joins, dates, reference limits, pairing, episode chains, exposure contrasts and execution failures. The preparation environment was independently installed from the pinned dependency file. All 17 statistical families have preparation coverage; outcome fitting, uncertainty comparisons, diagnostics, final rendering and full manuscript reproduction remain later work.

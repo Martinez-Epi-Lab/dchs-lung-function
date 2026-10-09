@@ -1,0 +1,56 @@
+name: Synthetic checks and source release
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Clean Python 3.12.14 / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      MPLCONFIGDIR: ${{ runner.temp }}/dchs-matplotlib
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out public source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Select the pinned Python runtime
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12.14'
+      - name: Install both dependency locks in a clean environment
+        run: |
+          python -m venv "$RUNNER_TEMP/dchs-ci-venv"
+          echo "DCHS_PYTHON=$RUNNER_TEMP/dchs-ci-venv/bin/python" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/dchs-ci-venv/bin/python" -m pip install --no-cache-dir -r requirements-preparation.lock.txt -r requirements-models.lock.txt
+          "$RUNNER_TEMP/dchs-ci-venv/bin/python" -m pip check
+      - name: Run the complete nonempty synthetic suite
+        run: '"$DCHS_PYTHON" -B tests/run_tests.py'
+      - name: Export, verify and extract the source-only release
+        run: |
+          "$DCHS_PYTHON" -B tools/export_source.py export --root . --output "$RUNNER_TEMP/dchs-source.zip" > "$RUNNER_TEMP/dchs-export.json"
+          DCHS_MANIFEST_SHA=$("$DCHS_PYTHON" -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["source_manifest_sha256"])' "$RUNNER_TEMP/dchs-export.json")
+          echo "DCHS_MANIFEST_SHA=$DCHS_MANIFEST_SHA" >> "$GITHUB_ENV"
+          "$DCHS_PYTHON" -B tools/export_source.py verify "$RUNNER_TEMP/dchs-source.zip" --manifest-sha256 "$DCHS_MANIFEST_SHA"
+          "$DCHS_PYTHON" -B tools/export_source.py extract "$RUNNER_TEMP/dchs-source.zip" "$RUNNER_TEMP/dchs-extracted" --manifest-sha256 "$DCHS_MANIFEST_SHA"
+          "$DCHS_PYTHON" -B "$RUNNER_TEMP/dchs-extracted/tools/export_source.py" verify-tree "$RUNNER_TEMP/dchs-extracted" --manifest-sha256 "$DCHS_MANIFEST_SHA"
+      - name: Run the extracted source and confirm its manifest stayed intact
+        run: |
+          cd "$RUNNER_TEMP/dchs-extracted"
+          "$DCHS_PYTHON" -B tests/run_tests.py
+          "$DCHS_PYTHON" -B tools/export_source.py verify-tree . --manifest-sha256 "$DCHS_MANIFEST_SHA"

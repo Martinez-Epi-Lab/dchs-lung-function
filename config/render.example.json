@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "reporting_publication": "REPLACE_WITH_ACCEPTED_M13_DIRECTORY",
+  "reporting_receipt_sha256": "REPLACE_WITH_TRUSTED_M13_RECEIPT_SHA256",
+  "figures_publication": "REPLACE_WITH_ACCEPTED_M14_DIRECTORY",
+  "figures_receipt_sha256": "REPLACE_WITH_TRUSTED_M14_RECEIPT_SHA256",
+  "work_directory": "REPLACE_WITH_PRIVATE_RENDER_WORK_DIRECTORY",
+  "output_directory": "REPLACE_WITH_PRIVATE_RENDER_OUTPUT_DIRECTORY",
+  "document_python": "REPLACE_WITH_PYTHON_EXECUTABLE",
+  "pdf_fonts_tool": "REPLACE_WITH_PDFFONTS_EXECUTABLE",
+  "fonts": {
+    "arial": "REPLACE_WITH_ARIAL_REGULAR_FONT_FILE",
+    "arial_bold": "REPLACE_WITH_ARIAL_BOLD_FONT_FILE"
+  }
+}

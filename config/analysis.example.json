@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "event_end": "REPLACE_WITH_SELECTED_EVENT_ENDPOINT_YYYY-MM-DD",
+  "respiratory_end": "REPLACE_WITH_SELECTED_RESPIRATORY_ENDPOINT_YYYY-MM-DD"
+}

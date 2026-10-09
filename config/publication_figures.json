@@ -1,0 +1,2684 @@
+{
+  "schema_version": 1,
+  "figures": [
+    {
+      "id": "main_figure_1",
+      "title": "Figure 1. Predicted pre-bronchodilator FEV₁/FVC trajectories from ages 5–10 years according to early-childhood tuberculosis",
+      "kind": "trajectory",
+      "panels": [
+        {
+          "id": "A",
+          "title": "First TB before age 1 year",
+          "kind": "trajectory",
+          "source": "trajectory/predictions",
+          "where": {
+            "target": "fev1_fvc",
+            "threshold": 1
+          },
+          "row_key": "age_years",
+          "row_order": "ascending",
+          "series_key": "group",
+          "series_order": [
+            "No recorded TB",
+            "First TB <1 years"
+          ],
+          "series_labels": {
+            "No recorded TB": "No recorded TB",
+            "First TB <1 years": "First TB <1 year"
+          },
+          "series_styles": {
+            "No recorded TB": {
+              "label": "No recorded TB",
+              "color": "#7A8189",
+              "line": "solid"
+            },
+            "First TB <1 years": {
+              "label": "First TB <1 year",
+              "color": "#246B96",
+              "line": "solid"
+            }
+          },
+          "fields": {
+            "x": "age_years",
+            "point": "predicted_mean",
+            "lower": "ci_low",
+            "upper": "ci_high"
+          },
+          "x_axis": {
+            "label": "Age (years)",
+            "scale": "linear",
+            "null": null,
+            "ticks": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "limits": [
+              5,
+              10
+            ]
+          },
+          "y_axis": {
+            "label": "FEV₁/FVC (%)",
+            "scale": "linear",
+            "null": null
+          },
+          "estimate": "model-predicted mean",
+          "interval": "95% confidence interval",
+          "population": "Common pre-bronchodilator sample at exact ages 5–10 years, inclusive",
+          "annotations": []
+        },
+        {
+          "id": "B",
+          "title": "First TB before age 5 years",
+          "kind": "trajectory",
+          "source": "trajectory/predictions",
+          "where": {
+            "target": "fev1_fvc",
+            "threshold": 5
+          },
+          "row_key": "age_years",
+          "row_order": "ascending",
+          "series_key": "group",
+          "series_order": [
+            "No recorded TB",
+            "First TB <5 years"
+          ],
+          "series_labels": {
+            "No recorded TB": "No recorded TB",
+            "First TB <5 years": "First TB <5 years"
+          },
+          "series_styles": {
+            "No recorded TB": {
+              "label": "No recorded TB",
+              "color": "#7A8189",
+              "line": "solid"
+            },
+            "First TB <5 years": {
+              "label": "First TB <5 years",
+              "color": "#246B96",
+              "line": "solid"
+            }
+          },
+          "fields": {
+            "x": "age_years",
+            "point": "predicted_mean",
+            "lower": "ci_low",
+            "upper": "ci_high"
+          },
+          "x_axis": {
+            "label": "Age (years)",
+            "scale": "linear",
+            "null": null,
+            "ticks": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "limits": [
+              5,
+              10
+            ]
+          },
+          "y_axis": {
+            "label": "FEV₁/FVC (%)",
+            "scale": "linear",
+            "null": null
+          },
+          "estimate": "model-predicted mean",
+          "interval": "95% confidence interval",
+          "population": "Common pre-bronchodilator sample at exact ages 5–10 years, inclusive",
+          "annotations": []
+        },
+        {
+          "id": "C",
+          "title": "First TB before age 1 year",
+          "kind": "trajectory",
+          "source": "trajectory/predictions",
+          "where": {
+            "target": "fev1_fvc_gli_z",
+            "threshold": 1
+          },
+          "row_key": "age_years",
+          "row_order": "ascending",
+          "series_key": "group",
+          "series_order": [
+            "No recorded TB",
+            "First TB <1 years"
+          ],
+          "series_labels": {
+            "No recorded TB": "No recorded TB",
+            "First TB <1 years": "First TB <1 year"
+          },
+          "series_styles": {
+            "No recorded TB": {
+              "label": "No recorded TB",
+              "color": "#7A8189",
+              "line": "solid"
+            },
+            "First TB <1 years": {
+              "label": "First TB <1 year",
+              "color": "#246B96",
+              "line": "solid"
+            }
+          },
+          "fields": {
+            "x": "age_years",
+            "point": "predicted_mean",
+            "lower": "ci_low",
+            "upper": "ci_high"
+          },
+          "x_axis": {
+            "label": "Age (years)",
+            "scale": "linear",
+            "null": null,
+            "ticks": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "limits": [
+              5,
+              10
+            ]
+          },
+          "y_axis": {
+            "label": "FEV₁/FVC (GLI z-score)",
+            "scale": "linear",
+            "null": null
+          },
+          "estimate": "model-predicted mean",
+          "interval": "95% confidence interval",
+          "population": "Common pre-bronchodilator sample at exact ages 5–10 years, inclusive",
+          "annotations": []
+        },
+        {
+          "id": "D",
+          "title": "First TB before age 5 years",
+          "kind": "trajectory",
+          "source": "trajectory/predictions",
+          "where": {
+            "target": "fev1_fvc_gli_z",
+            "threshold": 5
+          },
+          "row_key": "age_years",
+          "row_order": "ascending",
+          "series_key": "group",
+          "series_order": [
+            "No recorded TB",
+            "First TB <5 years"
+          ],
+          "series_labels": {
+            "No recorded TB": "No recorded TB",
+            "First TB <5 years": "First TB <5 years"
+          },
+          "series_styles": {
+            "No recorded TB": {
+              "label": "No recorded TB",
+              "color": "#7A8189",
+              "line": "solid"
+            },
+            "First TB <5 years": {
+              "label": "First TB <5 years",
+              "color": "#246B96",
+              "line": "solid"
+            }
+          },
+          "fields": {
+            "x": "age_years",
+            "point": "predicted_mean",
+            "lower": "ci_low",
+            "upper": "ci_high"
+          },
+          "x_axis": {
+            "label": "Age (years)",
+            "scale": "linear",
+            "null": null,
+            "ticks": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "limits": [
+              5,
+              10
+            ]
+          },
+          "y_axis": {
+            "label": "FEV₁/FVC (GLI z-score)",
+            "scale": "linear",
+            "null": null
+          },
+          "estimate": "model-predicted mean",
+          "interval": "95% confidence interval",
+          "population": "Common pre-bronchodilator sample at exact ages 5–10 years, inclusive",
+          "annotations": []
+        }
+      ],
+      "caption": {
+        "template": "Lines show model-predicted mean FEV₁/FVC, with 95% confidence bands. Upper panels show percentages and lower panels show GLI-Global 2022 z-scores. Separate child-random-intercept models were fitted for first tuberculosis (TB) before age one and before age five, using child-cluster-robust standard errors. Exact age from 5–10 years was modeled with a three-degree-of-freedom natural cubic spline, interacting the early-TB indicator with all spline terms. Models adjusted for current height, sex, future TB and post-TB measurements following first TB outside the target cutoff. Predictions use the analytic sex distribution and age-specific expected height, with other TB-timing indicators set to zero. Early-TB curves represent post-diagnosis measurements; the reference comprises children with no recorded TB. The common sample contains {measurements} measurements from {children} children. Bands describe uncertainty in the estimated mean, not individual prediction intervals.",
+        "bindings": {
+          "measurements": {
+            "source": "trajectory/global_tests",
+            "where": {
+              "target": "fev1_fvc",
+              "threshold": 1
+            },
+            "fields": [
+              "n_observations"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "children": {
+            "source": "trajectory/global_tests",
+            "where": {
+              "target": "fev1_fvc",
+              "threshold": 1
+            },
+            "fields": [
+              "n_children"
+            ],
+            "style": "integer",
+            "digits": 0
+          }
+        }
+      },
+      "limitations": [
+        "Predicted curves are adjusted associations, not individual predictions.",
+        "No interaction p-values were printed in the selected archived figure; no new p-value annotations are added."
+      ]
+    },
+    {
+      "id": "main_figure_2",
+      "title": "Figure 2. Adjusted associations of early-childhood tuberculosis with pre- and post-bronchodilator FEV₁/FVC and spirometric abnormalities at ages 5–10 years",
+      "kind": "forest",
+      "panels": [
+        {
+          "id": "A",
+          "title": "FEV₁/FVC difference (percentage points)",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "before5_pre",
+              "label": "TB before age 5 years",
+              "series": "pre",
+              "source": "primary/ratio_pre/estimates",
+              "where": {
+                "contrast": "TB <5 weighted"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "before5_post",
+              "label": "TB before age 5 years",
+              "series": "post",
+              "source": "primary/ratio_post/estimates",
+              "where": {
+                "contrast": "TB <5 weighted"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "infancy_pre",
+              "label": "TB during infancy",
+              "series": "pre",
+              "source": "primary/ratio_pre/estimates",
+              "where": {
+                "contrast": "TB <1"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "infancy_post",
+              "label": "TB during infancy",
+              "series": "post",
+              "source": "primary/ratio_post/estimates",
+              "where": {
+                "contrast": "TB <1"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            }
+          ],
+          "row_order": [
+            "before5_pre",
+            "before5_post",
+            "infancy_pre",
+            "infancy_post"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "FEV₁/FVC difference (percentage points)",
+            "scale": "linear",
+            "null": 0
+          },
+          "estimate": "posterior mean",
+          "interval": "95% credible interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "pre",
+            "post"
+          ],
+          "series_labels": {
+            "pre": "Pre-bronchodilator",
+            "post": "Post-bronchodilator"
+          },
+          "series_styles": {
+            "pre": {
+              "label": "Pre-bronchodilator",
+              "color": "#5B3A72",
+              "marker": "square",
+              "fill": "filled"
+            },
+            "post": {
+              "label": "Post-bronchodilator",
+              "color": "#177E89",
+              "marker": "circle",
+              "fill": "open"
+            }
+          }
+        },
+        {
+          "id": "B",
+          "title": "FEV₁/FVC difference (GLI z-score)",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "before5_pre",
+              "label": "TB before age 5 years",
+              "series": "pre",
+              "source": "primary/ratio_pre_z/estimates",
+              "where": {
+                "contrast": "TB <5 weighted"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "before5_post",
+              "label": "TB before age 5 years",
+              "series": "post",
+              "source": "primary/ratio_post_z/estimates",
+              "where": {
+                "contrast": "TB <5 weighted"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "infancy_pre",
+              "label": "TB during infancy",
+              "series": "pre",
+              "source": "primary/ratio_pre_z/estimates",
+              "where": {
+                "contrast": "TB <1"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "infancy_post",
+              "label": "TB during infancy",
+              "series": "post",
+              "source": "primary/ratio_post_z/estimates",
+              "where": {
+                "contrast": "TB <1"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            }
+          ],
+          "row_order": [
+            "before5_pre",
+            "before5_post",
+            "infancy_pre",
+            "infancy_post"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "FEV₁/FVC difference (GLI z-score)",
+            "scale": "linear",
+            "null": 0
+          },
+          "estimate": "posterior mean",
+          "interval": "95% credible interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "pre",
+            "post"
+          ],
+          "series_labels": {
+            "pre": "Pre-bronchodilator",
+            "post": "Post-bronchodilator"
+          },
+          "series_styles": {
+            "pre": {
+              "label": "Pre-bronchodilator",
+              "color": "#5B3A72",
+              "marker": "square",
+              "fill": "filled"
+            },
+            "post": {
+              "label": "Post-bronchodilator",
+              "color": "#177E89",
+              "marker": "circle",
+              "fill": "open"
+            }
+          }
+        },
+        {
+          "id": "C",
+          "title": "FEV₁/FVC below the lower limit of normal",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "before5_pre",
+              "label": "TB before age 5 years",
+              "series": "pre",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "pre",
+                "outcome": "ratio_LLN",
+                "design": "before5",
+                "term": "post_before5"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "before5_post",
+              "label": "TB before age 5 years",
+              "series": "post",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "post",
+                "outcome": "ratio_LLN",
+                "design": "before5",
+                "term": "post_before5"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "age_groups_pre",
+              "label": "TB during infancy",
+              "series": "pre",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "pre",
+                "outcome": "ratio_LLN",
+                "design": "age_groups",
+                "term": "post_infancy"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "age_groups_post",
+              "label": "TB during infancy",
+              "series": "post",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "post",
+                "outcome": "ratio_LLN",
+                "design": "age_groups",
+                "term": "post_infancy"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            }
+          ],
+          "row_order": [
+            "before5_pre",
+            "before5_post",
+            "age_groups_pre",
+            "age_groups_post"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "Adjusted risk ratio",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.25,
+              0.5,
+              1,
+              2,
+              4,
+              8
+            ]
+          },
+          "estimate": "adjusted risk ratio",
+          "interval": "95% confidence interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "pre",
+            "post"
+          ],
+          "series_labels": {
+            "pre": "Pre-bronchodilator",
+            "post": "Post-bronchodilator"
+          },
+          "series_styles": {
+            "pre": {
+              "label": "Pre-bronchodilator",
+              "color": "#5B3A72",
+              "marker": "square",
+              "fill": "filled"
+            },
+            "post": {
+              "label": "Post-bronchodilator",
+              "color": "#177E89",
+              "marker": "circle",
+              "fill": "open"
+            }
+          }
+        },
+        {
+          "id": "D",
+          "title": "Obstructive spirometric pattern",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "before5_pre",
+              "label": "TB before age 5 years",
+              "series": "pre",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "pre",
+                "outcome": "obstructive_pattern",
+                "design": "before5",
+                "term": "post_before5"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "before5_post",
+              "label": "TB before age 5 years",
+              "series": "post",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "post",
+                "outcome": "obstructive_pattern",
+                "design": "before5",
+                "term": "post_before5"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "age_groups_pre",
+              "label": "TB during infancy",
+              "series": "pre",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "pre",
+                "outcome": "obstructive_pattern",
+                "design": "age_groups",
+                "term": "post_infancy"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "age_groups_post",
+              "label": "TB during infancy",
+              "series": "post",
+              "source": "binary/estimates",
+              "where": {
+                "stage": "post",
+                "outcome": "obstructive_pattern",
+                "design": "age_groups",
+                "term": "post_infancy"
+              },
+              "fields": {
+                "point": "rr",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            }
+          ],
+          "row_order": [
+            "before5_pre",
+            "before5_post",
+            "age_groups_pre",
+            "age_groups_post"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "Adjusted risk ratio",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.25,
+              0.5,
+              1,
+              2,
+              4,
+              8
+            ]
+          },
+          "estimate": "adjusted risk ratio",
+          "interval": "95% confidence interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "pre",
+            "post"
+          ],
+          "series_labels": {
+            "pre": "Pre-bronchodilator",
+            "post": "Post-bronchodilator"
+          },
+          "series_styles": {
+            "pre": {
+              "label": "Pre-bronchodilator",
+              "color": "#5B3A72",
+              "marker": "square",
+              "fill": "filled"
+            },
+            "post": {
+              "label": "Post-bronchodilator",
+              "color": "#177E89",
+              "marker": "circle",
+              "fill": "open"
+            }
+          }
+        }
+      ],
+      "caption": {
+        "template": "Filled squares show pre-bronchodilator and open circles post-bronchodilator estimates. Panels A and B show posterior mean differences and 95% credible intervals from Bayesian shared-parameter joint models of respiratory mechanics, spirometry and time to first tuberculosis (TB), retaining measurements after first TB at age five or older. Panels C and D show adjusted risk ratios and 95% confidence intervals from modified Poisson generalized estimating equations with child-clustered robust standard errors. Null values are zero for differences and one for ratios. FEV₁/FVC below the lower limit of normal is a GLI z-score <−1.645, irrespective of FVC. Obstruction requires FEV₁/FVC z-score <−1.645 and FVC z-score ≥−1.645. Continuous models account for planned visit, height, sex and shared respiratory mechanics. Binary models adjust for planned visit, height, sex, future TB and TB at age five or older. Continuous models include {pre_measurements} measurements from {pre_children} children before bronchodilator and {post_measurements} from {post_children} after bronchodilator. Continuous contrasts use the modeled pre/no-TB state. Binary contrasts use no recorded TB, with prediagnosis observations of future cases represented separately. Infancy TB is nested within TB before age five. Stages use separate available-case models and do not provide a formal within-visit test of bronchodilator response. Post-bronchodilator binary estimates have sparse support: {early_abnormal} abnormal observations occurred after TB before age five, with {infant_abnormal} following infancy TB. Intervals are not adjusted for multiple comparisons. FEV₁, forced expiratory volume in one second; FVC, forced vital capacity; GLI, Global Lung Function Initiative.",
+        "bindings": {
+          "pre_measurements": {
+            "source": "primary/ratio_pre/estimates",
+            "where": {
+              "contrast": "TB <5 weighted"
+            },
+            "fields": [
+              "n_outcome_measurements"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "pre_children": {
+            "source": "primary/ratio_pre/estimates",
+            "where": {
+              "contrast": "TB <5 weighted"
+            },
+            "fields": [
+              "n_outcome_children"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "post_measurements": {
+            "source": "primary/ratio_post/estimates",
+            "where": {
+              "contrast": "TB <5 weighted"
+            },
+            "fields": [
+              "n_outcome_measurements"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "post_children": {
+            "source": "primary/ratio_post/estimates",
+            "where": {
+              "contrast": "TB <5 weighted"
+            },
+            "fields": [
+              "n_outcome_children"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "early_abnormal": {
+            "source": "binary/estimates",
+            "where": {
+              "stage": "post",
+              "outcome": "ratio_LLN",
+              "design": "before5",
+              "term": "post_before5"
+            },
+            "fields": [
+              "exposed_events"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "infant_abnormal": {
+            "source": "binary/estimates",
+            "where": {
+              "stage": "post",
+              "outcome": "ratio_LLN",
+              "design": "age_groups",
+              "term": "post_infancy"
+            },
+            "fields": [
+              "exposed_events"
+            ],
+            "style": "integer",
+            "digits": 0
+          }
+        }
+      },
+      "limitations": [
+        "Continuous contrasts and binary risk ratios have different reference states and interval types.",
+        "Separate available-case pre- and post-bronchodilator models do not estimate paired bronchodilator response."
+      ]
+    },
+    {
+      "id": "main_figure_3",
+      "title": "Figure 3. Age-specific associations of tuberculosis during infancy with subsequent wheeze and fractional exhaled nitric oxide",
+      "kind": "forest",
+      "panels": [
+        {
+          "id": "A",
+          "title": "Scheduled current wheeze",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "age_1",
+              "label": "1 to <3 years",
+              "series": "wheeze",
+              "source": "wheeze/primary_sex/standardized_rr",
+              "where": {
+                "age_band": "1-<3 years"
+              },
+              "fields": {
+                "point": "rr_median",
+                "lower": "rr_low",
+                "upper": "rr_high"
+              }
+            },
+            {
+              "id": "age_2",
+              "label": "3 to <5 years",
+              "series": "wheeze",
+              "source": "wheeze/primary_sex/standardized_rr",
+              "where": {
+                "age_band": "3-<5 years"
+              },
+              "fields": {
+                "point": "rr_median",
+                "lower": "rr_low",
+                "upper": "rr_high"
+              }
+            },
+            {
+              "id": "age_3",
+              "label": "5 to 10.5 years",
+              "series": "wheeze",
+              "source": "wheeze/primary_sex/standardized_rr",
+              "where": {
+                "age_band": "5-10.5 years"
+              },
+              "fields": {
+                "point": "rr_median",
+                "lower": "rr_low",
+                "upper": "rr_high"
+              }
+            }
+          ],
+          "row_order": [
+            "age_1",
+            "age_2",
+            "age_3"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "Standardized current-wheeze risk ratio",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.25,
+              0.5,
+              1,
+              2,
+              4
+            ]
+          },
+          "estimate": "posterior median standardized risk ratio",
+          "interval": "95% credible interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "wheeze"
+          ],
+          "series_labels": {
+            "wheeze": "Scheduled current wheeze"
+          },
+          "series_styles": {
+            "wheeze": {
+              "label": "Scheduled current wheeze",
+              "color": "#2D6E95",
+              "marker": "circle",
+              "fill": "filled"
+            }
+          }
+        },
+        {
+          "id": "B",
+          "title": "Fractional exhaled nitric oxide",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "12months",
+              "label": "12 months",
+              "series": "feno",
+              "source": "feno/estimates",
+              "where": {
+                "target": "main_12months"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "24months",
+              "label": "24 months",
+              "series": "feno",
+              "source": "feno/estimates",
+              "where": {
+                "target": "main_24months"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "8years",
+              "label": "8 years",
+              "series": "feno",
+              "source": "feno/estimates",
+              "where": {
+                "target": "main_8years"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "9years",
+              "label": "9 years",
+              "series": "feno",
+              "source": "feno/estimates",
+              "where": {
+                "target": "main_9years"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "10years",
+              "label": "10 years",
+              "series": "feno",
+              "source": "feno/estimates",
+              "where": {
+                "target": "main_10years"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            }
+          ],
+          "row_order": [
+            "12months",
+            "24months",
+            "8years",
+            "9years",
+            "10years"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "Adjusted geometric mean ratio",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.25,
+              0.5,
+              1,
+              2,
+              4
+            ]
+          },
+          "estimate": "adjusted geometric mean ratio",
+          "interval": "95% confidence interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "feno"
+          ],
+          "series_labels": {
+            "feno": "FeNO"
+          },
+          "series_styles": {
+            "feno": {
+              "label": "FeNO",
+              "color": "#2A788E",
+              "marker": "square",
+              "fill": "filled"
+            }
+          }
+        }
+      ],
+      "caption": {
+        "template": "Infancy tuberculosis (TB) means first recorded diagnosis before age one. Panel A shows posterior median standardized ratios of current-wheeze probabilities at scheduled assessments, with 95% credible intervals, from the sex-adjusted joint model of scheduled wheeze, recurrent wheeze episodes and time to TB. Probabilities use a common sex distribution, a common standard-normal latent-factor distribution and uniform age averaging within each displayed band. These are ratios of current-wheeze probabilities, not cumulative risk across the band. Panel B shows adjusted geometric mean ratios for fractional exhaled nitric oxide (FeNO), with 95% confidence intervals, from separate visit-specific regressions adjusted for sex, exact assessment age and height. Both panels compare post-infancy-TB observations with the pre/no-TB state; later-onset TB is modeled separately. FeNO labels denote nominal visits. The nominal 12-month sample can include attendance before the first birthday; all exposed measurements are on or after TB diagnosis. Dashed lines denote a ratio of one. The panels do not establish a shared mechanism or resolution within individual children.",
+        "bindings": {}
+      },
+      "limitations": [
+        "The wheeze panel uses standardized probability ratios, not conditional odds ratios or recurrent-episode incidence rate ratios.",
+        "The main FeNO comparison and sample rules differ from the supplementary FeNO comparison."
+      ]
+    },
+    {
+      "id": "appendix_figure_s1",
+      "title": "Figure S1. Participant flow and lung-function analytic samples",
+      "kind": "flow",
+      "panels": [
+        {
+          "id": "A",
+          "kind": "flow",
+          "nodes": [
+            {
+              "id": "antenatal_enrollment",
+              "label": "Pregnant women enrolled antenatally",
+              "role": "main",
+              "template": "Pregnant women enrolled antenatally\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "antenatal_enrollment"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "women"
+            },
+            {
+              "id": "women_with_liveborn_children",
+              "label": "Women with live births",
+              "role": "main",
+              "template": "Women with live births\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "women_with_liveborn_children"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "women"
+            },
+            {
+              "id": "liveborn_children_enrolled",
+              "label": "Liveborn children enrolled",
+              "role": "main",
+              "template": "Liveborn children enrolled\nn = {count}\nTwin pairs: {twin_sets}; triplet sets: {triplet_sets}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "liveborn_children_enrolled"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "twin_sets": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "live_birth_sets_of_2"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "triplet_sets": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "live_birth_sets_of_3"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "children_with_pft_records",
+              "label": "Children with at least one lung-function measurement",
+              "role": "main",
+              "template": "Children with at least one lung-function measurement\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "children_with_pft_records"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "combined_eligible_lung_function",
+              "label": "Combined eligible lung-function cohort",
+              "role": "main",
+              "template": "Combined eligible lung-function cohort\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "combined_eligible_lung_function"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "excluded_before_child_cohort",
+              "label": "Excluded before establishment of child cohort",
+              "role": "exclusion",
+              "template": "Excluded before establishment of child cohort\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "excluded_before_child_cohort"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "women"
+            },
+            {
+              "id": "antenatal_loss_to_followup",
+              "label": "Lost to antenatal follow-up",
+              "role": "exclusion_detail",
+              "template": "Lost to antenatal follow-up\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "antenatal_loss_to_followup"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "women"
+            },
+            {
+              "id": "pregnancy_loss",
+              "label": "Pregnancy loss",
+              "role": "exclusion_detail",
+              "template": "Pregnancy loss\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "pregnancy_loss"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "women"
+            },
+            {
+              "id": "children_without_pft_records",
+              "label": "No lung-function measurement",
+              "role": "exclusion",
+              "template": "No lung-function measurement\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "children_without_pft_records"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "pft_children_without_descriptive_measurements",
+              "label": "No eligible analyzed spirometry or oscillometry measurement",
+              "role": "exclusion",
+              "template": "No eligible analyzed spirometry or oscillometry measurement\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "pft_children_without_descriptive_measurements"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "no_tb_before_five",
+              "label": "No TB before age 5 years",
+              "role": "stratum",
+              "template": "No TB before age 5 years\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "no_tb_before_five"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "tb_before_five",
+              "label": "First TB before age 5 years",
+              "role": "stratum",
+              "template": "First TB before age 5 years\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "tb_before_five"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "no_recorded_tb",
+              "label": "No recorded TB",
+              "role": "subgroup",
+              "template": "No recorded TB\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "no_recorded_tb"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "age_five_or_later",
+              "label": "First TB at age 5 years or older",
+              "role": "subgroup",
+              "template": "First TB at age 5 years or older\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "age_five_or_later"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "infancy",
+              "label": "First TB before age 1 year",
+              "role": "subgroup",
+              "template": "First TB before age 1 year\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "infancy"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "age_one_to_under_five",
+              "label": "First TB at age 1 to <5 years",
+              "role": "subgroup",
+              "template": "First TB at age 1 to <5 years\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "age_one_to_under_five"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              },
+              "unit": "children"
+            },
+            {
+              "id": "spirometry",
+              "label": "Spirometry",
+              "role": "outcome",
+              "unit": "children",
+              "template": "Spirometry\nPre-BD n = {pre}\nPost-BD FEV₁ and FEV₁/FVC n = {post_ratio}\nPost-BD FVC n = {post_fvc}",
+              "bindings": {
+                "pre": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:ratio_pre"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "post_ratio": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:ratio_post"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "post_fvc": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:fvc_post_native"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              }
+            },
+            {
+              "id": "mechanics",
+              "label": "Respiratory mechanics",
+              "role": "outcome",
+              "unit": "children",
+              "template": "Respiratory mechanics\nResistance n = {resistance}\nCompliance n = {compliance}",
+              "bindings": {
+                "resistance": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:resistance"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "compliance": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:compliance"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              }
+            },
+            {
+              "id": "within_breath",
+              "label": "Within-breath oscillometry",
+              "role": "outcome",
+              "unit": "children",
+              "template": "Within-breath oscillometry\nReE n = {ree}; ReI n = {rei}\nXeE n = {xee}; XeI n = {xei}",
+              "bindings": {
+                "ree": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:ree"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "rei": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:rei"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "xee": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:xee"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                },
+                "xei": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "primary:xei"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              }
+            },
+            {
+              "id": "x6",
+              "label": "Low-frequency reactance",
+              "role": "outcome",
+              "unit": "children",
+              "template": "Low-frequency reactance (X6)\nn = {count}",
+              "bindings": {
+                "count": {
+                  "source": "preparation/flow",
+                  "where": {
+                    "node": "descriptive:x6"
+                  },
+                  "fields": [
+                    "count"
+                  ],
+                  "style": "integer",
+                  "digits": 0
+                }
+              }
+            }
+          ],
+          "edges": [
+            [
+              "antenatal_enrollment",
+              "women_with_liveborn_children"
+            ],
+            [
+              "antenatal_enrollment",
+              "excluded_before_child_cohort"
+            ],
+            [
+              "excluded_before_child_cohort",
+              "antenatal_loss_to_followup"
+            ],
+            [
+              "excluded_before_child_cohort",
+              "pregnancy_loss"
+            ],
+            [
+              "women_with_liveborn_children",
+              "liveborn_children_enrolled"
+            ],
+            [
+              "liveborn_children_enrolled",
+              "children_with_pft_records"
+            ],
+            [
+              "liveborn_children_enrolled",
+              "children_without_pft_records"
+            ],
+            [
+              "children_with_pft_records",
+              "combined_eligible_lung_function"
+            ],
+            [
+              "children_with_pft_records",
+              "pft_children_without_descriptive_measurements"
+            ],
+            [
+              "combined_eligible_lung_function",
+              "no_tb_before_five"
+            ],
+            [
+              "combined_eligible_lung_function",
+              "tb_before_five"
+            ],
+            [
+              "no_tb_before_five",
+              "no_recorded_tb"
+            ],
+            [
+              "no_tb_before_five",
+              "age_five_or_later"
+            ],
+            [
+              "tb_before_five",
+              "infancy"
+            ],
+            [
+              "tb_before_five",
+              "age_one_to_under_five"
+            ],
+            [
+              "combined_eligible_lung_function",
+              "spirometry"
+            ],
+            [
+              "combined_eligible_lung_function",
+              "mechanics"
+            ],
+            [
+              "combined_eligible_lung_function",
+              "within_breath"
+            ],
+            [
+              "combined_eligible_lung_function",
+              "x6"
+            ]
+          ],
+          "unavailable_label": "Unavailable from supplied inputs",
+          "unavailable_nodes": [
+            "antenatal_enrollment",
+            "excluded_before_child_cohort",
+            "antenatal_loss_to_followup",
+            "pregnancy_loss"
+          ],
+          "outcome_samples_overlap": true
+        }
+      ],
+      "caption": {
+        "template": "Counts are woman-level through live births and child-level thereafter. Pre-bronchodilator spirometry includes {pre_children} children; post-bronchodilator FEV₁ and FEV₁/FVC include {post_children}, and FVC includes {post_fvc_children}. Outcome-specific samples overlap and must not be added. The joint-model cohort contains {joint_children} children across linked processes. Antenatal enrollment, exclusion before establishment of the child cohort, antenatal loss to follow-up and pregnancy loss are unavailable from the supplied inputs and are shown explicitly as unavailable. Outcome-specific measurement counts appear in Table 2 and Tables S3 and S6. BD, bronchodilator; TB, tuberculosis.",
+        "bindings": {
+          "pre_children": {
+            "source": "preparation/flow",
+            "where": {
+              "node": "primary:ratio_pre"
+            },
+            "fields": [
+              "count"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "post_children": {
+            "source": "preparation/flow",
+            "where": {
+              "node": "primary:ratio_post"
+            },
+            "fields": [
+              "count"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "post_fvc_children": {
+            "source": "preparation/flow",
+            "where": {
+              "node": "primary:fvc_post_native"
+            },
+            "fields": [
+              "count"
+            ],
+            "style": "integer",
+            "digits": 0
+          },
+          "joint_children": {
+            "source": "preparation/flow",
+            "where": {
+              "node": "children_with_pft_records"
+            },
+            "fields": [
+              "count"
+            ],
+            "style": "integer",
+            "digits": 0
+          }
+        }
+      },
+      "limitations": [
+        "Unavailable upstream counts are not zero and are not filled from archived artwork.",
+        "Woman-level counts and child-level counts have different denominators.",
+        "Outcome-specific samples overlap."
+      ]
+    },
+    {
+      "id": "appendix_figure_s2",
+      "title": "Figure S2. Study visits at which each lung-function modality was represented in the combined pulmonary-function dataset",
+      "kind": "schedule",
+      "panels": [
+        {
+          "id": "A",
+          "kind": "schedule",
+          "source": "preparation/modality_schedule",
+          "where": {},
+          "row_key": "modality",
+          "column_key": "visit",
+          "row_order": [
+            "multiple_breath_washout",
+            "mechanics_within_breath",
+            "frequency_domain_oscillometry",
+            "spirometry"
+          ],
+          "row_labels": {
+            "multiple_breath_washout": "Multiple-breath washout",
+            "mechanics_within_breath": "Oscillometry: mechanics and within-breath R/X",
+            "frequency_domain_oscillometry": "Multi-frequency oscillometry",
+            "spirometry": "Spirometry"
+          },
+          "column_order": [
+            "6-10 weeks",
+            "12 months",
+            "24 months",
+            "36 months",
+            "48 months",
+            "60 months",
+            "72 months",
+            "84 months",
+            "96 months",
+            "FeNO",
+            "10 years"
+          ],
+          "column_labels": {
+            "6-10 weeks": "6–10 weeks",
+            "12 months": "1 year",
+            "24 months": "2 years",
+            "36 months": "3 years",
+            "48 months": "4 years",
+            "60 months": "5 years",
+            "72 months": "6 years",
+            "84 months": "7 years",
+            "96 months": "8 years",
+            "FeNO": "9 years",
+            "10 years": "10 years"
+          },
+          "fields": {
+            "represented": "represented",
+            "records": "records_with_numeric_value",
+            "children": "children_with_measurement"
+          },
+          "column_groups": [
+            {
+              "label": "Infancy",
+              "columns": [
+                "6-10 weeks",
+                "12 months"
+              ]
+            },
+            {
+              "label": "Early childhood",
+              "columns": [
+                "24 months",
+                "36 months",
+                "48 months"
+              ]
+            },
+            {
+              "label": "School age",
+              "columns": [
+                "60 months",
+                "72 months",
+                "84 months",
+                "96 months",
+                "FeNO",
+                "10 years"
+              ]
+            }
+          ]
+        }
+      ],
+      "caption": {
+        "template": "Filled cells indicate nominal visits with at least one numeric measurement for the displayed modality in the combined pulmonary-function data. Blank cells indicate no represented measurement. This is an observed data-availability inventory, not a claim that every child attended every visit or completed every test. Source visit labels of 96 months and FeNO display as eight and nine years, respectively. LCI, lung clearance index; R, resistance; X, reactance.",
+        "bindings": {}
+      },
+      "limitations": [
+        "Modality representation does not imply complete attendance by all children."
+      ]
+    },
+    {
+      "id": "appendix_figure_s3",
+      "title": "Figure S3. Associations of pre-tuberculosis oscillometry with the risk of subsequent childhood tuberculosis",
+      "kind": "forest",
+      "panels": [
+        {
+          "id": "A",
+          "title": "Pre-TB lung function and subsequent TB",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "resistance",
+              "label": "Model-derived resistance (R)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "resistance"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "compliance",
+              "label": "Model-derived compliance (C)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "compliance"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "ree",
+              "label": "End-expiratory resistance (ReE)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "ree"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "rei",
+              "label": "End-inspiratory resistance (ReI)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "rei"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "xee",
+              "label": "End-expiratory reactance (XeE)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "xee"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "xei",
+              "label": "End-inspiratory reactance (XeI)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "xei"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "dr_mean",
+              "label": "Within-breath resistance difference (ΔR)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "dr_mean"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "dx_mean",
+              "label": "Within-breath reactance difference (ΔX)",
+              "series": "mechanics",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "dx_mean"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "r6_sa_z",
+              "label": "Resistance at 6 Hz",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "r6_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "r8_sa_z",
+              "label": "Resistance at 8 Hz",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "r8_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "r10_sa_z",
+              "label": "Resistance at 10 Hz",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "r10_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "x6_sa_z",
+              "label": "Reactance at 6 Hz",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "x6_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "x8_sa_z",
+              "label": "Reactance at 8 Hz",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "x8_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "x10_sa_z",
+              "label": "Reactance at 10 Hz",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "x10_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "fres_sa_z",
+              "label": "Resonant frequency",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "fres_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "r6_r20_sa_z",
+              "label": "Frequency dependence of resistance (R6–R20)",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "r6_r20_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            },
+            {
+              "id": "ax_sa_z",
+              "label": "Area of reactance (AX)",
+              "series": "frequency",
+              "source": "pretb_corrected/estimates",
+              "where": {
+                "target": "ax_sa_z"
+              },
+              "fields": {
+                "point": "hr_per_adverse_sd",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              },
+              "support_fields": {
+                "children": "n_children",
+                "events": "n_subsequent_tb"
+              },
+              "unit": "per one standard deviation worse lung function"
+            }
+          ],
+          "row_order": [
+            "resistance",
+            "compliance",
+            "ree",
+            "rei",
+            "xee",
+            "xei",
+            "dr_mean",
+            "dx_mean",
+            "r6_sa_z",
+            "r8_sa_z",
+            "r10_sa_z",
+            "x6_sa_z",
+            "x8_sa_z",
+            "x10_sa_z",
+            "fres_sa_z",
+            "r6_r20_sa_z",
+            "ax_sa_z"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "Adjusted hazard ratio per 1 SD worse lung function",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.5,
+              1,
+              2,
+              3
+            ]
+          },
+          "estimate": "adjusted hazard ratio",
+          "interval": "95% confidence interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "mechanics",
+            "frequency"
+          ],
+          "series_labels": {
+            "mechanics": "Longitudinal and within-breath mechanics",
+            "frequency": "Frequency-domain oscillometry from age 3 years"
+          },
+          "series_styles": {
+            "mechanics": {
+              "label": "Longitudinal and within-breath mechanics",
+              "color": "#222222",
+              "marker": "square",
+              "fill": "filled"
+            },
+            "frequency": {
+              "label": "Frequency-domain oscillometry from age 3 years",
+              "color": "#6A7078",
+              "marker": "circle",
+              "fill": "open"
+            }
+          },
+          "support_annotation": {
+            "template": "{children}/{events}",
+            "heading": "Children/TB",
+            "digits": 0
+          }
+        }
+      ],
+      "caption": {
+        "template": "Points show adjusted hazard ratios and horizontal lines show 95% confidence intervals from separate time-updated Cox models using attained age as the time scale. Only measurements strictly before first tuberculosis (TB) enter the analysis. A measurement is carried forward until the next measurement, first TB, end of observed TB follow-up or two years, whichever comes first. Models adjust for sex and recruitment site. Measures without applicable reference equations are standardized for scheduled visit, height and sex; frequency-domain measures use South African reference z-scores. Every measure is oriented so one standard deviation represents worse lung function. Ratios above one indicate a higher hazard of subsequent TB. Children/TB gives the number of included children and subsequent first TB episodes. The Efron partial-likelihood coefficient estimates are retained. Child-clustered robust confidence intervals use corrected score contributions restricted to actual risk-set membership, retaining Breslow-style baseline-increment bookkeeping.",
+        "bindings": {}
+      },
+      "limitations": [
+        "Figure uncertainty uses the separately verified risk-set-membership correction; the source-reproduction archive and its point estimates remain preserved.",
+        "The correction changes robust uncertainty, not the fitted hazard ratios, sample, covariates or follow-up window."
+      ]
+    },
+    {
+      "id": "appendix_figure_s4",
+      "title": "Figure S4. Adjusted associations between childhood tuberculosis and fractional exhaled nitric oxide at different ages",
+      "kind": "forest",
+      "panels": [
+        {
+          "id": "A",
+          "title": "Early-life FeNO",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "6to10weeks",
+              "label": "6–10 weeks",
+              "series": "future",
+              "source": "feno/estimates",
+              "where": {
+                "target": "supplement_6to10weeks"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "12months",
+              "label": "12 months",
+              "series": "post",
+              "source": "feno/estimates",
+              "where": {
+                "target": "supplement_12months"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "24months",
+              "label": "24 months",
+              "series": "post",
+              "source": "feno/estimates",
+              "where": {
+                "target": "supplement_24months"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            }
+          ],
+          "row_order": [
+            "6to10weeks",
+            "12months",
+            "24months"
+          ],
+          "orientation": "vertical",
+          "value_axis": {
+            "label": "Adjusted geometric mean ratio",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.5,
+              0.75,
+              1,
+              1.5,
+              2,
+              3
+            ]
+          },
+          "estimate": "adjusted geometric mean ratio",
+          "interval": "95% confidence interval",
+          "annotation": {
+            "show": false,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "future",
+            "post"
+          ],
+          "series_labels": {
+            "future": "Future TB versus no recorded TB",
+            "post": "TB before/on measurement versus no recorded TB"
+          },
+          "series_styles": {
+            "future": {
+              "label": "Future TB versus no recorded TB",
+              "color": "#2A788E",
+              "marker": "square",
+              "fill": "open"
+            },
+            "post": {
+              "label": "TB before/on measurement versus no recorded TB",
+              "color": "#2A788E",
+              "marker": "square",
+              "fill": "filled"
+            }
+          }
+        },
+        {
+          "id": "B",
+          "title": "School-age FeNO",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "8years",
+              "label": "8 years",
+              "series": "post",
+              "source": "feno/estimates",
+              "where": {
+                "target": "supplement_8years"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "9years",
+              "label": "9 years",
+              "series": "post",
+              "source": "feno/estimates",
+              "where": {
+                "target": "supplement_9years"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            },
+            {
+              "id": "10years",
+              "label": "10 years",
+              "series": "post",
+              "source": "feno/estimates",
+              "where": {
+                "target": "supplement_10years"
+              },
+              "fields": {
+                "point": "geometric_mean_ratio",
+                "lower": "ci_low",
+                "upper": "ci_high"
+              }
+            }
+          ],
+          "row_order": [
+            "8years",
+            "9years",
+            "10years"
+          ],
+          "orientation": "vertical",
+          "value_axis": {
+            "label": "Adjusted geometric mean ratio",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.5,
+              0.75,
+              1,
+              1.5,
+              2,
+              3
+            ]
+          },
+          "estimate": "adjusted geometric mean ratio",
+          "interval": "95% confidence interval",
+          "annotation": {
+            "show": false,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "future",
+            "post"
+          ],
+          "series_labels": {
+            "future": "Future TB versus no recorded TB",
+            "post": "TB before/on measurement versus no recorded TB"
+          },
+          "series_styles": {
+            "future": {
+              "label": "Future TB versus no recorded TB",
+              "color": "#2A788E",
+              "marker": "square",
+              "fill": "open"
+            },
+            "post": {
+              "label": "TB before/on measurement versus no recorded TB",
+              "color": "#2A788E",
+              "marker": "square",
+              "fill": "filled"
+            }
+          }
+        }
+      ],
+      "caption": {
+        "template": "Points show adjusted geometric mean ratios (GMRs) and vertical lines show 95% confidence intervals for fractional exhaled nitric oxide (FeNO), with no recorded tuberculosis (TB) as the reference. TB status is updated at each visit. At 6–10 weeks, the open square compares children who later developed TB with those with no recorded TB; no TB preceded the selected measurements at this visit. At later visits, filled squares compare first TB on or before measurement with no recorded TB, regardless of age at diagnosis. Future-TB measurements enter later models as a separate category and are not plotted. Models adjust for exact age, current height and sex. The dotted line marks GMR=1; larger ratios indicate higher FeNO. Infant tidal-breathing and school-age FeNO used different testing contexts, with no selected assessments between approximately ages two and eight. These are visit-specific associations, not a continuous FeNO trajectory.",
+        "bindings": {}
+      },
+      "limitations": [
+        "The earliest plotted contrast concerns future TB; the later plotted contrasts concern TB before/on measurement.",
+        "These supplementary samples and reference groups differ from Figure 3B.",
+        "No line connects visits or interpolates the unobserved age gap."
+      ]
+    },
+    {
+      "id": "appendix_figure_s5",
+      "title": "Figure S5. Associations of combined respiratory mechanics with pre- and post-bronchodilator spirometry at ages 5–10 years",
+      "kind": "forest",
+      "panels": [
+        {
+          "id": "A",
+          "title": "Combined respiratory mechanics and spirometry",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "ratio_pre_z",
+              "label": "FEV₁/FVC",
+              "series": "pre",
+              "source": "shared_factor/estimates",
+              "where": {
+                "target": "ratio_pre_z"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "ratio_post_z",
+              "label": "FEV₁/FVC",
+              "series": "post",
+              "source": "shared_factor/estimates",
+              "where": {
+                "target": "ratio_post_z"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "fev1_pre_z",
+              "label": "FEV₁",
+              "series": "pre",
+              "source": "shared_factor/estimates",
+              "where": {
+                "target": "fev1_pre_z"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "fev1_post_z",
+              "label": "FEV₁",
+              "series": "post",
+              "source": "shared_factor/estimates",
+              "where": {
+                "target": "fev1_post_z"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "fvc_pre_z",
+              "label": "FVC",
+              "series": "pre",
+              "source": "shared_factor/estimates",
+              "where": {
+                "target": "fvc_pre_z"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            },
+            {
+              "id": "fvc_post_z",
+              "label": "FVC",
+              "series": "post",
+              "source": "shared_factor/estimates",
+              "where": {
+                "target": "fvc_post_z"
+              },
+              "fields": {
+                "point": "mean",
+                "lower": "lower",
+                "upper": "upper"
+              }
+            }
+          ],
+          "row_order": [
+            "ratio_pre_z",
+            "ratio_post_z",
+            "fev1_pre_z",
+            "fev1_post_z",
+            "fvc_pre_z",
+            "fvc_post_z"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "Difference in GLI z-score per 1 SD poorer mechanics",
+            "scale": "linear",
+            "null": 0,
+            "ticks": [
+              -0.6,
+              -0.4,
+              -0.2,
+              0
+            ]
+          },
+          "estimate": "posterior mean",
+          "interval": "95% credible interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "pre",
+            "post"
+          ],
+          "series_labels": {
+            "pre": "Pre-bronchodilator",
+            "post": "Post-bronchodilator"
+          },
+          "series_styles": {
+            "pre": {
+              "label": "Pre-bronchodilator",
+              "color": "#246B96",
+              "marker": "square",
+              "fill": "filled"
+            },
+            "post": {
+              "label": "Post-bronchodilator",
+              "color": "#C8792C",
+              "marker": "circle",
+              "fill": "filled"
+            }
+          }
+        }
+      ],
+      "caption": {
+        "template": "Points show posterior mean differences in Global Lung Function Initiative (GLI) z-scores, with 95% credible intervals, per one model-defined standard deviation poorer combined respiratory mechanics. The shared latent factor is informed by repeated respiratory resistance, compliance, end-expiratory resistance and end-expiratory reactance, as well as spirometry. Expanded shared-parameter joint models retain follow-up at nominal ages five to ten and incorporate first tuberculosis (TB) at all recorded ages with separate post-TB shifts, adjusting for visit, height and sex. Blue squares show pre-bronchodilator and orange circles post-bronchodilator estimates. Negative differences indicate lower spirometric z-scores. Outcomes and stages are modeled separately; differences between estimates are not a formal test of bronchodilator response. The factor uses both earlier and later measurements, so these associations are not an independently validated prediction from pre-TB lung function. The dashed line marks zero. FEV₁, forced expiratory volume in one second; FVC, forced vital capacity.",
+        "bindings": {}
+      },
+      "limitations": [
+        "Use the accepted, already oriented and scaled shared-factor effects without another sign or scale transformation.",
+        "These are shared-factor associations, not TB exposure effects or independent pre-TB predictions."
+      ]
+    },
+    {
+      "id": "appendix_figure_s6",
+      "title": "Figure S6. Age-specific associations of tuberculosis during infancy with subsequent recurrent wheeze episodes",
+      "kind": "forest",
+      "panels": [
+        {
+          "id": "A",
+          "title": "Recurrent wheeze episodes",
+          "kind": "forest",
+          "rows": [
+            {
+              "id": "age_1",
+              "label": "1 to <3 years",
+              "series": "recurrent",
+              "source": "wheeze/primary_sex/effects",
+              "where": {
+                "process": "Participant-initiated recurrent wheeze episodes",
+                "age_band": "1-<3 years"
+              },
+              "fields": {
+                "point": "posterior_median",
+                "lower": "cri_2_5",
+                "upper": "cri_97_5"
+              }
+            },
+            {
+              "id": "age_2",
+              "label": "3 to <5 years",
+              "series": "recurrent",
+              "source": "wheeze/primary_sex/effects",
+              "where": {
+                "process": "Participant-initiated recurrent wheeze episodes",
+                "age_band": "3-<5 years"
+              },
+              "fields": {
+                "point": "posterior_median",
+                "lower": "cri_2_5",
+                "upper": "cri_97_5"
+              }
+            },
+            {
+              "id": "age_3",
+              "label": "5 to 10.5 years",
+              "series": "recurrent",
+              "source": "wheeze/primary_sex/effects",
+              "where": {
+                "process": "Participant-initiated recurrent wheeze episodes",
+                "age_band": "5-10.5 years"
+              },
+              "fields": {
+                "point": "posterior_median",
+                "lower": "cri_2_5",
+                "upper": "cri_97_5"
+              }
+            }
+          ],
+          "row_order": [
+            "age_1",
+            "age_2",
+            "age_3"
+          ],
+          "orientation": "horizontal",
+          "value_axis": {
+            "label": "Conditional incidence rate ratio",
+            "scale": "log",
+            "null": 1,
+            "ticks": [
+              0.25,
+              0.5,
+              1,
+              2,
+              4
+            ]
+          },
+          "estimate": "posterior median conditional incidence rate ratio",
+          "interval": "95% credible interval",
+          "annotation": {
+            "show": true,
+            "style": "interval",
+            "digits": 2
+          },
+          "series_order": [
+            "recurrent"
+          ],
+          "series_labels": {
+            "recurrent": "Recurrent wheeze episodes"
+          },
+          "series_styles": {
+            "recurrent": {
+              "label": "Recurrent wheeze episodes",
+              "color": "#C8792C",
+              "marker": "circle",
+              "fill": "filled"
+            }
+          }
+        }
+      ],
+      "caption": {
+        "template": "Points show posterior median conditional incidence rate ratios and 95% credible intervals from the sex-adjusted Bayesian joint model of scheduled current wheeze, recurrent wheeze episodes and time to first tuberculosis (TB). They compare post-infancy-TB time with pre/no-TB time within each attained-age band; later-onset TB is modeled separately. Episodes arise from participant-initiated wheeze visits and wheeze-positive illness-triggered study visits. Consecutive qualifying contacts separated by no more than 30 days form one episode; a gap exceeding 30 days begins a new episode. Scheduled assessments are modeled separately and are not recurrent episodes. No post-diagnosis lag is applied. The dashed line marks a ratio of one.",
+        "bindings": {}
+      },
+      "limitations": [
+        "These are conditional recurrent-episode incidence rate ratios, not the standardized scheduled-wheeze risk ratios in Figure 3A."
+      ]
+    }
+  ]
+}

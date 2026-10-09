@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "chains": 4,
+  "draws": 3200,
+  "tune": 2200,
+  "cores": 2,
+  "target_accept": 0.95,
+  "max_treedepth": 10,
+  "seed_offset": 104729
+}

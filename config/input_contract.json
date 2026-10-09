@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "status": "M01 source readers and selected private bindings validated; M02-M03 reconstruct required preparation from these inputs",
+  "inputs": [
+    {
+      "id": "baseline",
+      "required": true,
+      "description": "Child baseline, censoring and covariates",
+      "kind": "external"
+    },
+    {
+      "id": "tb_events",
+      "required": true,
+      "description": "Dated TB events for longitudinal linkage",
+      "kind": "external"
+    },
+    {
+      "id": "pulmonary_function",
+      "required": true,
+      "description": "Longitudinal source PFT measurements",
+      "kind": "external"
+    },
+    {
+      "id": "respiratory_tb_dates",
+      "required": true,
+      "description": "Child diagnosis-date linkage for wheeze and aligned FeNO",
+      "kind": "external"
+    },
+    {
+      "id": "wheeze_assessments",
+      "required": true,
+      "description": "Scheduled and illness-triggered wheeze assessments",
+      "kind": "external"
+    },
+    {
+      "id": "gli_lookup",
+      "required": true,
+      "description": "Selected reference-score coefficients and lookup",
+      "kind": "reference_dependency"
+    },
+    {
+      "id": "pft_dictionary",
+      "required": false,
+      "description": "PFT source dictionary",
+      "kind": "dictionary"
+    },
+    {
+      "id": "wheeze_dictionary",
+      "required": false,
+      "description": "Wheeze source dictionary",
+      "kind": "dictionary"
+    },
+    {
+      "id": "wheeze_csv_check",
+      "required": false,
+      "description": "Equivalent CSV input used for import cross-checks",
+      "kind": "optional_comparison"
+    }
+  ],
+  "derived_inputs": "M02/M03 regenerate linked/reference-scored/paired/covariate-enriched PFT values from source measurements; historical copies are private comparison material and are not run prerequisites.",
+  "reference_dependency": "Separately supplied GLIgl_lookup from rspiro 0.5 R/sysdata.rda; package DESCRIPTION records GPL (>= 2). The selected local file is identified by checksum; no lookup is bundled."
+}

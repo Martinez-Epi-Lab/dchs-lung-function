@@ -1,0 +1,59 @@
+# Supporting MMEF and X6 models
+
+M08 owns the supporting MMEF and X6 analyses. Its selected fits are three MMEF joint models, four X6 joint models, two paired-change GEE models, four repeated X6 models and two X6 trajectory analyses with full and reduced fits. All use verified M03 contracts. The spirometry trajectory module does not fit X6.
+
+## MMEF joint models
+
+The available-case pre-bronchodilator MMEF model supplies the retained prose estimates. Separate pre- and post-bronchodilator models use the common paired MMEF sample for Table S2. The available-case sample must not be replaced by the paired sample. A paired model's post-TB contrast is a lung-function difference between exposure states, not a within-visit bronchodilator response.
+
+Each joint model includes the oriented resistance, compliance, end-expiratory reactance and end-expiratory resistance processes, an independent LCI process and MMEF. Process-specific nuisance regressions use visit category, standardized height and sex, trained on pre/no-TB observations. Each response is centered using its fitted nuisance regression and divided by the training residual SD, with degrees of freedom equal to the nuisance design column count. Post-diagnosis measurements after first TB at age five or later are excluded. Records before those diagnoses remain eligible.
+
+The mechanics child factor has a unit-normal prior. Its indicator loadings and residual scales have half-normal priors with SD one. The separate LCI process is a unit-normal child effect multiplied by a half-normal scale. LCI contributes neither to the target mean nor to the TB hazard. The MMEF mechanics loading is normal with SD one; direct effects, process shifts, infancy additions and hazard associations are normal with SD 0.75. Residual scales have half-normal priors with SD one.
+
+First-TB events and censoring use the strict before-five definition, with piecewise hazard intervals 0–<1, 1–<3 and 3–<5 years. Baseline log hazards have normal priors centered on the logarithms of 0.045, 0.018 and 0.006, with SD 1.25. The hazard includes the pre-TB mechanics factor and sex.
+
+For each draw, the age-one-to-under-five total effect is the direct effect plus target loading times mechanics shift. The infancy total adds both the direct infancy term and the loading times the infancy mechanics shift. The pooled before-five effect weights those totals by distinct post-TB target children in the two diagnosis-age groups. Native L/s estimates multiply the complete draw-wise contrast by the target residual scale. Six effect/component rows and two exponentiated hazard-association rows are retained per MMEF fit.
+
+## Paired MMEF change
+
+The response is post-minus-pre MMEF within the same child/test-date row. Both original values are converted separately to double precision before subtraction, preserving the selected calculation. The prepared response's storage-precision reconciliation is audited; earlier preparation artifacts remain unchanged.
+
+The change sample retains future-TB and post-later-TB states as separate covariates and therefore differs from the paired joint-model sample. The before-five and infancy designs are fitted separately, adjusting for visit, height and sex. The infancy design also retains the age-one-to-under-five state separately.
+
+Gaussian independence GEE supplies the coefficient and child-cluster robust covariance, without an additional small-sample covariance multiplier. Coefficients are independently checked against ordinary least squares. The selected intervals use the robust SE and multiplier 1.96. Standardized reference and exposed changes average the observed covariate design after setting other TB states to zero. Whole-child bootstrap intervals use 2,000 resamples stratified by first-TB age group with seed 20260903. Exact leave-one-child-out coefficient ranges are separate influence summaries. Neither supporting interval replaces the selected robust interval. Only aggregate summaries are exported.
+
+## Joint X6
+
+Native X6 and South African reference X6 z-scores each have separate before-one and before-five fits. These are threshold-specific models; their before-five contrast is not a child-weighted combination of separate infancy and older-child effects. Target measurements require exact age three through seventeen years inclusive, valid dates, height and sex. Post-TB measurements following first TB at or after the selected cutoff are excluded.
+
+The joint X6 model uses the four mechanics indicators and a unit-normal child factor, without an LCI process. Nuisance regressions again train on pre/no-TB observations. Their residual scale is the square root of training residual sum of squares divided by residual degrees of freedom. Indicator loadings and residual scales have half-normal priors with SD one; the target loading is normal with SD one. The mechanics shift, direct target effect and hazard associations have normal priors with SD 0.75. Eligible hazard intervals are drawn from 0–<1, 1–<3 and 3–<5 years; baseline log hazards are normal with mean log(0.03) and SD 1.25. Sex and the pre-TB mechanics factor enter the hazard.
+
+Total X6 effect equals the direct effect plus target loading times mechanics shift. Total, direct and shared-mechanics effects are rescaled draw by draw to native hPa*s/L or reference SD. The selected source contains no separate X6 hazard result rows.
+
+## Repeated X6 and trajectories
+
+Repeated native and reference-z X6 models retain all eligible exact-age three-through-seventeen observations, with target-TB, later-TB and future-TB states separate. The model has a child random intercept and adjusts for visit, height and sex.
+
+The reference-z trajectory analyses use the distinct exact-age three-through-ten sample. A natural cubic spline with three degrees of freedom replaces visit category. The full model interacts the target-TB state with all three spline terms; the reduced model estimates a parallel trajectory difference. Full and reduced models adjust for height, sex, later TB and future TB. Both reuse the unchanged general Gaussian REML engine from M06, including its selected variance search and child-cluster robust covariance correction `G/(G-1) * (N-1)/(N-P)`.
+
+Predictions reuse the training knots and centering constraints. Sex is standardized to its measurement-weighted mean, height to its fitted cubic age relationship, and future/later TB states to zero. The age polynomial remains centered at 7.5 years. Each analysis produces 202 mean predictions on a 101-point grid and eight annual exposed-minus-reference contrasts. Full coefficient vectors, model and robust covariance matrices, variance components and sample counts accompany the outputs.
+
+Selected inference includes the raw three-degree-of-freedom interaction Wald test, the overall trajectory test and reduced-model contrast. No multiple-testing adjustment is recomputed on the selected cutoff subset: the original exploratory adjustment families also contained an unselected cutoff.
+
+## Execution and validation
+
+```sh
+.venv/bin/python run.py --through M08 --config config/paths.local.json --analysis config/analysis.local.json --resume
+```
+
+M08 verifies M01–M07 before fitting its selected models. `--supporting-sampling FILE` controls M08 only; `--sampling FILE` controls M04 and `--mechanics-sampling FILE` controls M07. The common M08 defaults use four chains, 3,200 retained draws, 2,200 tuning iterations, target acceptance 0.95 and maximum tree depth 10. The recorded fresh seed is the applicable source-wrapper seed plus the configured offset. Historical arrays establish retained chain/draw counts; archived audits do not establish all realized historical sampling controls. Wrapper defaults are identified separately from realized evidence.
+
+MMEF uses `adapt_diag` with four distinct initial mechanics and target loadings (0.25, 0.35, 0.45 and 0.55) and initial target residual SD 0.9, following the established M04 initialization. The target loading remains an unconstrained normal parameter. This initialization was adopted after a jittered paired-post fit produced a persistent collapsed mechanics-factor chain with markedly lower log density. The initial failed run is retained privately; no TB contrast estimate selected the remedy. X6 retains `jitter+adapt_diag`.
+
+Complete posterior variables, including child effects, are retained privately. Acceptance requires maximum rank-normalized R-hat at most 1.01, bulk and tail effective sample sizes at least 400, BFMI at least 0.3 in every chain, and no divergences or maximum-tree-depth hits. Raw-fit and aggregate-validation fingerprints are separate. Resume verifies inventories, hashes, sampling controls and complete posterior shapes, then recomputes posterior aggregates and diagnostics. Changed reporting code can validate unchanged raw draws without refitting.
+
+The independent reference protocol was frozen before fresh-result inspection. It selects the converged unpaired MMEF archive corresponding to the manuscript, separately from a similarly named unsuccessful archived fit. It compares posterior means and both interval endpoints for 36 selected effect/hazard rows, using four combined Monte Carlo standard errors, including endpoint-specific quantile MCSE. Rounded values and arbitrary tolerance floors do not determine acceptance. A first fully converged batch used 1,600 retained draws per chain; one secondary component upper-endpoint comparison exceeded the fixed limit. A single documented increase to 3,200 draws for every model retained the same seeds, tuning, initialization and gates. This precision check was a subsequent amendment, not part of the original frozen sampling plan; both earlier results and the amendment are retained privately. Every posterior draw and non-timing sampler statistic from the 1,600-draw initialized batch was reproduced exactly in the longer sequence. All 108 final comparisons pass the unchanged gates.
+
+Deterministic execution retains all ten component fits and eight aggregate tables. Resume recomputes selected fits and checks saved tables against those results. Failed diagnostics, inference or artifact checks cannot create a successful cumulative completion marker. Raw joint draws remain under private `supporting_fits/`; joint aggregates are under `supporting_joint/`, and deterministic aggregates under `supporting_repeated/`. Only a successful cumulative run writes `supporting_current.json`. Manuscript table and figure rendering remain in M13–M14; source-only GitHub delivery remains in M15.
+
+The final synthetic suite passes 437 tests, including 92 M08 additions. Five review roles independently checked source/sample provenance, likelihoods and derivatives, posterior and deterministic calculations, manuscript definitions, and execution failure/resume behavior. Numerical verification includes all 117 deterministic coefficients and 2,782 covariance cells. All seven final fits pass complete-posterior diagnostics; the earlier diagnostic failure and 107/108 comparison outcome remain recorded separately.

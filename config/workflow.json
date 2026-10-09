@@ -1,0 +1,1220 @@
+{
+  "schema_version": 1,
+  "project": "DCHS lung function manuscript reproduction",
+  "implementation_language": "Python; retain the existing statistical engines and verify their specifications",
+  "status": "M01-M14 independently validated, including the 868-test baseline and final original/copied cumulative replays; M15 clean full reconstruction, aggregate-only rendering and reviewed source-release controls implemented, with final run/package/remote acceptance established by separate private receipts; four upstream antenatal counts and the combined loss fact remain unavailable",
+  "model_families": [
+    "SPIRO-JOINT-PRIMARY",
+    "SPIRO-SHARED-FACTOR",
+    "SPIRO-BINARY-GEE",
+    "SPIRO-TRAJECTORY",
+    "MECHANICS-JOINT",
+    "SPIRO-COVARIATE-SENSITIVITY",
+    "SPIRO-WINDOW-SENSITIVITY",
+    "MMEF-UNPAIRED",
+    "MMEF-PAIRED-JOINT",
+    "MMEF-PAIRED-CHANGE",
+    "X6-JOINT",
+    "X6-REPEATED-TRAJECTORY",
+    "PRETB-COX",
+    "WHEEZE-JOINT",
+    "WHEEZE-STANDARDIZED-RR",
+    "FENO-MAIN",
+    "FENO-SUPPLEMENT"
+  ],
+  "preparation_families": [
+    "COHORT-DESCRIPTIVE",
+    "MODALITY-SCHEDULE"
+  ],
+  "stages": [
+    {
+      "id": "S1",
+      "title": "Inventory and reference selection",
+      "status": "complete",
+      "completion": "Existing inventory and saved-result checks retained unchanged; no model-refit claim."
+    },
+    {
+      "id": "S2",
+      "title": "Repository foundation and manuscript workflow",
+      "status": "implemented_validated",
+      "completion": "Portable M01-M14 compute all selected analysis targets from documented inputs."
+    },
+    {
+      "id": "S3",
+      "title": "Independent verification and clean rebuild",
+      "status": "m01_m14_validated_clean_release_evidence_recorded_separately",
+      "completion": "Independent checks, diagnostic gates and a complete clean reconstruction pass."
+    },
+    {
+      "id": "S4",
+      "title": "Code-only GitHub delivery",
+      "status": "release_controls_implemented_delivery_evidence_recorded_separately",
+      "completion": "M15 exports reviewed source; clean installation, remote identity and hosted synthetic CI pass."
+    }
+  ],
+  "targets": [
+    {
+      "id": "main_table_1",
+      "label": "Table 1",
+      "kind": "table",
+      "model_ids": [],
+      "preparation_ids": [
+        "COHORT-DESCRIPTIVE"
+      ],
+      "producer_modules": [
+        "M02"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "main_table_2",
+      "label": "Table 2",
+      "kind": "table",
+      "model_ids": [
+        "SPIRO-JOINT-PRIMARY"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M04"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "main_figure_1",
+      "label": "Figure 1",
+      "kind": "figure",
+      "model_ids": [
+        "SPIRO-TRAJECTORY"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M06"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "main_figure_2",
+      "label": "Figure 2",
+      "kind": "figure",
+      "model_ids": [
+        "SPIRO-JOINT-PRIMARY",
+        "SPIRO-BINARY-GEE"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M04",
+        "M05"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "main_figure_3",
+      "label": "Figure 3",
+      "kind": "figure",
+      "model_ids": [
+        "WHEEZE-JOINT",
+        "WHEEZE-STANDARDIZED-RR",
+        "FENO-MAIN"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M10",
+        "M11"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "appendix_table_s1",
+      "label": "Table S1",
+      "kind": "table",
+      "model_ids": [
+        "SPIRO-COVARIATE-SENSITIVITY"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M12"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "appendix_table_s2",
+      "label": "Table S2",
+      "kind": "table",
+      "model_ids": [
+        "MMEF-PAIRED-JOINT",
+        "MMEF-PAIRED-CHANGE"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M08"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "appendix_table_s3",
+      "label": "Table S3",
+      "kind": "table",
+      "model_ids": [
+        "SPIRO-JOINT-PRIMARY",
+        "SPIRO-COVARIATE-SENSITIVITY",
+        "SPIRO-WINDOW-SENSITIVITY"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M04",
+        "M12"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "appendix_table_s4",
+      "label": "Table S4",
+      "kind": "table",
+      "model_ids": [
+        "WHEEZE-JOINT"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M10",
+        "M12"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "appendix_table_s5",
+      "label": "Table S5",
+      "kind": "table",
+      "model_ids": [
+        "MECHANICS-JOINT"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M07"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "appendix_table_s6",
+      "label": "Table S6",
+      "kind": "table",
+      "model_ids": [
+        "SPIRO-JOINT-PRIMARY"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M04"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "appendix_figure_s1",
+      "label": "Figure S1",
+      "kind": "figure",
+      "model_ids": [],
+      "preparation_ids": [
+        "COHORT-DESCRIPTIVE"
+      ],
+      "producer_modules": [
+        "M02"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "appendix_figure_s2",
+      "label": "Figure S2",
+      "kind": "figure",
+      "model_ids": [],
+      "preparation_ids": [
+        "MODALITY-SCHEDULE"
+      ],
+      "producer_modules": [
+        "M02"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "appendix_figure_s3",
+      "label": "Figure S3",
+      "kind": "figure",
+      "model_ids": [
+        "PRETB-COX"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M09"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "appendix_figure_s4",
+      "label": "Figure S4",
+      "kind": "figure",
+      "model_ids": [
+        "FENO-SUPPLEMENT"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M11"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "appendix_figure_s5",
+      "label": "Figure S5",
+      "kind": "figure",
+      "model_ids": [
+        "SPIRO-SHARED-FACTOR"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M07"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "appendix_figure_s6",
+      "label": "Figure S6",
+      "kind": "figure",
+      "model_ids": [
+        "WHEEZE-JOINT"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M10"
+      ],
+      "render_module": "M14"
+    },
+    {
+      "id": "text_mmef_unpaired",
+      "label": "Numerical prose: unpaired MMEF",
+      "kind": "prose",
+      "model_ids": [
+        "MMEF-UNPAIRED"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M08"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "text_x6_joint",
+      "label": "Numerical prose: joint X6",
+      "kind": "prose",
+      "model_ids": [
+        "X6-JOINT"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M08"
+      ],
+      "render_module": "M13"
+    },
+    {
+      "id": "text_x6_repeated",
+      "label": "Numerical prose: repeated X6 and trajectory tests",
+      "kind": "prose",
+      "model_ids": [
+        "X6-REPEATED-TRAJECTORY"
+      ],
+      "preparation_ids": [],
+      "producer_modules": [
+        "M08"
+      ],
+      "render_module": "M13"
+    }
+  ],
+  "prose_scope": {
+    "numeric_sentences": 42,
+    "numeric_table_cells_including_headers": 304,
+    "all_nonempty_table_cells": 413,
+    "physical_tables": 10,
+    "prose_only_families": [
+      "MMEF-UNPAIRED",
+      "X6-JOINT",
+      "X6-REPEATED-TRAJECTORY"
+    ],
+    "check": "Map all 304 original digit-containing cells and 42 retained numerical sentences to computed results or explicit context classifications. The public specification contains neutral original locators and source selectors; original values, reference documents and file paths remain private.",
+    "scientific_table_cells": 261,
+    "sentence_result_tokens": 95,
+    "qualitative_evidence_bindings": 52
+  },
+  "modules": [
+    {
+      "id": "M01",
+      "title": "Import and harmonize study extracts",
+      "stage": "S2",
+      "depends_on": [],
+      "status": "implemented_validated",
+      "model_families": [],
+      "preparation_families": [],
+      "output_ids": [],
+      "code_targets": [
+        "src/dchs_lung_function/inputs.py"
+      ],
+      "steps": [
+        {
+          "id": "M01.1",
+          "title": "Read study extracts",
+          "work": "Implement format-specific readers, required-column checks, explicit missing-value/date conversions and stable row identities.",
+          "acceptance": "Reconcile source and imported rows; reject malformed rows, silent truncation and missing required fields."
+        },
+        {
+          "id": "M01.2",
+          "title": "Resolve input bindings",
+          "work": "Bind neutral input roles to the selected private files; verify wheeze candidates and reference lookup provenance before use.",
+          "acceptance": "Every required source is identified and hashed; no unresolved candidate is silently selected; private paths stay outside shared source."
+        }
+      ],
+      "acceptance": [
+        "Reconcile source and imported rows; reject malformed rows, silent truncation and missing required fields.",
+        "Every required source is identified and hashed; no unresolved candidate is silently selected; private paths stay outside shared source."
+      ]
+    },
+    {
+      "id": "M02",
+      "title": "Construct cohorts and descriptive outputs",
+      "stage": "S2",
+      "depends_on": [
+        "M01"
+      ],
+      "status": "implemented_with_upstream_flow_gap",
+      "model_families": [],
+      "preparation_families": [
+        "COHORT-DESCRIPTIVE",
+        "MODALITY-SCHEDULE"
+      ],
+      "output_ids": [
+        "main_table_1",
+        "appendix_figure_s1",
+        "appendix_figure_s2"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/cohorts.py",
+        "src/dchs_lung_function/descriptive.py"
+      ],
+      "steps": [
+        {
+          "id": "M02.1",
+          "title": "Build cohort ledgers",
+          "work": "Construct the joint, descriptive and outcome-specific populations, diagnosis groups and sequential exclusions.",
+          "acceptance": "Independent membership comparisons and exact counts reproduce the selected populations; joins do not inflate records."
+        },
+        {
+          "id": "M02.2",
+          "title": "Calculate Table 1",
+          "work": "Calculate all category counts, nonmissing denominators, continuous summaries and the three parity median/IQR entries.",
+          "acceptance": "Every Table 1 scientific cell is generated from the descriptive sample with the selected summary convention."
+        },
+        {
+          "id": "M02.3",
+          "title": "Calculate flow and testing schedule",
+          "work": "Derive participant-flow arithmetic and observed modality-by-visit availability from imported PFT records; use the provisional visit/TB linkage shared with M03.",
+          "acceptance": "Figures S1/S2 use calculated aggregate ledgers; population counts are checked again against finalized M03 samples."
+        }
+      ],
+      "acceptance": [
+        "Independent membership comparisons and exact counts reproduce the selected populations; joins do not inflate records.",
+        "Every Table 1 scientific cell is generated from the descriptive sample with the selected summary convention.",
+        "Figures S1/S2 use calculated aggregate ledgers; population counts are checked again against finalized M03 samples."
+      ]
+    },
+    {
+      "id": "M03",
+      "title": "Prepare longitudinal model inputs",
+      "stage": "S2",
+      "depends_on": [
+        "M01",
+        "M02"
+      ],
+      "status": "implemented_validated",
+      "model_families": [],
+      "preparation_families": [],
+      "output_ids": [],
+      "code_targets": [
+        "src/dchs_lung_function/preparation.py",
+        "src/dchs_lung_function/reference_scores.py",
+        "src/dchs_lung_function/respiratory_preparation.py"
+      ],
+      "steps": [
+        {
+          "id": "M03.1",
+          "title": "Link dates and construct exposure",
+          "work": "Implement child/visit linkage, source date precedence, same-day TB transitions and mutually exclusive diagnosis-age groups.",
+          "acceptance": "Reference linkage and boundary fixtures agree, including missing dates and repeated visits; preserve one dataset identity with neutral role names."
+        },
+        {
+          "id": "M03.2",
+          "title": "Rebuild reference scores and transforms",
+          "work": "Recreate pre/post-bronchodilator GLI scores, X6 reference scores, native units and visit/height/sex residualization.",
+          "acceptance": "Reference coefficients and lookup version are verified; model matrices and transformed values agree before fitting."
+        },
+        {
+          "id": "M03.3",
+          "title": "Freeze model-specific samples",
+          "work": "Create explicit available-case, paired, exact-age and nominal-visit sample rules with model covariates and child weights.",
+          "acceptance": "All distinct eligibility rules have tested sample ledgers; source values are preserved and no sample is reused solely because its label is similar."
+        }
+      ],
+      "acceptance": [
+        "Reference linkage and boundary fixtures agree, including missing dates and repeated visits; preserve one dataset identity with neutral role names.",
+        "Reference coefficients and lookup version are verified; model matrices and transformed values agree before fitting.",
+        "All distinct eligibility rules have tested sample ledgers; source values are preserved and no sample is reused solely because its label is similar."
+      ]
+    },
+    {
+      "id": "M04",
+      "title": "Fit primary spirometry joint models",
+      "stage": "S2",
+      "depends_on": [
+        "M03"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "SPIRO-JOINT-PRIMARY"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "main_table_2",
+        "main_figure_2",
+        "appendix_table_s3",
+        "appendix_table_s6"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/spirometry.py",
+        "src/dchs_lung_function/sampling.py",
+        "src/dchs_lung_function/model_runtime.py",
+        "src/dchs_lung_function/diagnostics.py",
+        "src/dchs_lung_function/analysis/primary_results.py",
+        "src/dchs_lung_function/primary_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M04.1",
+          "title": "Make primary models explicit",
+          "work": "Replace runtime source rewriting with versioned PyMC model functions preserving joint likelihoods, priors, residual scales, TB process and shared child effects.",
+          "acceptance": "An independent reviewer reconstructs the specification and compares the complete design matrices and prior/likelihood terms."
+        },
+        {
+          "id": "M04.2",
+          "title": "Fit continuous spirometry",
+          "work": "Run the 12 selected continuous fits and compute primary and diagnosis-age contrasts; retain private posterior draws and realized sampler metadata.",
+          "acceptance": "Sample counts and deterministic transforms match exactly; convergence and prespecified Monte Carlo comparison gates pass for Table 2, Table S6 and shared primary rows."
+        }
+      ],
+      "acceptance": [
+        "An independent reviewer reconstructs the specification and compares the complete design matrices and prior/likelihood terms.",
+        "Sample counts and deterministic transforms match exactly; convergence and prespecified Monte Carlo comparison gates pass for Table 2, Table S6 and shared primary rows."
+      ]
+    },
+    {
+      "id": "M05",
+      "title": "Fit binary spirometry models",
+      "stage": "S2",
+      "depends_on": [
+        "M03"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "SPIRO-BINARY-GEE"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "main_figure_2"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/binary_spirometry.py",
+        "src/dchs_lung_function/binary_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M05.1",
+          "title": "Define binary outcomes",
+          "work": "Derive LLN indicators and mutually exclusive spirometric patterns separately for pre/post-bronchodilator samples.",
+          "acceptance": "LLN equality, joint low-ratio/low-FVC states, missing stages and all small/zero aggregate counts are tested."
+        },
+        {
+          "id": "M05.2",
+          "title": "Fit binary spirometry",
+          "work": "Fit modified-Poisson GEE with the selected log link, working correlation and child-robust covariance.",
+          "acceptance": "Independent coefficients, cluster counts, covariance and intervals agree; nonestimable terms receive an explicit status."
+        }
+      ],
+      "acceptance": [
+        "LLN equality, joint low-ratio/low-FVC states, missing stages and all small/zero aggregate counts are tested.",
+        "Independent coefficients, cluster counts, covariance and intervals agree; nonestimable terms receive an explicit status."
+      ]
+    },
+    {
+      "id": "M06",
+      "title": "Fit spirometry trajectories",
+      "stage": "S2",
+      "depends_on": [
+        "M03"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "SPIRO-TRAJECTORY"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "main_figure_1"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/spirometry_trajectories.py",
+        "src/dchs_lung_function/trajectory_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M06.1",
+          "title": "Fit spirometry trajectories",
+          "work": "Implement the selected spline basis, random intercept, covariance calculation and reduced-model comparison for school-age ratio trajectories.",
+          "acceptance": "Fit and interaction tests reproduce the selected specification and exact-age sample; X6 fits are owned only by M08."
+        },
+        {
+          "id": "M06.2",
+          "title": "Standardize trajectory predictions",
+          "work": "Produce the common age grid, sex/height standardization, uncertainty bands and native/z-score prose contrasts.",
+          "acceptance": "Figure 1 plotting data and retained trajectory sentences are checked against independent predictions."
+        }
+      ],
+      "acceptance": [
+        "Fit and interaction tests reproduce the selected specification and exact-age sample; X6 fits are owned only by M08.",
+        "Figure 1 plotting data and retained trajectory sentences are checked against independent predictions."
+      ]
+    },
+    {
+      "id": "M07",
+      "title": "Fit mechanics and summarize the shared factor",
+      "stage": "S2",
+      "depends_on": [
+        "M03",
+        "M04"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "MECHANICS-JOINT",
+        "SPIRO-SHARED-FACTOR"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "appendix_table_s5",
+        "appendix_figure_s5"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/mechanics.py",
+        "src/dchs_lung_function/mechanics_sampling.py",
+        "src/dchs_lung_function/mechanics_execution.py",
+        "src/dchs_lung_function/analysis/mechanics_results.py",
+        "src/dchs_lung_function/analysis/shared_factor.py",
+        "src/dchs_lung_function/shared_factor_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M07.1",
+          "title": "Fit individual mechanics outcomes",
+          "work": "Fit the six selected joint mechanics models with their own samples, adverse-direction transforms and rescaling.",
+          "acceptance": "Table S5 sample counts, contrasts, signs, units and intervals pass independent comparisons."
+        },
+        {
+          "id": "M07.2",
+          "title": "Summarize the shared mechanics factor",
+          "work": "Calculate the selected six factor-loading associations from M04 posterior draws, preserving the selected sign and outcome-scale conversion.",
+          "acceptance": "Figure S5 summaries reproduce the loading transformation; this is postprocessing of primary fits, not a separate TB-effect model."
+        }
+      ],
+      "acceptance": [
+        "Table S5 sample counts, contrasts, signs, units and intervals pass independent comparisons.",
+        "Figure S5 summaries reproduce the loading transformation; this is postprocessing of primary fits, not a separate TB-effect model."
+      ]
+    },
+    {
+      "id": "M08",
+      "title": "Fit supporting MMEF and X6 models",
+      "stage": "S2",
+      "depends_on": [
+        "M03"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "MMEF-UNPAIRED",
+        "MMEF-PAIRED-JOINT",
+        "MMEF-PAIRED-CHANGE",
+        "X6-JOINT",
+        "X6-REPEATED-TRAJECTORY"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "appendix_table_s2",
+        "text_mmef_unpaired",
+        "text_x6_joint",
+        "text_x6_repeated"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/mmef.py",
+        "src/dchs_lung_function/models/x6.py",
+        "src/dchs_lung_function/models/supporting_repeated.py",
+        "src/dchs_lung_function/supporting_sampling.py",
+        "src/dchs_lung_function/analysis/supporting_results.py",
+        "src/dchs_lung_function/supporting_execution.py",
+        "src/dchs_lung_function/supporting_repeated_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M08.1",
+          "title": "Fit unpaired MMEF",
+          "work": "Implement available-case MMEF joint models for retained prose estimates.",
+          "acceptance": "Unpaired sample counts and native-unit contrasts are verified separately from Table S2."
+        },
+        {
+          "id": "M08.2",
+          "title": "Fit paired MMEF",
+          "work": "Implement paired pre/post-bronchodilator joint MMEF models.",
+          "acceptance": "Table S2 paired joint estimates and intervals match the selected model sample and reference group."
+        },
+        {
+          "id": "M08.3",
+          "title": "Fit MMEF change",
+          "work": "Fit the paired-change GEE using its own covariates and valid paired-change sample.",
+          "acceptance": "Change-model membership, covariance and contrasts are verified independently; its denominator is not forced to equal the joint-model denominator."
+        },
+        {
+          "id": "M08.4",
+          "title": "Fit joint X6",
+          "work": "Implement the selected X6 joint model and reference-score contrast.",
+          "acceptance": "Retained prose estimates, units and sample windows are checked even though they have no separate numbered display."
+        },
+        {
+          "id": "M08.5",
+          "title": "Fit repeated X6 and trajectories",
+          "work": "Implement the repeated X6 model, trajectory interaction and reduced-model differences once in this module.",
+          "acceptance": "All retained X6 tests and native/z-score prose estimates are checked; M06 does not duplicate these fits."
+        }
+      ],
+      "acceptance": [
+        "Unpaired sample counts and native-unit contrasts are verified separately from Table S2.",
+        "Table S2 paired joint estimates and intervals match the selected model sample and reference group.",
+        "Change-model membership, covariance and contrasts are verified independently; its denominator is not forced to equal the joint-model denominator.",
+        "Retained prose estimates, units and sample windows are checked even though they have no separate numbered display.",
+        "All retained X6 tests and native/z-score prose estimates are checked; M06 does not duplicate these fits."
+      ]
+    },
+    {
+      "id": "M09",
+      "title": "Fit pre-TB lung-function survival models",
+      "stage": "S2",
+      "depends_on": [
+        "M03"
+      ],
+      "status": "implemented_source_reproduction_validated_with_covariance_limitation",
+      "model_families": [
+        "PRETB-COX"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "appendix_figure_s3"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/pretb_cox.py",
+        "src/dchs_lung_function/pretb_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M09.1",
+          "title": "Construct pre-TB risk intervals",
+          "work": "Use attained age; carry each eligible measurement until the next measurement, two-year ceiling, first TB event or censoring, whichever occurs first.",
+          "acceptance": "Independent risk intervals and risk sets agree; no post-TB predictor enters analysis and full counts survive nonestimable fits."
+        },
+        {
+          "id": "M09.2",
+          "title": "Fit and verify Cox uncertainty",
+          "work": "Fit the selected sex/site-adjusted Cox models with adverse orientation and the original robust covariance specification.",
+          "acceptance": "Independent estimation verifies all 17 Figure S3 rows, covariance calculations and uncertainty intervals."
+        }
+      ],
+      "acceptance": [
+        "Independent risk intervals and risk sets agree; no post-TB predictor enters analysis and full counts survive nonestimable fits.",
+        "Independent estimation verifies all 17 Figure S3 rows, covariance calculations and uncertainty intervals."
+      ]
+    },
+    {
+      "id": "M10",
+      "title": "Fit age-specific wheeze models",
+      "stage": "S2",
+      "depends_on": [
+        "M03"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "WHEEZE-JOINT",
+        "WHEEZE-STANDARDIZED-RR"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "main_figure_3",
+        "appendix_table_s4",
+        "appendix_figure_s6"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/respiratory_preparation.py",
+        "src/dchs_lung_function/models/wheeze.py",
+        "src/dchs_lung_function/wheeze_sampling.py",
+        "src/dchs_lung_function/wheeze_execution.py",
+        "src/dchs_lung_function/analysis/wheeze_results.py",
+        "src/dchs_lung_function/analysis/wheeze_standardization.py"
+      ],
+      "steps": [
+        {
+          "id": "M10.1",
+          "title": "Build scheduled and episode outcomes",
+          "work": "Verify wheeze input bindings, separate scheduled assessments from participant-initiated contacts, form episodes by consecutive gaps of at most 30 days and construct risk time.",
+          "acceptance": "Episode chaining, 30/31-day boundaries, assessment denominators, no-lag exposure and later-onset indicators pass independent checks."
+        },
+        {
+          "id": "M10.2",
+          "title": "Fit joint wheeze",
+          "work": "Implement primary and designated adjusted joint wheeze specifications through explicit configuration and a shared model function.",
+          "acceptance": "Conditional ORs and recurrent-episode IRRs for Table S4/Figure S6 are validated on their original scales; M12 verifies and reuses the accepted scenarios without duplicating this engine."
+        },
+        {
+          "id": "M10.3",
+          "title": "Calculate standardized probability ratios",
+          "work": "Integrate the selected posterior predictive probabilities and standardization distribution to obtain the displayed risk ratios.",
+          "acceptance": "Figure 3A uses standardized RR; independent calculations show that conditional ORs and episode IRRs were not substituted."
+        }
+      ],
+      "acceptance": [
+        "Episode chaining, 30/31-day boundaries, assessment denominators, no-lag exposure and later-onset indicators pass independent checks.",
+        "Conditional ORs and recurrent-episode IRRs for Table S4/Figure S6 are validated on their original scales; M12 verifies and reuses the accepted scenarios without duplicating this engine.",
+        "Figure 3A uses standardized RR; independent calculations show that conditional ORs and episode IRRs were not substituted."
+      ]
+    },
+    {
+      "id": "M11",
+      "title": "Fit FeNO regressions",
+      "stage": "S2",
+      "depends_on": [
+        "M03"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "FENO-MAIN",
+        "FENO-SUPPLEMENT"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "main_figure_3",
+        "appendix_figure_s4"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/feno.py",
+        "src/dchs_lung_function/feno_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M11.1",
+          "title": "Fit main FeNO",
+          "work": "Fit the five age-specific log-FeNO regressions with selected exposure timing, sex, height, exact age and child-robust covariance.",
+          "acceptance": "Figure 3B sample counts, GMRs and intervals match; nonpositive observations never enter a logarithm."
+        },
+        {
+          "id": "M11.2",
+          "title": "Fit supplementary FeNO",
+          "work": "Implement the six visit-specific supplementary contrasts, retaining the distinct earliest-visit future-TB comparison.",
+          "acceptance": "Figure S4 selectors, comparator groups and intervals are verified separately from the main five-age analysis."
+        }
+      ],
+      "acceptance": [
+        "Figure 3B sample counts, GMRs and intervals match; nonpositive observations never enter a logarithm.",
+        "Figure S4 selectors, comparator groups and intervals are verified separately from the main five-age analysis."
+      ]
+    },
+    {
+      "id": "M12",
+      "title": "Run designated sensitivity analyses",
+      "stage": "S2",
+      "depends_on": [
+        "M04",
+        "M10"
+      ],
+      "status": "implemented_validated",
+      "model_families": [
+        "SPIRO-COVARIATE-SENSITIVITY",
+        "SPIRO-WINDOW-SENSITIVITY"
+      ],
+      "preparation_families": [],
+      "output_ids": [
+        "appendix_table_s1",
+        "appendix_table_s3",
+        "appendix_table_s4"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/models/sensitivity.py",
+        "src/dchs_lung_function/sensitivity_sampling.py",
+        "src/dchs_lung_function/sensitivity_execution.py",
+        "src/dchs_lung_function/sensitivity_tables_execution.py",
+        "src/dchs_lung_function/analysis/sensitivities.py"
+      ],
+      "steps": [
+        {
+          "id": "M12.1",
+          "title": "Run spirometry sensitivities",
+          "work": "Fit eight selected early-TB specifications and two all-age observation-window variants with distinct graphs and samples; verify and reuse two accepted M04 full-follow-up ratio fits. Preserve configurable endpoints, baseline versus exploratory covariate placement and complete sampler metadata.",
+          "acceptance": "All 34 selected Tables S1/S3 effect rows derive from computed means and intervals; eight attenuation cells use full-precision posterior mean magnitudes without invented uncertainty. All 267 frozen new-fit comparisons and complete posterior diagnostics pass."
+        },
+        {
+          "id": "M12.2",
+          "title": "Coordinate wheeze sensitivities",
+          "work": "Verify and reuse both accepted M10 scenarios for Table S4 with conditional scheduled-wheeze ORs and recurrent-episode IRRs, posterior medians and the original model-specific samples.",
+          "acceptance": "Verified fit identities prevent duplicate sampling; all twelve Table S4 effects preserve accepted M10 draws and summaries on conditional OR/IRR scales."
+        }
+      ],
+      "acceptance": [
+        "All 34 selected Tables S1/S3 effect rows derive from computed means and intervals; eight attenuation cells use full-precision posterior mean magnitudes without invented uncertainty. All 267 frozen new-fit comparisons and complete posterior diagnostics pass.",
+        "Verified fit identities prevent duplicate sampling; all twelve Table S4 effects preserve accepted M10 draws and summaries on conditional OR/IRR scales."
+      ]
+    },
+    {
+      "id": "M13",
+      "title": "Generate tables and numerical text",
+      "stage": "S2",
+      "depends_on": [
+        "M02",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "M10",
+        "M11",
+        "M12"
+      ],
+      "status": "implemented_validated",
+      "model_families": [],
+      "preparation_families": [],
+      "output_ids": [
+        "main_table_1",
+        "main_table_2",
+        "appendix_table_s1",
+        "appendix_table_s2",
+        "appendix_table_s3",
+        "appendix_table_s4",
+        "appendix_table_s5",
+        "appendix_table_s6",
+        "text_mmef_unpaired",
+        "text_x6_joint",
+        "text_x6_repeated"
+      ],
+      "code_targets": [
+        "src/dchs_lung_function/reporting/sources.py",
+        "src/dchs_lung_function/reporting/results.py",
+        "src/dchs_lung_function/reporting/facts.py",
+        "src/dchs_lung_function/reporting/tables.py",
+        "src/dchs_lung_function/reporting/formatting.py",
+        "src/dchs_lung_function/reporting/numerical_text.py",
+        "src/dchs_lung_function/reporting/render_document.py",
+        "config/manuscript_reporting.json",
+        "src/dchs_lung_function/reporting_execution.py",
+        "config/reporting_schemas.json"
+      ],
+      "steps": [
+        {
+          "id": "M13.1",
+          "title": "Create a common result interface",
+          "work": "Resolve current analytical identities and verify complete aggregate receipts/inventories. Retain full-precision estimates, point estimators, intervals, denominators, units and explicit non-estimable statuses without participant records; canonical aliases require exact agreement with original model fields.",
+          "acceptance": "Tables and prose use the same keyed full-precision result; estimates are never typed into production rendering code. All prior scientific results and raw fits must remain unchanged."
+        },
+        {
+          "id": "M13.2",
+          "title": "Render tables and numerical prose",
+          "work": "Generate editable DOCX/HTML tables, ten table CSVs, numerical text and lineage/comparison artifacts. Use centralized display rules and a separate standard-library document interpreter with actual embedded Arial/Arial Bold; preserve scientific environment locks.",
+          "acceptance": "All eight numbered/ten physical tables, 304 original digit-containing cells, 261 scientific cells and 42 sentences are classified and checked; 95 result tokens and 52 qualitative bindings resolve. Complete-suite, document visual/font and final original-source/copied-source cumulative receipts are required before delivery. Archived display comparison remains informational."
+        }
+      ],
+      "acceptance": [
+        "Tables and prose use the same keyed full-precision result; estimates are never typed into production rendering code. All prior scientific results and raw fits must remain unchanged.",
+        "All eight numbered/ten physical tables, 304 original digit-containing cells, 261 scientific cells and 42 sentences are classified and checked; 95 result tokens and 52 qualitative bindings resolve. Complete-suite, document visual/font and final original-source/copied-source cumulative receipts are required before delivery. Archived display comparison remains informational."
+      ]
+    },
+    {
+      "id": "M14",
+      "title": "Generate publication figures",
+      "stage": "S2",
+      "depends_on": [
+        "M13"
+      ],
+      "status": "implemented_validated",
+      "model_families": [],
+      "preparation_families": [],
+      "output_ids": [
+        "main_figure_1",
+        "main_figure_2",
+        "main_figure_3",
+        "appendix_figure_s1",
+        "appendix_figure_s2",
+        "appendix_figure_s3",
+        "appendix_figure_s4",
+        "appendix_figure_s5",
+        "appendix_figure_s6"
+      ],
+      "code_targets": [
+        "config/publication_figures.json",
+        "src/dchs_lung_function/analysis/pretb_uncertainty.py",
+        "src/dchs_lung_function/reporting/figure_data.py",
+        "src/dchs_lung_function/reporting/figures.py",
+        "src/dchs_lung_function/figures_execution.py"
+      ],
+      "steps": [
+        {
+          "id": "M14.1",
+          "title": "Resolve figure data and corrected uncertainty",
+          "work": "Verify the complete accepted M13 publication and source M09 fits. Separately compute the authorized actual-risk-membership robust covariance and derived SE/CI/p/q for Figure S3, preserving coefficients, hazard ratios, model covariance, counts and source files. Resolve all nine figures, 17 panels, 56 forest estimates, 808 trajectory rows and ledger-derived flow/schedule data.",
+          "acceptance": "Independent calculation verifies corrected uncertainty, exact unchanged source point estimates/support, every panel selector and all caption bindings. Retain Efron-fit/Breslow-score and inclusive-boundary conventions; keep four unavailable antenatal counts explicit."
+        },
+        {
+          "id": "M14.2",
+          "title": "Render and verify publication figures",
+          "work": "Load actual externally supplied Arial/Arial Bold and produce nine vector PDFs, nine 600-dpi PNGs and one combined nine-page PDF, eleven data/metadata payloads and a receipt. Regenerate all payloads on resume and verify complete identities/inventories.",
+          "acceptance": "Numerical, caption, visual and embedded-font checks, the full expanded test suite and final original/copied-source cumulative replays must pass before acceptance. Layout changes preserve scientific values; proprietary font files and all generated results remain outside the code-only repository."
+        }
+      ],
+      "acceptance": [
+        "Independent calculation verifies corrected uncertainty, exact unchanged source point estimates/support, every panel selector and all caption bindings. Retain Efron-fit/Breslow-score and inclusive-boundary conventions; keep four unavailable antenatal counts explicit.",
+        "Numerical, caption, visual and embedded-font checks, the full expanded test suite and final original/copied-source cumulative replays must pass before acceptance. Layout changes preserve scientific values; proprietary font files and all generated results remain outside the code-only repository."
+      ]
+    },
+    {
+      "id": "M15",
+      "title": "Verify and deliver the code-only repository",
+      "stage": "S4",
+      "depends_on": [
+        "M13",
+        "M14"
+      ],
+      "status": "implemented_acceptance_recorded_separately",
+      "model_families": [],
+      "preparation_families": [],
+      "output_ids": [],
+      "code_targets": [
+        "src/dchs_lung_function/full_execution.py",
+        "src/dchs_lung_function/render_execution.py",
+        "src/dchs_lung_function/pipeline.py",
+        "config/render.example.json",
+        "config/source_allowlist.json",
+        "tools/export_source.py",
+        ".github/workflows/checks.yml"
+      ],
+      "steps": [
+        {
+          "id": "M15.1",
+          "title": "Verify clean full and render runs",
+          "work": "Implement --full from absent/empty separate work/output roots with paired full_run_origin.json records, exact source/input/configuration/runtime/destination identity and 37 joint fits. Full resume requires the same origin. Implement --render --render-config FILE from trusted accepted M13/M14 receipt hashes, with exact structured aggregate preservation and a separate presentation identity; it does not load study inputs or raw draws, fit models, or revalidate analysis.",
+          "acceptance": "The reviewed extracted tree completes a genuine clean reconstruction and same-origin resume; unchanged full-posterior diagnostics, the 924 frozen posterior-summary comparisons and declared deterministic tolerances pass. Aggregate-only rendering and its resume preserve accepted scientific payloads; rendering does not establish analytical reproduction."
+        },
+        {
+          "id": "M15.2",
+          "title": "Prepare source-only release",
+          "work": "Export the explicit reviewed source allowlist with deterministic archive/manifest bytes, externally trusted manifest-hash verification and safe non-overwriting extraction. Review content for sensitive material, retain the scientific lock and exclude private/generated artifacts and proprietary fonts. Provide macOS/Linux source and fabricated-data CI.",
+          "acceptance": "The exact extracted source inventory and content/privacy audit, clean locked installation and complete nonempty synthetic suite pass. Archive integrity and reviewed release identity are checked separately; hosted synthetic passes do not establish cross-platform confidential-data equivalence."
+        },
+        {
+          "id": "M15.3",
+          "title": "Verify GitHub delivery",
+          "work": "Record the chosen private repository and visibility, upload only reviewed source, compare remote files/commit with the accepted manifest and check actual hosted synthetic CI outcomes. Source export and full execution perform no GitHub upload.",
+          "acceptance": "Remote source identity and hosted CI are verified separately from local export and confidential-data reconstruction, with private delivery receipts. Reuse licensing is not selected automatically."
+        }
+      ],
+      "acceptance": [
+        "The reviewed extracted tree completes a genuine clean reconstruction and same-origin resume; unchanged full-posterior diagnostics, the 924 frozen posterior-summary comparisons and declared deterministic tolerances pass. Aggregate-only rendering and its resume preserve accepted scientific payloads; rendering does not establish analytical reproduction.",
+        "The exact extracted source inventory and content/privacy audit, clean locked installation and complete nonempty synthetic suite pass. Archive integrity and reviewed release identity are checked separately; hosted synthetic passes do not establish cross-platform confidential-data equivalence.",
+        "Remote source identity and hosted CI are verified separately from local export and confidential-data reconstruction, with private delivery receipts. Reuse licensing is not selected automatically."
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "id": "G01",
+      "title": "Required wheeze paths",
+      "owners": [
+        "M01",
+        "M10"
+      ],
+      "resolution": "Selected wheeze inputs matched stored source hashes and all substantive Stata/CSV fields; accepted private bindings recorded.",
+      "status": "resolved"
+    },
+    {
+      "id": "G02",
+      "title": "Parity summaries",
+      "owners": [
+        "M02"
+      ],
+      "resolution": "Parity median and quartiles regenerated from the descriptive cohort and compared with all selected manuscript cells.",
+      "status": "resolved"
+    },
+    {
+      "id": "G03",
+      "title": "Explicit model implementation",
+      "owners": [
+        "M03",
+        "M04",
+        "M12"
+      ],
+      "resolution": "The selected engines through M12 explicitly match independently checked definitions and results. All ten designated sensitivity fits pass full-posterior diagnostics and all 267 frozen posterior comparisons; the four reused M04/M10 fits retain their accepted raw identities. Aggregate sensitivity selectors and posterior-mean attenuation are independently checked.",
+      "status": "implemented_engines_through_m12_independently_validated"
+    },
+    {
+      "id": "G04",
+      "title": "Calculated reporting inputs",
+      "owners": [
+        "M02",
+        "M12",
+        "M13"
+      ],
+      "resolution": "Table 1, flow/schedule ledgers, sensitivity tables and M13 table/prose bindings are computed and independently validated with final cumulative replays. M14 uses those ledgers directly. Four antenatal nodes require unavailable upstream recruitment/disposition evidence and remain explicit missing values; the combined antenatal/pregnancy-loss fact is also unavailable and is never inferred by summing missing components as zero.",
+      "status": "reporting_validated_upstream_flow_evidence_pending"
+    },
+    {
+      "id": "G05",
+      "title": "Realized sampler configuration",
+      "owners": [
+        "M04",
+        "M07",
+        "M08",
+        "M10",
+        "M12",
+        "M15"
+      ],
+      "resolution": "All 37 selected primary, mechanics, supporting, wheeze and sensitivity joint fits retain explicit controls, complete private posteriors and realized metadata; diagnostics and frozen comparisons passed. M12 passed at its initial draw count. Historical early defaults do not establish realized sampling. M15 clean reconstruction is bound to a new empty-root origin and compared with the accepted run using the same selected seeds/controls and unchanged diagnostic/scientific gates; final evidence is recorded separately.",
+      "status": "accepted_fit_provenance_validated_clean_reconstruction_evidence_separate"
+    },
+    {
+      "id": "G06",
+      "title": "Portable environment and restart rules",
+      "owners": [
+        "M01",
+        "M15"
+      ],
+      "resolution": "Exact scientific/preparation locks and Python 3.12.14 macOS ARM64 reference runtime are established. Final M14 original/copied cumulative replays verified identities, restart behavior and all publication payloads, including external Arial/runtime/font-inspector identities. M15 adds paired clean origins, trusted aggregate-only rendering, explicit source export/extraction and synthetic macOS/Linux CI. Final package, clean-run and hosted outcomes require their own receipts; cross-platform scientific equivalence is not inferred.",
+      "status": "runtime_restart_validated_release_controls_implemented"
+    },
+    {
+      "id": "G07",
+      "title": "Model and caption correspondence",
+      "owners": [
+        "M07",
+        "M08",
+        "M13",
+        "M14"
+      ],
+      "resolution": "M13 table/prose estimators, units, intervals, reference groups, canonical lineage and inspected document are independently validated with final replays. All nine M14 figures, caption bindings, rendered pages and embedded fonts are independently checked; the 868-test suite and final-source original/copied cumulative replays passed. No selected manuscript is edited.",
+      "status": "table_prose_figure_correspondence_independently_validated"
+    },
+    {
+      "id": "G08",
+      "title": "Pre-TB survival uncertainty",
+      "owners": [
+        "M09",
+        "M14",
+        "M15"
+      ],
+      "resolution": "Original M09 interval samples, likelihood risk sets and source covariance remain independently reproduced and preserved. The user-approved M14 correction uses actual inclusive event-time score membership. Separate robust covariance, SE, CI, p and selected-family BH q preserve coefficients, HRs, model covariance, counts and source files. Independent numerical/visual review and final-source replays passed. Efron-fit/Breslow-score and inclusive-boundary conventions remain explicit; render-only preserves the accepted correction without recomputing it.",
+      "status": "authorized_membership_correction_independently_validated_source_preserved"
+    },
+    {
+      "id": "G09",
+      "title": "Outcome-specific eligibility",
+      "owners": [
+        "M03",
+        "M06",
+        "M08"
+      ],
+      "resolution": "Outcome-specific preparation samples, spirometry trajectory samples/fits and supporting MMEF/X6 samples/fits are independently validated, preserving distinct available-case, paired and repeated-measures eligibility.",
+      "status": "preparation_and_outcome_specific_models_validated"
+    }
+  ],
+  "validation_cases": [
+    {
+      "id": "V01",
+      "topic": "Input identity",
+      "acceptance": "A changed input or code dependency invalidates downstream results; an absent required input fails before analysis."
+    },
+    {
+      "id": "V02",
+      "topic": "Encoding and malformed rows",
+      "acceptance": "Non-ASCII fields work under UTF-8 and C locales; import warnings, silent truncation and missing required columns fail."
+    },
+    {
+      "id": "V03",
+      "topic": "Keys and joins",
+      "acceptance": "Unexpected duplicate child/visit keys and many-to-many joins fail or follow a documented reviewed aggregation rule."
+    },
+    {
+      "id": "V04",
+      "topic": "TB timing boundaries",
+      "acceptance": "A measurement immediately before diagnosis stays pre-TB; same-day and later measurements follow the selected inclusive rule."
+    },
+    {
+      "id": "V05",
+      "topic": "Eligibility boundaries",
+      "acceptance": "Test exactly1 and5 years at diagnosis; nominal visits, exact-age limits, study exit and administrative cutoffs are separate explicit rules."
+    },
+    {
+      "id": "V06",
+      "topic": "Available and paired samples",
+      "acceptance": "Missing one bronchodilator stage excludes a paired measurement without excluding valid unpaired outcomes."
+    },
+    {
+      "id": "V07",
+      "topic": "Outcome definitions",
+      "acceptance": "Test LLN equality versus strictly below, mixed low-ratio/low-FVC patterns, unit transforms and adverse-direction signs."
+    },
+    {
+      "id": "V08",
+      "topic": "Wheeze episodes",
+      "acceptance": "Contacts30days apart remain one episode,31days apart split; chained contacts use consecutive gaps; scheduled assessments are never episode contacts."
+    },
+    {
+      "id": "V09",
+      "topic": "FeNO",
+      "acceptance": "Nonpositive values do not enter the log analysis; main and supplementary timing comparators are checked separately."
+    },
+    {
+      "id": "V10",
+      "topic": "Cox follow-up",
+      "acceptance": "Carry-forward stops at the earliest next observation, two-year limit, TB event or censoring; no post-TB measurement enters the predictor."
+    },
+    {
+      "id": "V11",
+      "topic": "Small and zero counts",
+      "acceptance": "All aggregate counts remain exact; zero-event/nonestimable coefficients receive an explicit status without fabricated estimates."
+    },
+    {
+      "id": "V12",
+      "topic": "Model/scale correspondence",
+      "acceptance": "RR, conditional OR, IRR, GMR and mean differences remain distinct; native versus z-score outputs cannot be swapped."
+    },
+    {
+      "id": "V13",
+      "topic": "No-op test prevention",
+      "acceptance": "Test discovery fails when zero tests or source files are found; deliberate malformed fixtures demonstrate that checks reject errors."
+    },
+    {
+      "id": "V14",
+      "topic": "Rebuild and presentation",
+      "acceptance": "Two execution modes validate their own prerequisites; figures retain estimates and embedded Arial; tables/prose share one rounding policy."
+    }
+  ],
+  "comparison_policy": {
+    "deterministic": "Exact row membership, keys, counts and classifications; declared scale-specific tolerances for floating-point transforms and deterministic fits, fixed before comparison.",
+    "stochastic": "Verify same model/sample first; specify convergence, Monte Carlo error and posterior-summary tolerances before new fits. Matching rounded values alone is insufficient; bitwise posterior identity is not required.",
+    "reporting": "Check full-precision source estimates and each displayed rounded scientific value; investigate discrepancies without changing targets to force a pass.",
+    "failure": "Any unresolved required input, estimand, diagnostic or output mismatch blocks the affected module and final release; independent unaffected modules can progress."
+  },
+  "execution_contract": {
+    "current": "M01-M14 are independently validated, including 868 tests, final original/copied cumulative replays, all 304 cell classifications, 261 scientific table cells, 42 sentences and nine figures with inspected embedded Arial. M15 implements --full, --render --render-config FILE and reviewed source export; final clean-run/package/remote evidence is bound separately. Four upstream flow counts and the combined loss fact remain explicitly unavailable.",
+    "full": "Reconstruct preparation, all deterministic models, all 37 joint fits and M13/M14 publications from authorized inputs using absent/empty separated roots. Bind paired origin records to source, inputs, nine configurations, runtime, fonts/references and destination paths. Verify unchanged diagnostic gates, final receipts and independent frozen scientific comparisons. Full command success does not establish GitHub delivery.",
+    "render": "Verify trusted accepted M13/M14 receipt SHA-256 values and complete aggregate inventories; require exact reconstructed scientific table/prose/plot payloads. Permit compatible renderer presentation/runtime changes under a separate identity. Load no study inputs or raw posteriors, fit no models and perform no analytical revalidation; retain the accepted Figure S3 correction unchanged.",
+    "restart": "Cumulative --through M14 --resume revalidates existing artifacts and preserves raw Bayesian identities. --full --resume additionally requires matching paired clean-origin records and unchanged source/input/configuration/runtime/destination identity; arbitrary old caches cannot be adopted. Aggregate-only --render --resume regenerates and compares complete rendered payloads from the same trusted source publications. Locks, staging, atomic publication and complete file hashes apply; source-package and remote verification remain separate."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "inputs": {
+    "baseline": {
+      "path": "REPLACE_WITH_AUTHORIZED_FILE"
+    },
+    "tb_events": {
+      "path": "REPLACE_WITH_AUTHORIZED_FILE"
+    },
+    "pulmonary_function": {
+      "path": "REPLACE_WITH_AUTHORIZED_FILE"
+    },
+    "respiratory_tb_dates": {
+      "path": "REPLACE_WITH_AUTHORIZED_FILE"
+    },
+    "wheeze_assessments": {
+      "path": "REPLACE_WITH_AUTHORIZED_FILE"
+    },
+    "gli_lookup": {
+      "path": "REPLACE_WITH_AUTHORIZED_FILE"
+    }
+  },
+  "directories": {
+    "work": "../../dchs-lung-function-work",
+    "outputs": "../../dchs-lung-function-results"
+  },
+  "fonts": {
+    "arial": "REPLACE_WITH_ARIAL_TTF",
+    "arial_bold": "REPLACE_WITH_ARIAL_BOLD_TTF"
+  }
+}

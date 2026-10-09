@@ -1,0 +1,121 @@
+# Primary spirometry joint models
+
+M04 implements twelve continuous fits: pre/post-bronchodilator FEV1/FVC,
+FEV1 and FVC, each on its native and GLI z-score scales. It consumes the
+M03 primary contracts. It does not substitute a pooled sample for the
+outcome-specific available-case populations or refit the nuisance trends
+using post-TB observations.
+
+## Statistical specification
+
+Each fit contains six Gaussian observation processes and a piecewise
+exponential first-TB process. Four mechanics indicators share a child factor
+with standard Normal prior. Their loadings and residual standard deviations
+have HalfNormal(1) priors. The source orientations represent better mechanics
+with higher factor values: resistance and ReE are reversed; compliance and
+XeE retain their signs.
+
+LCI has a separate child process: a standard Normal child effect multiplied
+by a HalfNormal(1) scale. Its observation residual SD also has a
+HalfNormal(1) prior and its loading is fixed at one. This
+process does not enter either the spirometry target or the TB hazard.
+
+Mechanics and LCI each have post-TB shifts for diagnosis before five years,
+an additional infancy shift, and a separate shift for diagnosis at five years
+or later. The spirometry target has a Normal(0,1) mechanics loading and direct
+post-TB terms with the same age coding. Each shift, direct term and hazard
+covariate coefficient has a Normal(0,0.75) prior. Target residual SD has a
+HalfNormal(1) prior.
+
+The log hazard contains the mechanics factor, male sex and an interval
+intercept. Its age boundaries are 0, 1, 3, 5, 8, 10 and 20 years. The six
+intercepts have Normal priors with SD 1.25 and means equal to the logarithms
+of 0.045, 0.018, 0.006, 0.006, 0.006 and 0.006. M03 supplies exact exposure
+durations and event indicators. The likelihood sums event log hazards minus
+integrated hazards; it does not treat observed TB ages as Gaussian outcomes.
+
+Every target total association combines its direct term with the product of
+the target loading and mechanics shift, calculated for each posterior draw.
+Pooled contrasts use counts of distinct children with post-TB target
+observations. Multiplication by the pre-TB nuisance-model residual SD saved by M03 restores
+reported units exactly once; the fitted observation SD is not used for this
+conversion. Native FEV1/FVC is already in percentage points at that
+stage. Eight contrast arrays are retained, including three age groups, two
+pooled contrasts and three age-group differences.
+
+## Sampling and acceptance
+
+`config/primary_sampling.json` fixes four chains, 1,600 tuning iterations and
+1,200 retained draws per chain, target acceptance 0.95, maximum tree depth
+10, and `adapt_diag` initialization. The four positive initial loading
+values are 0.25, 0.35, 0.45 and 0.55; initial target SD is 0.9. The selected
+target seeds are versioned in `fit_spec`; the new-run configuration adds a
+fixed 104729 offset for an independent realization. Sampling controls and
+realized counts are retained with the private draws. Each chain uses one
+BLAS thread; two chains run simultaneously by default.
+
+Acceptance requires zero divergences and zero retained maximum-tree-depth
+hits, rank-normalized R-hat at most 1.01, bulk and tail ESS at least 400, and
+BFMI at least 0.3 in every chain. R-hat and ESS checks cover every posterior
+scalar, including every child effect. Missing variables, incomplete latent
+coordinates and nonfinite diagnostics fail validation. These are this
+repository's prospective acceptance rules; they extend the recorded
+reference-run checks.
+
+The independent scientific comparison checks all 96 target/contrast
+combinations. For each posterior mean and each 95% interval endpoint, the
+allowed absolute difference is four times the square root of the sum of
+the two runs' squared Monte Carlo standard errors. Endpoint checks use
+quantile-specific MCSE, as supported by [ArviZ 0.22.0](https://python.arviz.org/en/v0.22.0/api/generated/arviz.mcse.html).
+This gives 288 prespecified comparisons. Matching rounded manuscript values
+alone is insufficient. Reference posterior arrays contain global variables;
+original latent draws and sampler statistics are unavailable, so historical
+all-parameter diagnostics are supported by their saved audits. All new
+latent draws and sampler statistics are retained privately.
+
+If a fit fails, retain its evidence and use a separately fingerprinted,
+reviewed sampling configuration for any longer run. Do not change the model,
+drop difficult parameters or relax the comparison tolerance to obtain a pass.
+
+## Runtime and saved runs
+
+`requirements-models.lock.txt` includes preparation dependencies and the
+selected PyMC 5.25.1, PyTensor 2.31.7 and ArviZ 0.22.0 versions. The validated
+environment is Python 3.12 on macOS ARM64 with the system Clang toolchain.
+Other platforms require their own clean-install and compiler validation.
+The small runtime adapter removes PyTensor 2.31.7's unsupported `-ld64`
+argument on macOS. It changes compilation configuration, not model math.
+Compiler caches remain in private work directories. Start the command in
+a fresh process so the private runtime is configured before importing PyMC.
+
+The sampling fingerprint includes the actual prepared contract, model and
+sampling code, environment lock, runtime and resolved sampling controls.
+The validation fingerprint separately includes summary/diagnostic code and
+acceptance criteria. A changed input, model or sampler cannot reuse the old
+raw fit. A changed diagnostic or reporting implementation can revalidate
+verified raw draws without new sampling.
+
+Raw files have `sampled` status. Aggregate results have `diagnostics_passed`
+or `diagnostics_failed` status. The latter remains explicit and never writes
+a successful batch pointer. A diagnostic pass does not by itself establish
+agreement with the selected scientific reference; that comparison is retained
+in private validation evidence. Full manuscript reconstruction remains a
+later acceptance step.
+
+`--resume` verifies posterior and sampler archives, metadata, complete model
+variable inventory and result files. It does not continue an interrupted
+chain from its last draw. An interrupted unsaved fit is sampled again.
+Ordinary failures clean staging directories and release locks. After a hard
+process termination, first establish that no process still owns a lock;
+use fresh output locations or deliberately clear the abandoned lock/staging
+files before rerunning. A lock is never broken automatically.
+
+## Results
+
+`estimates.csv` contains full-precision means, medians, equal-tailed 95%
+credible intervals, probabilities, MCSE and sample/weight metadata. Selection
+fields identify 24 Table 2 estimates, 60 Table S6 estimates and eight
+continuous Figure 2 estimates across the twelve fits. `shared_factor.csv`
+also preserves the loading summaries that M07 will use. M13/M14 still own
+final manuscript rendering; the result interface does not round or edit the
+manuscript. Exact small aggregate counts are retained.

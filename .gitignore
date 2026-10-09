@@ -1,0 +1,32 @@
+# Local configuration and study material.
+*.local.json
+*.local.toml
+*.local.yml
+.env
+.env.*
+!.env.example
+data/
+private/
+work/
+outputs/
+draws/
+release/
+*.dta
+*.rds
+*.sas7bdat
+*.npz
+*.npy
+*.nc
+*.parquet
+*.feather
+
+# Runtime and editor files.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+*.egg-info/
+build/
+dist/

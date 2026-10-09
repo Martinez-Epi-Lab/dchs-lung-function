@@ -20,7 +20,6 @@ jobs:
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       PIP_DISABLE_PIP_VERSION_CHECK: '1'
-      MPLCONFIGDIR: ${{ runner.temp }}/dchs-matplotlib
     defaults:
       run:
         shell: bash
@@ -35,6 +34,7 @@ jobs:
           python-version: '3.12.14'
       - name: Install both dependency locks in a clean environment
         run: |
+          echo "MPLCONFIGDIR=$RUNNER_TEMP/dchs-matplotlib" >> "$GITHUB_ENV"
           python -m venv "$RUNNER_TEMP/dchs-ci-venv"
           echo "DCHS_PYTHON=$RUNNER_TEMP/dchs-ci-venv/bin/python" >> "$GITHUB_ENV"
           "$RUNNER_TEMP/dchs-ci-venv/bin/python" -m pip install --no-cache-dir -r requirements-preparation.lock.txt -r requirements-models.lock.txt

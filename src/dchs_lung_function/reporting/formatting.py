@@ -1,4 +1,4 @@
-"""Central display rules; never change the full-precision result being displayed."""
+"""Display formatting that preserves the underlying full-precision result."""
 from __future__ import annotations
 
 import math
@@ -42,7 +42,7 @@ def cell(record, fields, style='interval', digits=2):
                 'mean_sd_n':3, 'median_iqr_n':4, 'date':1, 'attenuation':4}
     if style not in expected or len(values) != expected[style]:
         raise ReportingError('Display style or number of fields is invalid.')
-    # Null is a state, never an invented zero, a suppressed cell or an empty string.
+    # Preserve null as a distinct state from zero or an empty display cell.
     if style == 'date':
         try:
             parsed = date.fromisoformat(values[0])

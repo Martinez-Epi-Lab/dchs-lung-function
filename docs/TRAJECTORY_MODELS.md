@@ -1,6 +1,6 @@
 # Spirometry trajectories
 
-M06 fits native FEV1/FVC (percentage points) and GLI FEV1/FVC z-score trajectories for first TB before age one and before age five. These four analyses each have a full model and a separately fitted parallel-trajectory model. Figure 1 uses the full-model predictions. Parallel differences used in numerical prose come from the reduced models. Rendering is owned by M14; X6 trajectories are owned by M08.
+M06 fits native FEV1/FVC (percentage points) and GLI FEV1/FVC z-score trajectories for first TB before age one and before age five. These four analyses each have a full model and a separately fitted parallel-trajectory model. Figure 1 uses the full-model predictions. Parallel differences used in numerical prose come from the reduced models. M14 renders the figures; M08 fits the X6 trajectories.
 
 ## Sample and design
 

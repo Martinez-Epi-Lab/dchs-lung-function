@@ -1,8 +1,7 @@
-"""Pure longitudinal linkage and explicit PFT analysis sample contracts.
+"""Longitudinal linkage and PFT analysis sample contracts.
 
 Returned frames contain confidential records and belong only in configured
-private work storage. ``audit`` mappings contain aggregate metadata. No model
-is fitted, and no archival source code is imported or rewritten.
+private work storage. ``audit`` mappings contain aggregate metadata.
 """
 from __future__ import annotations
 import numpy as np

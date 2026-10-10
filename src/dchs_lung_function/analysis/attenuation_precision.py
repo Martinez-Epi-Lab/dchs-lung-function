@@ -13,11 +13,11 @@ MAX_MCSE_BOUND_PP = 1.0
 
 
 def attenuation_precision(adjusted_mean, core_mean, adjusted_mcse, core_mcse):
-    """Return a signed-status magnitude comparison and MC precision evidence.
+    """Compare effect magnitudes and estimate their Monte Carlo precision.
 
-The bound is conditional on the supplied mean-MCSE estimates and a first-order
-delta approximation.  It is neither a confidence/credible interval nor a
-guarantee that independently rounded simulations have identical last digits.
+    The bound uses the supplied mean MCSEs and a first-order delta
+    approximation. It is not a confidence or credible interval and does not
+    guarantee identical last digits across independently rounded simulations.
     """
     values = (adjusted_mean, core_mean, adjusted_mcse, core_mcse)
     if any(isinstance(v, bool) or not isinstance(v, numbers.Real)
@@ -30,7 +30,7 @@ guarantee that independently rounded simulations have identical last digits.
                 'attenuation_mcse_bound_pp': None, 'attenuation_mcse_independent_pp': None,
                 'attenuation_precision_passed': False}
     if adjusted_mean == 0:
-        # abs(a) is nondifferentiable here; do not invent a delta-method MCSE.
+        # The delta-method MCSE is undefined at the kink in abs(a).
         return {'attenuation_percent': 100.0, 'attenuation_status': 'zero_adjusted_mean',
                 'attenuation_mcse_bound_pp': None, 'attenuation_mcse_independent_pp': None,
                 'attenuation_precision_passed': False}

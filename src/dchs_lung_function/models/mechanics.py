@@ -2,8 +2,8 @@
 
 Each Gaussian outcome has its own shared child effect and first-event hazard.
 Prepared outcomes are adverse-oriented; native-unit reporting must reverse
-that orientation after residual rescaling. Graph construction neither samples
-nor reads or writes data. Child coordinates are positional, not identifiers.
+that orientation after residual rescaling. Child coordinates are positional
+indices, not identifiers.
 """
 from __future__ import annotations
 
@@ -187,7 +187,7 @@ def validate_contract(contract: Mapping, target: str) -> dict[str, Any]:
 
 
 def build_model(contract: Mapping, target: str):
-    """Build the exact selected PyMC graph without fitting or modifying inputs."""
+    """Validate the contract and build the mechanics/first-TB PyMC model."""
     validated = validate_contract(contract, target)
     import pymc as pm
     import pytensor.tensor as pt

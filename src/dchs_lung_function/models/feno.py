@@ -1,4 +1,4 @@
-"""Eleven selected FeNO Gaussian-independence GEE models on log FeNO."""
+"""Eleven Gaussian GEE models for log FeNO with working independence."""
 from __future__ import annotations
 from dataclasses import dataclass
 from collections.abc import Mapping
@@ -217,7 +217,7 @@ def _result(contract,target,metadata,beta=None,robust=None,naive=None):
 
 
 def fit_contract(contract,target):
-    """Fit once with the selected source GEE controls and complete diagnostics."""
+    """Fit a visit-specific GEE and return convergence diagnostics."""
     info=validate_contract(contract,target);spec=fit_spec(target)
     x=contract['design'].to_numpy(float);y=np.asarray(contract['response'],float);n,p=x.shape
     rank=int(np.linalg.matrix_rank(x));condition=float(np.linalg.cond(x))
@@ -274,7 +274,7 @@ def fit_contract(contract,target):
 
 
 def fit_selected(contracts):
-    """Fit exactly the five main and six supplementary selected visit models."""
+    """Fit the five main and six supplementary visit models."""
     if not isinstance(contracts,Mapping) or set(contracts)!=set(DEFAULT_TARGETS):
         raise ValueError('FeNO selection requires exactly the eleven selected target contracts.')
     fits=[fit_contract(contracts[t],t) for t in DEFAULT_TARGETS]

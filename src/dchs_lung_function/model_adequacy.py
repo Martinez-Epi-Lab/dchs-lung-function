@@ -1,4 +1,4 @@
-"""Keep convergence and prespecified predictive adequacy as distinct gates."""
+"""Validate predictive adequacy separately from sampler convergence."""
 import math
 from .covariance_ppc import evaluate_target_covariance, protocol, _route
 from .execution import canonical_bytes
@@ -68,7 +68,7 @@ def adequacy_status(diagnostics_passed, covariance_passed):
 
 
 def verify_covariance(directory, summary, diagnostics, covariance):
-    """Verify recomputed predictive evidence, including repaired-hash attacks."""
+    """Compare saved checks and status with results recomputed from the draws."""
     try:
         if (canonical_bytes(read_json(directory/'covariance_ppc.json','Covariance adequacy evidence'))!=canonical_bytes(covariance)
                 or type(summary.get('covariance_ppc_passed')) is not bool

@@ -1,4 +1,4 @@
-"""Draw-wise mechanics contrasts and aggregate support on explicit scales."""
+"""Mechanics contrasts on standardized, native, and reported scales."""
 from __future__ import annotations
 
 from dataclasses import dataclass

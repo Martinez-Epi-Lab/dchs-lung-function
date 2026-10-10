@@ -1,7 +1,7 @@
-"""Fingerprint, fit, and validate wheeze age-specific wheeze joint models in private output directories.
+"""Fit and validate age-specific wheeze joint models privately.
 
-Raw sampling identity is separate from validation identity: changed reporting
-or diagnostic code rechecks verified draws without pretending to refit them.
+Sampling and validation have separate identities, so verified draws can be
+rechecked when reporting or diagnostic code changes.
 """
 from __future__ import annotations
 

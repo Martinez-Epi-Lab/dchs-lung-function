@@ -2,6 +2,8 @@
 
 M07 fits six individual mechanics/first-TB joint models for Table S5 and the retained mechanics prose. It also derives the six Figure S5 shared-factor associations from accepted M04 posterior draws. Tables and figures are rendered by M13 and M14.
 
+In the preserved V3 corrective reconstruction, all six fits passed sampler diagnostics, but R, ReE, ReI, XeE and XeI failed the ICC screen; C passed. The model below remains the implemented specification, not an accepted final model. Independent exploratory checks found age-dependent variance and covariance. A revised specification is pending; see [current corrective status](CORRECTIVE_REVISION.md#current-status).
+
 ## Selected outcomes and samples
 
 | Target | Measurement | Orientation for fitting | Native unit | Reporting unit |
@@ -77,4 +79,4 @@ Independent source checks reconstruct the samples and compare complete model log
 
 The cumulative command verifies M01-M06 before completing M07. Raw fits are stored privately under `mechanics_fits/<target>/<sampling fingerprint>/`. Aggregate diagnostics, estimates, hazard summaries, counts and metadata are stored under `mechanics_models/<target>/<validation fingerprint>/`. Six shared-factor rows and their primary-fit bindings are stored under `shared_factor/<fingerprint>/` in the aggregate directory. The repository contains only code, documentation, example configuration and synthetic tests.
 
-Sampling and validation have separate fingerprints, allowing reporting or validation corrections to recheck unchanged raw draws. Publication uses locks, staging directories and atomic publication. Resume checks complete inventories, file hashes, realized sampling metadata and recomputes aggregates, diagnostics and covariance checks from the verified draws. The cumulative `mechanics_current.json` pointer is written only after all required models and shared-factor summaries pass. Full reconstruction and source delivery have separate acceptance receipts.
+Sampling and validation have separate fingerprints, allowing reporting or validation corrections to recheck unchanged raw draws. Results are published atomically from locked staging directories. Resume checks complete inventories, file hashes, realized sampling metadata and recomputes aggregates, diagnostics and covariance checks from the verified draws. The cumulative `mechanics_current.json` pointer is written only after all required models and shared-factor summaries pass. Full reconstruction and source delivery have separate acceptance receipts.

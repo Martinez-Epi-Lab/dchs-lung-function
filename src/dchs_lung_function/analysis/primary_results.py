@@ -1,9 +1,8 @@
 """Full-precision aggregate summaries for primary spirometry joint models.
 
 Contrasts are derived draw by draw from model parameters, using the target
-outcome's residual scale and its post-diagnosis child counts. No manuscript
-values, archive paths, participant records, or fitting operations are stored
-or written here.
+outcome's residual scale and its post-diagnosis child counts. Outputs contain
+aggregate estimates and counts only.
 """
 from __future__ import annotations
 

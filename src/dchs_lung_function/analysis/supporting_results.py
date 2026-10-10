@@ -1,4 +1,4 @@
-"""Draw-wise selected MMEF/X6 effects, with model-specific native scales."""
+"""MMEF and X6 posterior contrasts on their native measurement scales."""
 from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
@@ -54,7 +54,7 @@ def _derived(posterior,contract,target):
 
 
 def derive_supporting_contrast_draws(posterior,contract,target):
-    """Selected source effect labels mapped to native-scale chain/draw arrays."""
+    """Map effect labels to native-scale arrays with chain and draw axes."""
     contrasts,_,validated,_=_derived(posterior,contract,target)
     return {label:value*validated['target_scale'] for label,value in contrasts.items()}
 

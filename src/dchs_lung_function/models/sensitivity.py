@@ -2,8 +2,8 @@
 
 Early models explicitly retain the first-TB-before-five graph. The two all-age
 window variants delegate to the corrected primary graph. Eligibility and the
-configured window endpoint are bound to the selected M03 artifact by execution;
-the builders never read inputs, sample, or load historical source code.
+configured window endpoint are bound to the selected M03 artifact by the
+execution layer.
 """
 from __future__ import annotations
 
@@ -279,7 +279,7 @@ def validate_contract(contract, target):
 
 
 def build_model(prepared: Mapping, target: str):
-    """Build the explicit selected model; retain original posterior variable names."""
+    """Build the sensitivity model, retaining source posterior variable names."""
     spec = fit_spec(target)
     validated = validate_contract(prepared, target)
     if spec["family"] == "window":
@@ -386,7 +386,7 @@ def build_model(prepared: Mapping, target: str):
         event_logp = pt.sum(event_interval * log_h - exposure * pt.exp(log_h))
         pm.Potential("first_tb_loglik", event_logp)
 
-        # Derived total associations include the empirically supported mechanics path.
+        # Total associations combine direct and modeled mechanics terms.
         total_ratio_1to5 = pm.Deterministic(
             "total_ratio_1to5",
             direct_ratio

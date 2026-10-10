@@ -1,6 +1,6 @@
 # Pre-TB lung-function survival models
 
-M09 implements the 17 selected two-year carry-forward Cox models and preserves their source-reproduction outputs. The user approved M14 to use separately corrected robust uncertainty for Figure S3, without changing the fitted coefficients, hazard ratios or samples. Each model uses its own verified M03 sample and estimates the hazard of subsequent first TB per one adverse-oriented SD of lung function, adjusting for child sex and recruitment site. The model has no intercept. Exploratory alternative carry-forward windows are outside this selected analysis.
+M09 implements the 17 selected two-year carry-forward Cox models and preserves their source-reproduction outputs. M14 applies the approved robust-uncertainty correction for Figure S3, preserving the fitted coefficients, hazard ratios and samples. Each model uses its own verified M03 sample and estimates the hazard of subsequent first TB per one adverse-oriented SD of lung function, adjusting for child sex and recruitment site. The model has no intercept. Exploratory alternative carry-forward windows are outside this selected analysis.
 
 ## Measurements and risk intervals
 
@@ -18,7 +18,7 @@ The selected PHReg implementation includes intervals with `start <= event age <=
 
 Cox coefficients and the observed information use the Efron tied-event partial likelihood. The selected source calculates child-cluster uncertainty from PHReg score residuals, which use Breslow-style martingale increments even when the likelihood uses Efron ties. This combination is retained explicitly in both source reproduction and the M14 membership correction. Replacing these residuals with a different tied-event score calculation would be a separate methodological change.
 
-The source residual routine also has an inherited membership issue. Intervals wholly outside the retained event span receive undefined residuals and are assigned zero scores. Some other intervals contain no event time but lie within the retained span; the residual routine's reverse-loop bookkeeping retains these in additional score sets, including times before their entry. The likelihood risk sets remain correct under the inclusive boundary convention. Reproducing the archived standard errors therefore requires reproducing this residual behavior as well as the Efron/Breslow combination. Exact source reproduction does not establish that the inherited residual membership is statistically appropriate. The independent uncertainty audit compares it with the same calculation using actual event-time risk membership. The user selected that membership correction for Figure S3. M09 files continue to preserve the original calculation for traceability.
+The source residual routine also has an inherited membership issue. Intervals wholly outside the retained event span receive undefined residuals and are assigned zero scores. Some other intervals contain no event time but lie within the retained span; the residual routine's reverse-loop bookkeeping retains these in additional score sets, including times before their entry. The likelihood risk sets remain correct under the inclusive boundary convention. Reproducing the archived standard errors therefore requires reproducing this residual behavior as well as the Efron/Breslow combination. Exact source reproduction does not establish that the inherited residual membership is statistically appropriate. The independent uncertainty audit compares it with the same calculation using actual event-time risk membership. That membership correction was approved for Figure S3. M09 files continue to preserve the original calculation for traceability.
 
 Scores are summed by child. With inverse observed information `B`, child score vectors `U`, `G` children, `N` intervals and three covariates, the selected archived covariance is
 
@@ -32,7 +32,7 @@ The source's fewer-than-three-event fitting guard is reported explicitly as a so
 
 Above that source guard, a converged three-covariate fit can still have sparse event support. Robust covariance and the finite-sample multiplier do not establish accurate normal-Wald coverage in that setting. Exact event counts, estimates and intervals remain visible; no blanket percentage widening or automatic suppression is applied.
 
-## Authorized Figure S3 uncertainty correction
+## Approved Figure S3 uncertainty correction
 
 M14 reads the accepted M09 coefficients and inverse Efron observed information;
 it performs no model refit. It reconstructs event-time membership directly as

@@ -1,7 +1,7 @@
 # Publication figures
 
 M14 implements all three main and six supplementary
-figures from verified aggregate results, including the user-authorized correction
+figures from verified aggregate results, including the approved correction
 of pre-TB score-residual risk membership for Figure S3. The original M14 baseline
 passed independent numerical/caption checks, rendered-page and actual-font
 inspection, its 868-test suite, and original/copied cumulative replays. Private
@@ -133,5 +133,4 @@ caption and unavailable-count display. Final-source original/copied cumulative
 replays must reproduce the publication and preserve all earlier scientific
 outputs and raw fits. Generated figures, aggregate data, local configurations
 and review evidence stay outside the code-only source export. No participant
-records are exported, no selected manuscript is edited and no stage report is
-created.
+records are exported, and the selected manuscripts remain unchanged.

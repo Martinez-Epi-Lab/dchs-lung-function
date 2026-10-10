@@ -74,7 +74,7 @@ def _compiler_identity(settings):
 
 
 def thread_observations():
-    """Report capabilities honestly; an empty controller list is not one thread."""
+    """Report observed thread controls and unsupported library backends."""
     requested = bootstrap()
     import numpy as np
     import scipy.linalg  # ensure both numerical-library backends are loaded
@@ -89,7 +89,7 @@ def thread_observations():
 
 
 def configure_runtime(cache_directory):
-    """Use a private compiler cache and the reviewed macOS linker workaround.
+    """Use a private compiler cache and the PyTensor macOS linker workaround.
 
     PyTensor 2.31.7 incorrectly treats macOS 15+ as requiring the linker
     library argument ``-ld64``. The narrow adapter removes that argument;

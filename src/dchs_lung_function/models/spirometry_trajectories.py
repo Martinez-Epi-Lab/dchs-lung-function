@@ -1,9 +1,8 @@
-"""Selected Gaussian random-intercept spirometry trajectories, version 1.0.0.
+"""Gaussian random-intercept spirometry trajectories, version 1.0.0.
 
 REML variance profiling, the child-cluster sandwich, and standardized
 predictions are explicit. The four selected families retain raw Wald p values;
-no multiple-testing family is created from this subset. No files are read or
-written and no participant-level results are returned.
+no multiple-testing family is created from this subset. Outputs are aggregate.
 """
 from __future__ import annotations
 

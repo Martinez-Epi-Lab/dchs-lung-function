@@ -2,7 +2,9 @@
 
 Reproducible Python code for the DCHS lung-function manuscript and appendix. The workflow imports authorized study extracts, rebuilds the selected samples, fits all 37 joint models and the deterministic analyses, and generates eight numbered tables, numerical text and nine publication figures. Study data, local configuration, raw posteriors and generated study results remain outside this source package.
 
-The current [corrective specification](docs/CORRECTIVE_REVISION.md) adds independent target child intercepts, bounds threshold-model TB follow-up by observed exit, and requires conditional covariance checks and explicit Table S1 Monte Carlo precision. Prior source-reproduction receipts describe the previous models. Acceptance of this revision requires its own complete reconstruction and independent review; old numerical agreement alone is not a model-adequacy test.
+**Current status: corrective revision under review; not ready for release.** The [corrective specification](docs/CORRECTIVE_REVISION.md) adds independent target child intercepts, bounds threshold-model TB follow-up by observed exit, and requires conditional covariance checks and explicit Table S1 Monte Carlo precision. In the preserved V3 reconstruction, all twelve primary fits passed sampler diagnostics and target-outcome covariance checks. Five of six mechanics fits failed the covariance screen, stopping the run before M08. Exploratory checks also found age-dependent covariance problems in auxiliary mechanics processes. Passing the primary target checks does not establish adequacy of the complete joint model.
+
+A broader covariance-model comparison awaits a decision on the statistical specification. Revised supporting and sensitivity results, final tables and figures, and full-release acceptance remain pending. Earlier source-reproduction receipts describe the previous models and do not establish acceptance of this revision.
 
 ## Prerequisites
 
@@ -61,7 +63,7 @@ Only `--resume` may be added. This regenerates editable tables, numerical text, 
 ../dchs-runtime/bin/python -B tests/run_tests.py
 ```
 
-Tests use fabricated data and reject empty discovery. The original M15 release passed 946 tests; the corrective revision adds scientific and recovery regressions, and each run reports its actual discovered count. The smaller preparation lock supports `tests/run_tests.py --preparation-only`. Hosted macOS/Linux synthetic checks are separate from confidential-data reconstruction; local acceptance and actual remote CI outcomes have distinct receipts.
+Tests use fabricated data and reject empty discovery. The original M15 release passed 946 tests; the V3 corrective source passed its 1,023-test suite locally and on hosted macOS. Hosted Linux checks passed with the one external-Arial metric check skipped. Each run reports its actual discovered count. The smaller preparation lock supports `tests/run_tests.py --preparation-only`. Synthetic checks do not establish scientific model adequacy or acceptance of the confidential-data reconstruction.
 
 Private work holds typed participant-level intermediates, complete posterior arrays, manifests and pointers. The separate output root holds aggregate results and publications. Full completion is recorded in `full_reconstruction/<fingerprint>/receipt.json`; render-only results use `render_only/<fingerprint>/`. Input/source/runtime hashes, locks, staged writes and complete inventories govern reuse. Independent scientific checks remain additional to command-level diagnostic acceptance.
 

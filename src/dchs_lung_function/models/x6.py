@@ -49,7 +49,7 @@ def validate_contract(contract,target):
     return _validate_shared_contract(contract,fit_spec(target))
 
 def build_model(prepared: Mapping, target: str):
-    """Build the explicit threshold-specific X6 graph without fitting."""
+    """Build the X6 model for the specified TB age threshold."""
     validate_contract(prepared,target)
     labels=fit_spec(target)['hazard_labels']
     import pymc as pm

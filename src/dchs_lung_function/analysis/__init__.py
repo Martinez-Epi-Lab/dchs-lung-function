@@ -1,1 +1,1 @@
-"""Explicit model definitions and aggregate posterior summaries."""
+"""Model contrasts and aggregate posterior summaries."""

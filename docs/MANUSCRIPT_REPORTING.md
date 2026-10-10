@@ -28,9 +28,8 @@ All 42 retained numerical sentences have explicit templates and classifications,
 with 96 result tokens and 52 qualitative evidence bindings. Age thresholds,
 interval coverage, references and contextual dates are distinguished from study
 estimates. `numerical_text.txt` contains pipeline-verifiable numerical claims
-with result bindings. It is a generated companion for review, not a drop-in
-replacement for the full interpretive manuscript prose: clinical meaning,
-limitations, causal language and synthesis still require author review. It does
+with result bindings. It is a numerical companion to the manuscript. Authors must review clinical
+interpretation, limitations, causal language and synthesis before using it. It does
 not edit either selected manuscript. Context-only statements remain classified, and
 qualitative statements retain their supporting result selections. An interval
 that no longer supports a null-compatibility statement requires wording review;
@@ -169,13 +168,13 @@ components are unavailable; they are never summed as zero. Neither missing
 counts nor archived literals are invented to complete the flow.
 
 The inherited [G08 pre-TB Cox covariance behavior](PRETB_MODELS.md) remains
-explicit in the preserved M13 source registry. The user approved a separate
-M14 actual-risk-membership uncertainty correction for Figure S3. It retains the
+explicit in the preserved M13 source registry. A separate M14 actual-risk-membership uncertainty correction was approved
+for Figure S3. It retains the
 M09 coefficients, hazard ratios, sample and source files, while recomputing robust
 covariance and derived inference. M13 does not overwrite or silently relabel its
-source-reproduction rows. [M14 figure publication](PUBLICATION_FIGURES.md) is
-independently validated, including final-source original/copied replays. M15
+source-reproduction rows. The original [M14 figure publication](PUBLICATION_FIGURES.md) passed
+independent validation, including final-source original/copied replays. M15
 provides `--full` clean reconstruction and aggregate-only
 `--render --render-config FILE`; [RELEASE.md](RELEASE.md) defines their distinct
 identities, prerequisites and acceptance evidence, plus separate source/GitHub
-delivery verification. No separate stage report is produced.
+delivery verification.

@@ -6,6 +6,12 @@ M03 primary contracts. It does not substitute a pooled sample for the
 outcome-specific available-case populations or refit the nuisance trends
 using post-TB observations.
 
+All twelve primary fits in the preserved V3 corrective reconstruction passed
+sampler diagnostics and the target-outcome covariance screen. Exploratory
+checks identified covariance problems in auxiliary mechanics processes, so
+these passes do not establish adequacy of the complete joint model. The
+[corrective revision](CORRECTIVE_REVISION.md#current-status) remains under review.
+
 ## Statistical specification
 
 Each fit contains six Gaussian observation processes and a piecewise
@@ -77,8 +83,8 @@ values are 0.25, 0.35, 0.45 and 0.55; initial target SD is 0.9. The selected
 target seeds are versioned in `fit_spec`; the new-run configuration adds a
 fixed 104729 offset. Reusing a seed does not itself establish biased inference,
 and different seed labels do not establish independence between estimates.
-Sampling controls and
-realized counts are retained with the private draws. Thread controls request one
+Sampling controls and realized counts are retained with the private draws.
+Thread controls request one
 BLAS thread before numerical libraries load; observed library capabilities are
 recorded separately, and Apple Accelerate's actual thread count is not observable
 through threadpoolctl. Two chains run simultaneously by default.

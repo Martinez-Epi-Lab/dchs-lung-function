@@ -1,4 +1,4 @@
-"""One keyed interface for full-precision, participant-free aggregate results.
+"""Keyed access to full-precision aggregate results.
 
 The source adapters name row coordinates and the meaning of interval fields.
 Rows retain their original numerical values. Tables and prose reference the
@@ -151,7 +151,7 @@ class ResultRegistry:
         self._schema_contract = json.loads((Path(__file__).resolve().parents[3]/'config/reporting_schemas.json').read_text())
 
     def add(self, source, frame, provenance=None):
-        """Register a whitelisted aggregate table, with unique semantic row keys."""
+        """Register an allowed aggregate table with unique semantic row keys."""
         if source in self._sources:
             raise ReportingError('An aggregate source was registered twice.')
         contract = self._schema_contract

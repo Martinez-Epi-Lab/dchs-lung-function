@@ -1,4 +1,4 @@
-"""Resolve reporting inputs from current contracts, never from latest pointers.
+"""Resolve reporting inputs from verified contracts and artifact inventories.
 
 The cumulative M13 runner first re-executes M01–M12 validation. This layer then
 independently derives every source identity and checks exact artifact inventories

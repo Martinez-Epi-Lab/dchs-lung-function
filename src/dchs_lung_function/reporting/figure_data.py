@@ -1,4 +1,4 @@
-"""Bind publication panels to full-precision aggregate results, never artwork."""
+"""Resolve publication panels from full-precision aggregate results."""
 from __future__ import annotations
 
 import copy
@@ -136,7 +136,7 @@ def validate_specification(specification):
 
 
 class AggregateView:
-    """Defensive, uniquely selected rows from the already verified M13 registry."""
+    """Select unique rows from the verified M13 result registry."""
     def __init__(self, exported, corrected):
         require(isinstance(exported, dict) and set(exported) == {'schema_version','sources','record_count','records'}
                 and type(exported['schema_version']) is int and exported['schema_version'] == 1
@@ -293,7 +293,7 @@ def check_meaning(panel, record, fields):
 
 
 def build_data(registry, specification, correction):
-    """Build all nine figures; no renderer calculates a scientific result."""
+    """Resolve estimates, labels, and counts for all nine figures before rendering."""
     validate_specification(specification)
     require(isinstance(specification,dict) and set(specification)=={'schema_version','figures'}
             and type(specification['schema_version']) is int and specification['schema_version']==1,

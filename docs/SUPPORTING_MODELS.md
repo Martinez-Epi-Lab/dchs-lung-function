@@ -1,6 +1,6 @@
 # Supporting MMEF and X6 models
 
-M08 owns the supporting MMEF and X6 analyses. Its selected fits are three MMEF joint models, four X6 joint models, two paired-change GEE models, four repeated X6 models and two X6 trajectory analyses with full and reduced fits. All use verified M03 contracts. The spirometry trajectory module does not fit X6.
+M08 implements the supporting MMEF and X6 analyses. Its selected fits are three MMEF joint models, four X6 joint models, two paired-change GEE models, four repeated X6 models and two X6 trajectory analyses with full and reduced fits. All use verified M03 contracts. Spirometry trajectories are fitted separately in M06.
 
 ## MMEF joint models
 

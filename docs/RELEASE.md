@@ -2,7 +2,9 @@
 
 M15 provides separate commands for a complete analytical reconstruction, rendering accepted aggregate results, and exporting reviewed source. Each operation has its own identity and receipt. A successful render or archive check does not establish analytical reproducibility or GitHub delivery. Final validation evidence, source manifests, authorized local configuration and delivery receipts remain private.
 
-M01–M14 have independent numerical and presentation checks, a completed 868-test baseline, and successful final-source original and copied cumulative replays. The original M15 release passed 946 synthetic tests. Corrective release acceptance additionally requires the complete current synthetic suite, the clean reconstruction and comparisons below, aggregate-only rendering checks, extracted-package verification, and remote source/hosted-CI verification. The private acceptance receipts establish which release and executions passed these requirements.
+The original M01–M14 baseline had independent numerical and presentation checks, 868 passing tests, and successful final-source original and copied cumulative replays. The original M15 release passed 946 synthetic tests. The V3 corrective source passed its 1,023-test suite locally and on hosted macOS. Hosted Linux checks passed with the one external-Arial metric check skipped. Its full reconstruction stopped before M08 after five of six mechanics fits failed the covariance screen. It is not accepted for release; see [current corrective status](CORRECTIVE_REVISION.md#current-status).
+
+Corrective release acceptance requires the complete current synthetic suite, the clean reconstruction and comparisons below, aggregate-only rendering checks, extracted-package verification, and remote source/hosted-CI verification. Private receipts identify the source and executions covered by each check.
 
 ## Environment and external dependencies
 

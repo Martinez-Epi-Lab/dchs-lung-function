@@ -3,7 +3,7 @@
 The target and four oriented mechanics indicators share a unit-variance child
 factor. An independent target child intercept captures remaining target
 persistence. LCI has its own observed process, with no LCI path in the target or
-first-TB hazard. Builders are pure: no data access, fitting, or source loading.
+first-TB hazard.
 """
 from __future__ import annotations
 from typing import Mapping
@@ -182,7 +182,7 @@ def validate_contract(contract,target):
     return _validate_shared_contract(contract,fit_spec(target))
 
 def build_model(prepared: Mapping, target: str):
-    """Build the explicit selected model; retain original posterior variable names."""
+    """Build the MMEF model, retaining the source posterior variable names."""
     validated = validate_contract(prepared, target)
     import pymc as pm
     import pytensor.tensor as pt
@@ -283,7 +283,7 @@ def build_model(prepared: Mapping, target: str):
         event_logp = pt.sum(event_interval * log_h - exposure * pt.exp(log_h))
         pm.Potential("first_tb_loglik", event_logp)
 
-        # Derived total associations include the empirically supported mechanics path.
+        # Total associations combine direct and modeled mechanics terms.
         total_ratio_1to5 = pm.Deterministic(
             "total_ratio_1to5",
             direct_ratio

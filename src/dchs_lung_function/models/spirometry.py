@@ -4,9 +4,8 @@ The six observed processes use the residuals and scales prepared by M03.
 The unit-variance mechanics factor is shared by the four mechanics indicators,
 the spirometry target, and the first-TB hazard. An independent target child
 intercept represents persistent target variation not shared with mechanics.
-The separate LCI process has no
-loading into either the target or hazard. No data are read or written and no
-sampling occurs here. Child coordinates are positional indices, not identifiers.
+The separate LCI process has no loading into either the target or hazard.
+Child coordinates are positional indices, not identifiers.
 """
 from __future__ import annotations
 
@@ -54,7 +53,7 @@ TARGETS = {
 
 
 def fit_spec(target: str) -> dict[str, Any]:
-    """Return independent, JSON-safe model and selected sampling metadata."""
+    """Return a copy of the model specification and default sampling controls."""
     if target not in TARGETS:
         raise ValueError('Unsupported primary spirometry target.')
     column, multiplier, label, unit, seed = TARGETS[target]
@@ -206,7 +205,7 @@ def validate_contract(contract: Mapping, target: str) -> dict[str, Any]:
 
 
 def build_model(contract: Mapping, target: str):
-    """Build the selected PyMC graph without fitting or changing the contract."""
+    """Validate the contract and build the primary spirometry PyMC model."""
     validated = validate_contract(contract, target)
     import pymc as pm
     import pytensor.tensor as pt

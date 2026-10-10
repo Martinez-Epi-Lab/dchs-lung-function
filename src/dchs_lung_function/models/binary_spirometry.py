@@ -1,9 +1,8 @@
-"""Selected modified-Poisson GEE models for binary spirometry, version 1.0.0.
+"""Modified-Poisson GEE models for binary spirometry, version 1.0.0.
 
 M03 supplies the observation sample and covariates. This module validates the
 binary definitions and design, fits independence-working-correlation GEE with
-child-cluster robust covariance, and returns aggregate outputs only. It never
-reads source files or writes participant records.
+child-cluster robust covariance, and returns aggregate outputs only.
 """
 from __future__ import annotations
 

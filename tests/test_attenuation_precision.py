@@ -23,8 +23,8 @@ class AttenuationPrecisionTests(unittest.TestCase):
             with self.assertRaises(ValueError):_summarize_ratio(invalid,False)
 
     def test_hand_calculated_gradient_and_covariance_bound(self):
-        # A=-1, C=-2: gradients are50 and-25; errors .05 and.1
-        # contribute2.5 each, hence an unrestricted covariance bound of5.
+        # A=-1, C=-2: gradients are 50 and -25; errors .05 and .1
+        # contribute 2.5 each, hence an unrestricted covariance bound of 5.
         r=attenuation_precision(-1.,-2.,.05,.1)
         self.assertEqual(r['attenuation_percent'],50.)
         self.assertEqual(r['attenuation_mcse_bound_pp'],5.)

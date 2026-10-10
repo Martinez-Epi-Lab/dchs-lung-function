@@ -1,4 +1,4 @@
-"""Computed sensitivity summaries and selected table inputs, without rendering."""
+"""Sensitivity contrasts and inputs for Tables S1, S3, and S4."""
 from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
@@ -172,9 +172,8 @@ def _binding(entry):
 def _build_tables(new_results, reused_primary, reused_wheeze):
     """Select S1/S3/S4 rows from full-precision, verified model summaries.
 
-    Entries contain freshly reconstructed estimates, aggregate metadata and a
-    verified diagnostic completion. Execution checks their receipt identities;
-    this pure function performs no file access or fitting.
+    Entries contain reconstructed estimates, aggregate metadata, and diagnostic
+    completion records. The execution layer verifies their receipt identities.
     """
     if set(new_results)!=set(DEFAULT_TARGETS) or set(reused_primary)!={'ratio_pre','ratio_post'} or set(reused_wheeze)!=set(WHEEZE_TARGETS):
         raise ValueError('Sensitivity tables require all ten selected fits and four reused fits.')

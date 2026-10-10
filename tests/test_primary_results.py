@@ -61,7 +61,7 @@ class PrimaryResultsTests(unittest.TestCase):
         self.assertEqual(row.n_post_tb_infancy_children, 1)
         self.assertEqual(row.n_post_tb_children_in_contrast, 3)
         self.assertAlmostEqual(row.weight_infancy, 1 / 3)
-        # A measurement-weighted infancy share would be4/6; do not use it.
+        # A measurement-weighted infancy share would be 4/6; do not use it.
         self.assertNotAlmostEqual(row.weight_infancy, 4 / 6)
 
     def test_later_term_is_its_own_direct_and_mechanics_path(self):
@@ -88,7 +88,7 @@ class PrimaryResultsTests(unittest.TestCase):
             posterior[key] = np.zeros((2, 4))
         posterior["direct_ratio_late"] = np.array([[-4., -1., 0., 0.], [0., 1., 2., 10.]])
         row = summarize_primary(posterior, prepared, "ratio_pre", compute_mcse=False).estimates.set_index("contrast").loc["TB >=5"]
-        # Linear interpolation of eight ordered draws, after multiplying by2.
+        # Linear interpolation of eight ordered draws, after multiplying by 2.
         self.assertAlmostEqual(row.lower, -6.95)
         self.assertAlmostEqual(row.upper, 17.2)
         self.assertEqual(row["median"], 0.)

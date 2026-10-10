@@ -6,6 +6,26 @@ The original release and its private results remain an immutable comparison.
 Faithful reproduction of those results did not establish that their repeated
 measurement covariance or ascertainment assumptions were adequate.
 
+## Current status
+
+The preserved V3 reconstruction completed all twelve primary fits. Each passed
+the sampler gates and target-outcome covariance screen below. All six mechanics
+fits passed sampler diagnostics, but five failed the ICC screen; only compliance
+passed both covariance checks. The cumulative run stopped before M08 and has no
+full-reconstruction acceptance receipt.
+
+Independent checks reproduced the inputs and failed screens. Exploratory
+visit-specific and matched-child checks found substantial age dependence in
+mechanics variance and covariance, including auxiliary mechanics processes in
+the primary joint models. These exploratory checks are additional findings,
+not retrospectively prespecified acceptance gates. A primary target-outcome
+pass therefore does not establish adequacy of the complete joint model.
+
+The broader covariance-model specification remains undecided. No replacement
+has been adopted, and final supporting and sensitivity fits, tables, figures
+and release checks remain pending. All earlier results and failed runs are
+preserved for comparison.
+
 ## Scientific specification
 
 The 29 continuous target/shared-mechanics joint models add an independent

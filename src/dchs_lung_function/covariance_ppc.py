@@ -1,9 +1,9 @@
-"""Prespecified saved-draw screen of repeated-target covariance adequacy.
+"""Prespecified posterior predictive checks of repeated-target covariance.
 
 Conditional Gaussian replicas use the observed pre/no-TB child/measurement
 layout and posterior realized child effects. This is an adequacy screen, not a
-calibrated multiple-testing procedure or a convergence diagnostic. No fitting,
-participant-level outputs, or modification of posterior draws occurs here.
+calibrated multiple-testing procedure or a convergence diagnostic. Only
+aggregate diagnostics are returned; posterior draws remain unchanged.
 """
 from __future__ import annotations
 from copy import deepcopy

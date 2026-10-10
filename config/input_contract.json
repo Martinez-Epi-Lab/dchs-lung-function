@@ -12,7 +12,15 @@
       "id": "tb_events",
       "required": true,
       "description": "Dated TB events for longitudinal linkage",
-      "kind": "external"
+      "kind": "external",
+      "category_vocabulary": {
+        "tbcat": {
+          "encoding": "exact_string",
+          "allowed_values": ["Confirmed tb", "Unconfirmed tb"],
+          "missing_allowed": false,
+          "unknown_or_numeric_encoding": "reject"
+        }
+      }
     },
     {
       "id": "pulmonary_function",

@@ -1,7 +1,7 @@
 """Fingerprint, fit, and validate mechanics models in private output directories.
 
-Raw sampling identity is separate from validation identity: changed reporting
-or diagnostic code rechecks verified draws without pretending to refit them.
+Sampling and validation have separate identities, so verified draws can be
+rechecked when reporting or diagnostic code changes.
 """
 from __future__ import annotations
 
@@ -22,15 +22,17 @@ from .execution import (artifact_subtree, canonical_bytes, file_hash, load_artif
 from .pipeline import ValidationError,read_json as _read_json
 from .models.mechanics import TARGETS,build_model,validate_contract
 from .model_runtime import configure_runtime,model_runtime_identity
+from .model_adequacy import evaluate_covariance, adequacy_status, verify_covariance
+from .covariance_ppc import protocol as covariance_protocol
 from .mechanics_sampling import resolved_sampling,sample_contract
 
 CRITERIA = {'min_chains':4,'min_draws':1200,'max_rhat':1.01,
             'min_bulk_ess':400,'min_tail_ess':400,'min_bfmi':.3,
             'max_divergences':0,'max_treedepth_hits':0}
-COMPUTE_SOURCES = ('models/mechanics.py','mechanics_sampling.py','sampling.py','model_runtime.py')
-VALIDATION_SOURCES = ('mechanics_execution.py','diagnostics.py','analysis/mechanics_results.py','analysis/primary_results.py')
+COMPUTE_SOURCES = ('models/mechanics.py','mechanics_sampling.py','sampling.py','model_runtime.py','runtime_bootstrap.py')
+VALIDATION_SOURCES = ('lifecycle.py','execution.py','pipeline.py','model_adequacy.py','covariance_ppc.py','mechanics_execution.py','diagnostics.py','analysis/mechanics_results.py','analysis/primary_results.py')
 _LOADED_RUNNER_HASH = file_hash(Path(__file__))
-RESULT_FILES = ('diagnostics.json', 'summary.json', 'result_metadata.json',
+RESULT_FILES = ('covariance_ppc.json','diagnostics.json', 'summary.json', 'result_metadata.json',
                 'estimates.csv', 'hazard.csv', 'sample_counts.csv')
 
 
@@ -87,6 +89,7 @@ def sampling_identity(root, descriptor, target, settings):
 def validation_identity(root, fit_fingerprint, criteria):
     identity = {'schema_version':1,'fit_fingerprint':fit_fingerprint,
                 'source':source_hashes(root,VALIDATION_SOURCES),'criteria':criteria,
+                'covariance_ppc_protocol':covariance_protocol(),
                 'runtime':model_runtime_identity()}
     return digest(identity),identity
 
@@ -149,13 +152,15 @@ def verify_aggregates(directory, posterior, stats, contract, target, validated, 
     from .analysis.mechanics_results import summarize_mechanics
     essential = {n:stats[n] for n in ('diverging', 'energy', 'reached_max_treedepth') if n in stats}
     diagnostics = evaluate_diagnostics(posterior, essential, CRITERIA)
+    covariance=evaluate_covariance(posterior,contract,family='mechanics',target=target)
+    verify_covariance(directory,summary,diagnostics,covariance)
     results = summarize_mechanics(posterior, contract, target)
     if (read_json(directory/'diagnostics.json', 'Mechanics diagnostics') != diagnostics
             or read_json(directory/'result_metadata.json', 'Mechanics result metadata') != results.metadata
             or summary.get('counts') != validated or summary.get('target') != target
             or summary.get('result_rows') != 8 or type(summary.get('diagnostics_passed')) is not bool
             or summary['diagnostics_passed'] != diagnostics['passed']
-            or summary.get('status') != ('diagnostics_passed' if diagnostics['passed'] else 'diagnostics_failed')):
+            or summary.get('status') != adequacy_status(diagnostics['passed'],summary.get('covariance_ppc_passed'))):
         raise ValidationError('Mechanics aggregates disagree with verified posterior draws or diagnostic gates.')
     for name in ('estimates', 'hazard', 'sample_counts'):
         try:
@@ -238,7 +243,7 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
             if (type(diagnostic.get('passed')) is not bool
                     or diagnostic['passed']!=summary.get('diagnostics_passed')
                     or diagnostic.get('status')!=('passed' if diagnostic['passed'] else 'failed')
-                    or summary.get('status')!=('diagnostics_passed' if diagnostic['passed'] else 'diagnostics_failed')):
+                    or summary.get('status')!=adequacy_status(diagnostic['passed'],summary.get('covariance_ppc_passed'))):
                 raise ValidationError('Verified diagnostics and mechanics completion summary disagree.')
             if receipt.get('raw_receipt_sha256')!=file_hash(final/'receipt.json'):
                 raise ValidationError('Validation receipt is not bound to the verified raw fit.')
@@ -253,15 +258,18 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
         from .analysis.mechanics_results import summarize_mechanics
         essential={name:stats[name] for name in ('diverging','energy','reached_max_treedepth') if name in stats}
         diagnostics=evaluate_diagnostics(posterior,essential,CRITERIA)
+        covariance=evaluate_covariance(posterior,contract,family='mechanics',target=target)
         results=summarize_mechanics(posterior,contract,target)
         summary={'target':target,'fit_fingerprint':fingerprint,'validation_fingerprint':validation_fp,
                  'diagnostics_passed':bool(diagnostics['passed']),
-                 'status':'diagnostics_passed' if diagnostics['passed'] else 'diagnostics_failed',
+                 'covariance_ppc_passed':covariance['accepted'],
+                 'status':adequacy_status(bool(diagnostics['passed']),covariance['accepted']),
                  'counts':validated,'result_rows':len(results.estimates),
                  'scientific_reference_comparison':'requires separate independent validation'}
         stage=Path(tempfile.mkdtemp(prefix='.staging-',dir=output))
         try:
             write_json(stage/'diagnostics.json',diagnostics)
+            write_json(stage/'covariance_ppc.json',covariance)
             write_json(stage/'summary.json',summary)
             write_json(stage/'result_metadata.json',results.metadata)
             for name,frame in [('estimates',results.estimates),('hazard',results.hazard),('sample_counts',results.sample_counts)]:
@@ -312,6 +320,11 @@ def run_mechanics(root, config_file, analysis_file, primary_sampling_file, mecha
             pending = [pool.submit(sample_one, root, prep, target, settings, work, output, resume=resume)
                        for target in selected]
             results = [done.result() for done in as_completed(pending)]
+    if len(results)!=len(selected) or sorted(r.get('target','') for r in results)!=sorted(selected):
+        raise ValidationError('Mechanics completion must contain exactly the selected targets.')
+    for r in results:
+        if r.get('status')!=adequacy_status(r.get('diagnostics_passed'),r.get('covariance_ppc_passed')):
+            raise ValidationError('Mechanics completion gates disagree.')
     results.sort(key=lambda result:selected.index(result['target']))
     factor = summarize_selected_shared_factors(root, prep, directories['work'], directories['outputs'],
                                                primary_settings, resume=resume)
@@ -319,12 +332,12 @@ def run_mechanics(root, config_file, analysis_file, primary_sampling_file, mecha
     if (verified['fingerprint'] != prior['preparation_fingerprint']
             or [file_hash(p) for p in (primary_sampling_file, mechanics_sampling_file)] != sampling_hashes):
         raise ValidationError('Preparation or sampling dependencies changed during mechanics execution.')
-    passed = all(result['diagnostics_passed'] for result in results) and factor['accepted']
+    passed = all(result['diagnostics_passed'] and result['covariance_ppc_passed'] for result in results) and factor['accepted']
     summary = {'through':'M07', 'preparation_fingerprint':prior['preparation_fingerprint'],
                'selected_models':len(results), 'mechanics_models':results,
                'shared_factor_rows':factor['result_rows'], 'shared_factor':factor,
                'primary_models_verified':12, 'binary_models_verified':28, 'trajectory_analyses_verified':4,
-               'accepted':passed, 'status':'accepted' if passed else 'diagnostics_failed',
+               'accepted':passed, 'status':'accepted' if passed else ('diagnostics_failed' if not all(r['diagnostics_passed'] for r in results) else 'model_adequacy_failed'),
                'scientific_reference_comparison':'requires separate independent validation'}
     if passed:
         write_pointer(directories['work']/'mechanics_current.json', summary)

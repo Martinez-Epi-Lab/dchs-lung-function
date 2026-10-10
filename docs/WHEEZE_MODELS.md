@@ -2,9 +2,8 @@
 
 M10 uses the verified M03 respiratory contracts to fit the selected primary
 sex-adjusted analysis and the analysis additionally adjusted for prenatal
-maternal smoking and birthweight z-score. These are two configurations of one
-explicit model. M12 can request the adjusted result without fitting a second
-implementation. The selected outputs feed Figure 3A, Table S4 and Figure S6;
+maternal smoking and birthweight z-score. The two scenarios use the same model implementation. M12 reuses the
+adjusted result after verifying its fit. The selected outputs feed Figure 3A, Table S4 and Figure S6;
 manuscript layout and figure rendering remain in M13–M14.
 
 ## Observations and risk time
@@ -124,6 +123,7 @@ reporting hashes bind validation receipts. Resume verifies both and recomputes
 aggregates. Cumulative success writes `wheeze_current.json` only after both
 selected models and all preceding modules pass their execution checks.
 
-The separate M09 covariance limitation under G08 and four unavailable
-antenatal flow counts remain unresolved. Completion of M10 does not settle
-those issues or constitute final GitHub release.
+The retained M09 covariance limitations and approved Figure S3 membership
+correction are documented in [PRETB_MODELS.md](PRETB_MODELS.md). Four antenatal
+flow counts remain unavailable. Full-release acceptance is specified separately
+in [RELEASE.md](RELEASE.md).

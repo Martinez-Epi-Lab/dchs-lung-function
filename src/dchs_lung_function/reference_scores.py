@@ -1,7 +1,6 @@
 """Deterministic reference scores and paired spirometry columns.
 
-The caller supplies the GLI Global lookup and retains its version/hash. No
-network access, archived-code imports, model fitting, or file writes occur.
+The caller supplies the GLI Global lookup and retains its version and hash.
 """
 from __future__ import annotations
 from dataclasses import dataclass

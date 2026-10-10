@@ -1,19 +1,38 @@
 # DCHS lung function implementation plan
 
-The deliverable is a reviewed, reproducible, code-only repository for the accepted lung-function manuscript and appendix. The existing Stage 1 inventory remains the reference baseline. This document replaces the forward implementation outline; it does not replace or rerun that inventory.
+This plan defines the code repository for the DCHS lung-function manuscript and appendix. The completed Stage 1 inventory remains the reference baseline.
 
-Stages are delivery phases. M01-M15 are implementation modules, comparable to the ordered modules in the AMPATH package. Each module below contains explicit coding pieces and a completion check. No separate stage reports are required.
+Stages describe delivery phases; M01–M15 define the implementation modules and their completion checks.
 
 ## Current state
 
-Stage 1 is complete and unchanged. M01-M03 preparation is implemented and independently checked in a clean pinned environment. Four antenatal flow counts remain unavailable from the supplied inputs. M04 is implemented and independently validated across twelve fresh fits and 288 prespecified posterior comparisons. M05 is implemented and independently validated across 28 selected GEE fits. M06 is implemented and independently validated across four full/parallel trajectory pairs. M07 is implemented and independently validated across six individual mechanics fits and six shared-factor summaries. M08 is implemented and independently validated across seven joint fits and ten deterministic component fits. M09 source reproduction is implemented and independently validated across 17 Cox fits; the inherited score-residual covariance limitation remains explicit under G08. M10 is implemented and independently validated across both selected joint fits, conditional and age-comparison summaries, and three standardized probability ratios. M11 is implemented and independently validated across all eleven selected FeNO regressions, with successful original-source and copied-source cumulative execution. M12 is implemented and independently validated across ten new fits and four reused fits; final original-source and copied-source cumulative replays passed. M13 table and numerical-text generation is implemented and independently validated; all 802 tests and actual cumulative M01-M13 execution pass. Final-source original/copied M13 cumulative replays passed. M14 figure publication and the approved Figure S3 uncertainty correction are independently validated, including all 868 tests and final-source original/copied cumulative replays. M15 provides clean full reconstruction, aggregate-only rendering and source-release controls; final reconstruction, package and remote-delivery acceptance are established by their private receipts. Both preparation and primary sampling environments have exact dependency locks.
+The repository is implemented, but the corrective revision is not ready for
+release. In the preserved V3 reconstruction, all twelve primary fits passed
+sampler and target-outcome covariance checks. Five of six mechanics fits failed
+the covariance screen, stopping the cumulative run before M08. Exploratory
+checks also found covariance problems in auxiliary mechanics processes. A
+broader statistical-model revision awaits a decision; no replacement has been
+adopted. See [CORRECTIVE_REVISION.md](CORRECTIVE_REVISION.md#current-status).
 
-| Stage | Scope | Status |
+V3 source checks passed the 1,023-test suite locally and on hosted macOS.
+Hosted Linux checks passed with the one external-Arial metric check skipped.
+These source checks do not establish scientific acceptance. Revised
+supporting and sensitivity results, final tables and figures, and complete
+reconstruction acceptance remain pending. Both preparation and primary sampling
+environments have exact dependency locks. Four antenatal flow counts remain
+unavailable from the supplied inputs.
+
+The module records below describe implementation and historical validation of
+the original source-reproduction baseline. They do not certify the corrective
+revision. Its current specification and acceptance requirements take precedence
+over the historical comparison criteria recorded here.
+
+| Stage | Scope | Current status |
 |---|---|---|
-| S1 | Inventory and reference selection | complete |
-| S2 | Repository foundation and manuscript workflow | implemented and independently validated through M14 |
-| S3 | Independent verification and clean rebuild | M01–M14 validated; final clean reconstruction evidence recorded separately |
-| S4 | Code-only GitHub delivery | M15 controls implemented; delivery requires package/remote receipts |
+| S1 | Inventory and reference selection | Complete; retained unchanged |
+| S2 | Repository foundation and manuscript workflow | Implemented; covariance revision unresolved |
+| S3 | Independent verification and clean rebuild | Corrective full reconstruction failed at mechanics validation |
+| S4 | Code-only GitHub delivery | Private draft; corrective release acceptance pending |
 
 ## Repository organization
 
@@ -54,10 +73,10 @@ The selected statistical functions are explicit and implemented. Original script
 
 The repository uses one dataset identity and neutral input roles. All input bindings remain accurate and private. Role-specific inputs and model-specific samples preserve the selected analysis definitions.
 
-## Stage 2 foundation work
+## Stage 2: implemented baseline
 
-- **Available now:** M01-M03 deterministic preparation, selected input bindings and lookup provenance, a clean-installed pinned preparation environment, synthetic boundary/failure tests and private independent comparisons.
-- **Execution controls available now:** fingerprints of inputs/code/configuration/runtime, verified typed artifacts, work/output locks, atomic preparation publication and checked resume. M15 adds strict clean-origin full reconstruction and separately identified aggregate-only rendering.
+- **Preparation:** M01-M03 deterministic preparation, selected input bindings and lookup provenance, a clean-installed pinned preparation environment, synthetic boundary/failure tests and private independent comparisons.
+- **Execution controls:** fingerprints of inputs/code/configuration/runtime, verified typed artifacts, work/output locks, atomic preparation publication and checked resume. M15 adds strict clean-origin full reconstruction and separately identified aggregate-only rendering.
 - **M04 implemented and validated:** explicit primary joint models, pinned sampling environment, recorded seeds/initialization/chains/tuning/draws, complete-posterior diagnostics, Monte Carlo comparison gates and separately fingerprinted sampling/validation. All twelve fresh fits passed full-posterior diagnostics and the 288 prespecified reference comparisons; five original review roles checked the implementation and evidence.
 - **M05 implemented and validated:** 28 modified-Poisson GEE fits, strict LLN/pattern classification, exact small/zero counts, full coefficient/covariance outputs, stable evaluation of the selected robust sandwich, independent score/QR comparisons and checked aggregate resume.
 - **M06 implemented and validated:** four native/GLI trajectory analyses, eight full/reduced REML fits, training-basis standardized predictions, raw Wald tests, complete coefficient/covariance artifacts, independent numerical and manuscript checks, and verified aggregate resume.
@@ -67,13 +86,15 @@ The repository uses one dataset identity and neutral input roles. All input bind
 - **M10 implemented and validated:** both selected wheeze scenarios, conditional OR/IRR effects, age comparisons, exact support and predictive cells, and primary standardized probability ratios; 81 frozen scientific comparisons pass.
 - **M11 implemented and independently validated:** five main and six supplementary FeNO Gaussian-independence GEE regressions, with distinct eligibility/reference definitions; all 2,368 numerical checks pass, including 63 coefficients and 726 full robust/naive covariance cells. Original-source and copied-source cumulative execution through M11 passed.
 - **M12 implemented and independently validated:** ten designated new sensitivity fits, with all 267 frozen comparisons passing at the initial 3,200 draws per chain; verified reuse of two M04 ratio fits and both M10 wheeze scenarios; full-precision aggregate inputs for Tables S1/S3/S4 and attenuation from posterior means. The complete M12 suite has 729 passing tests. Final original-source and copied-source cumulative replays through M12 passed.
-- **M13 implemented and independently validated:** eight numbered/ten physical tables, 304 classified digit-containing cells, 261 computed scientific cells and 42 sentence templates with 95 result tokens and 52 qualitative bindings. All 802 tests and actual cumulative M01-M13 execution pass. The published editable document matches the independently inspected ten-page artifact with verified Arial embedding. Final-source original/copied cumulative M13 replays passed with reporting payloads and prior science preserved.
+- **M13 implemented and independently validated:** eight numbered/ten physical tables, 304 classified digit-containing cells, 261 computed scientific cells and 42 sentence templates with 96 result tokens and 52 qualitative bindings. All 802 tests and actual cumulative M01-M13 execution pass. The published editable document matches the independently inspected ten-page artifact with verified Arial embedding. Final-source original/copied cumulative M13 replays passed with reporting payloads and prior science preserved.
 - **M14 implemented and independently validated:** all nine figures in 17 panels, 56 forest estimates, 808 trajectory predictions, 44 schedule cells and ledger-derived flow labels. The authorized Figure S3 correction retains source coefficients, hazard ratios and samples while separately recomputing actual-risk-membership uncertainty. All 868 tests, final layout/font review and both final-source cumulative replays passed; private receipts bind the evidence.
 - **M15 release controls:** paired empty-root origins, all 37 joint fits, complete analytical/publication receipts, trusted accepted-aggregate rendering, exact source allowlisting and safe verified extraction. [Release instructions](RELEASE.md) define the separate clean-run, synthetic, source-package and remote-delivery acceptance evidence.
 
 File preflight checks readability and optional identity. Cumulative M01-M03 execution additionally verifies source schemas and constructs the selected scientific populations/matrices. Neither command fits the later outcome models.
 
 ## Ordered coding modules
+
+The status lines in this section refer to the original source-reproduction baseline. The current corrective status is summarized above.
 
 ### M01. Import and harmonize study extracts
 
@@ -196,7 +217,7 @@ File preflight checks readability and optional identity. Cumulative M01-M03 exec
 **Code:** `src/dchs_lung_function/reporting/` and `config/manuscript_reporting.json`. See [reporting methods](MANUSCRIPT_REPORTING.md) for `--through M13 --reporting FILE`, the separate standard-library document runtime, output inventory and acceptance requirements.
 
 - **M13.1 — Create a common result interface:** Resolve current analytical identities and verify complete aggregate receipts/inventories; retain full-precision estimates, point estimators, interval types, denominators, units and explicit non-estimable statuses without participant records. Repeated sensitivity-table fields alias to their original model result keys with exact-value verification. Completion: Tables and prose use the same canonical results; estimates are never typed into production rendering code.
-- **M13.2 — Render tables and numerical prose:** Produce editable DOCX/HTML tables, ten CSVs, generated numerical text and machine-readable lineage/comparison outputs with centralized display rules. Use a separate standard-library document interpreter and actual embedded Arial/Arial Bold, preserving the scientific locks. Completion: All eight numbered/ten physical tables, 304 digit-containing cells, 261 scientific cells and 42 sentences are classified and checked; 95 tokens and 52 qualitative bindings resolve. Complete-suite, document visual/font and final original-source/copied-source cumulative receipts must pass. Original reference comparison is informational and never forces a computed estimate to match an archived rounded literal.
+- **M13.2 — Render tables and numerical prose:** Produce editable DOCX/HTML tables, ten CSVs, generated numerical text and machine-readable lineage/comparison outputs with centralized display rules. Use a separate standard-library document interpreter and actual embedded Arial/Arial Bold, preserving the scientific locks. Completion: All eight numbered/ten physical tables, 304 digit-containing cells, 261 scientific cells and 42 sentences are classified and checked; 96 tokens and 52 qualitative bindings resolve. Complete-suite, document visual/font and final original-source/copied-source cumulative receipts must pass. Original reference comparison is informational and never forces a computed estimate to match an archived rounded literal.
 
 ### M14. Generate publication figures
 
@@ -250,7 +271,7 @@ M06 owns spirometry trajectories; M08 owns X6 fits. M07 derives factor summaries
 
 ## Stage 3: verification
 
-Five independent review roles cover (1) import/linkage/cohort reconstruction, (2) longitudinal preparation and statistical specifications, (3) independent model calculations and uncertainty, (4) complete manuscript and presentation coverage, and (5) execution, environment and release checks. Reviewers cross-check findings against one another and the lead implementation. Review is performed during coding and repeated on the final integrated result; summaries stay in the task and private validation evidence.
+Five independent review roles cover (1) import/linkage/cohort reconstruction, (2) longitudinal preparation and statistical specifications, (3) independent model calculations and uncertainty, (4) complete manuscript and presentation coverage, and (5) execution, environment and release checks. Reviewers cross-check findings against one another and the lead implementation. Review is performed during coding and repeated on the integrated result; supporting evidence remains private.
 
 | Check family | Acceptance |
 |---|---|
@@ -258,10 +279,10 @@ Five independent review roles cover (1) import/linkage/cohort reconstruction, (2
 | V02 — Encoding and malformed rows | Non-ASCII fields work under UTF-8 and C locales; import warnings, silent truncation and missing required columns fail. |
 | V03 — Keys and joins | Unexpected duplicate child/visit keys and many-to-many joins fail or follow a documented reviewed aggregation rule. |
 | V04 — TB timing boundaries | A measurement immediately before diagnosis stays pre-TB; same-day and later measurements follow the selected inclusive rule. |
-| V05 — Eligibility boundaries | Test exactly1 and5 years at diagnosis; nominal visits, exact-age limits, study exit and administrative cutoffs are separate explicit rules. |
+| V05 — Eligibility boundaries | Test exactly 1 and exactly 5 years at diagnosis; nominal visits, exact-age limits, study exit and administrative cutoffs are separate explicit rules. |
 | V06 — Available and paired samples | Missing one bronchodilator stage excludes a paired measurement without excluding valid unpaired outcomes. |
 | V07 — Outcome definitions | Test LLN equality versus strictly below, mixed low-ratio/low-FVC patterns, unit transforms and adverse-direction signs. |
-| V08 — Wheeze episodes | Contacts30days apart remain one episode,31days apart split; chained contacts use consecutive gaps; scheduled assessments are never episode contacts. |
+| V08 — Wheeze episodes | Contacts 30 days apart remain one episode; contacts 31 days apart split; chained contacts use consecutive gaps; scheduled assessments are never episode contacts. |
 | V09 — FeNO | Nonpositive values do not enter the log analysis; main and supplementary timing comparators are checked separately. |
 | V10 — Cox follow-up | Carry-forward stops at the earliest next observation, two-year limit, TB event or censoring; no post-TB measurement enters the predictor. |
 | V11 — Small and zero counts | All aggregate counts remain exact; zero-event/nonestimable coefficients receive an explicit status without fabricated estimates. |
@@ -271,9 +292,11 @@ Five independent review roles cover (1) import/linkage/cohort reconstruction, (2
 
 Deterministic counts, membership and classifications must agree exactly. Floating-point tolerances are specified by output scale before comparison. Bayesian comparisons require an identical specification/sample, prespecified diagnostic and Monte Carlo-error criteria, and independent posterior-summary checks; neither matching displayed rounding nor bitwise draws alone establishes scientific validity.
 
-A full clean rebuild uses absent/empty, nonoverlapping work/output roots and only documented authorized inputs and dependencies. The accepted 37-fit run is the baseline for same-seed reconstruction with recorded controls. Complete posterior/non-timing sampler comparisons, unchanged full-posterior diagnostic gates and the 924 frozen mean/quantile MCSE comparisons assess reproduction; counts/membership remain exact and deterministic tolerances remain unchanged. This is not an independent random sample. Aggregate-only rendering has separate trusted-receipt prerequisites and cannot establish analytical reproduction. See RELEASE.md for origin/resume and evidence requirements.
+A full clean rebuild uses absent/empty, nonoverlapping work/output roots and only documented authorized inputs and dependencies. For reproduction of the original specification, the accepted 37-fit run is the baseline for same-seed reconstruction with recorded controls. Complete posterior/non-timing sampler comparisons, unchanged full-posterior diagnostic gates and the 924 frozen mean/quantile MCSE comparisons assess reproduction; counts/membership remain exact and deterministic tolerances remain unchanged. This is not an independent random sample. Aggregate-only rendering has separate trusted-receipt prerequisites and cannot establish analytical reproduction. See RELEASE.md for origin/resume and evidence requirements.
 
-## Assigned implementation gaps
+## Original inventory gaps
+
+These records describe the original implementation. The additional covariance and follow-up findings are tracked in [the corrective revision](CORRECTIVE_REVISION.md).
 
 The nine inventory findings retain their original scope. G01 and G02 are resolved. Selected engines and fresh-fit provenance through M12 are implemented and independently checked. All ten designated M12 new fits pass full-posterior diagnostics and all 267 frozen comparisons, and the four reused fits retain their accepted raw identities. Final M12 cumulative original-source and copied-source replays passed. M13 analytical lineage, numerical coverage, document presentation and final-source original/copied cumulative replays are verified. Outcome-specific preparation and implemented model samples are checked under G09. G04 retains four unavailable antenatal nodes; the computed M13 reporting layer and its complete numerical coverage are independently validated. G08 has an approved and independently validated actual-risk-membership correction for Figure S3, with completed numerical, visual and final-source replay evidence. The Efron-fit/Breslow-score and inclusive-boundary conventions remain explicit; original M09 outputs remain preserved. G07 table, prose and figure/caption correspondence is independently checked. G06 clean-release and platform-specific checks require their own receipts; synthetic CI does not establish cross-platform scientific equivalence. The machine-readable workflow records these statuses without treating numerical implementation as final release.
 
@@ -305,6 +328,30 @@ GitHub completion means the uploaded source matches the reviewed release manifes
 4. Preserve explicit missing antenatal facts, the original M09 calculation and the accepted separate Figure S3 correction; no inferred upstream counts or manuscript edits enter release.
 5. Verify the chosen private remote tree/commit and hosted macOS/Linux synthetic outcomes against the reviewed package; record delivery separately from local acceptance.
 
-## M01-M15 implementation update
+## Historical validation details
 
-M01 and M03 preparation checks pass. M02 reproduces Table 1, selected cohort memberships and empirical modality availability; four antenatal recruitment/disposition nodes are explicitly unresolved. See PREPARATION.md for the inherited descriptive recodes and upstream input boundary. Runtime fingerprints, artifact verification, two-directory locks and atomic preparation publication are implemented. All five original review roles contributed. Detailed review evidence remains private. M04 now uses those validated contracts for twelve independently checked fresh fits, all 288 reference comparisons, complete-posterior diagnostic recomputation and selected global trace review. M05 adds 28 selected modified-Poisson GEE fits with complete robust covariance and explicit boundary statuses; 8,006 independent current-output checks and 499 archived-reference checks pass. M06 adds four independently validated full/parallel trajectory pairs; 5,480 current-output checks, 3,412 historical-reference checks and 58 manuscript checks pass. The completed M14 baseline contains 868 passing synthetic tests, including 102 preparation regression tests; release acceptance requires the complete current suite. Cumulative execution and identical copied-source resume are required for each completed module; earlier primary draws and binary scientific outputs remain unchanged. M07 adds six independently validated joint mechanics fits and six derived shared-factor associations; all 180 prespecified scientific comparisons pass, with full-posterior diagnostics and exact source/sample checks. M08 adds seven independently validated joint MMEF/X6 fits and ten supporting component fits; all 108 unchanged Monte Carlo comparison gates and 6,995 independent deterministic checks pass. The documented initialization repair and single precision extension preserve the selected likelihoods and acceptance gates. M09 reproduces all 17 archived Cox models, all 51 coefficients and all 306 covariance cells. Independent review also quantifies an inherited score-membership limitation affecting uncertainty; computational agreement does not close G08 statistically. M10 adds two independently seeded wheeze joint fits and exact source graph parity checks, with all 81 frozen posterior comparisons passing. It retains 12 conditional effects, 12 age contrasts, four global age summaries, 44 support cells, 44 predictive cells and three primary standardized probability ratios. Complete posterior diagnostics cover 2,175 scalars, including child effects; all 44 conditional predictive simulation checks pass. M11 implements all eleven selected log-FeNO regressions: five main and six supplementary models. All 2,368 independent full-precision checks across 65,293 cells pass; outputs retain 11 selected estimates, 63 coefficients, 726 covariance cells and 33 support rows. Source selection, nominal-visit exceptions, comparison groups and manuscript rounding are independently checked. Original-source and copied-source cumulative execution through M11 passed. M12 is implemented and independently validated: ten new fits, two reused M04 ratios and both reused M10 scenarios, with distinct early/all-age estimands. All 267 frozen new-fit comparisons pass at 3,200 retained draws per chain; no precision extension was needed. Full-posterior diagnostics cover 31,910 scalars. The module retains 64 effect rows, 25 hazard rows, 300 support rows and 46 selected sensitivity table-input rows. Final M12 original-source and copied-source cumulative replays passed. M13 is implemented and independently validated across all 304 classified locations, 261 scientific cells and 42 sentence templates. The actual cumulative M01-M13 command passes, and its published DOCX is identical to the independently inspected ten-page artifact. Final-source original and copied-source M13 replays passed and all five review receipts bind that delivery. M14 implements all selected figures and the approved separate G08 uncertainty correction; the 868-test suite, independent visual/font review and final-source original/copied cumulative replays passed. M15 implements distinct full/render modes and source-release controls. Its final clean-reconstruction, extracted-package and remote-delivery results are established by separate private acceptance receipts, without changing scientific thresholds or the frozen Stage 1 baseline.
+M01 and M03 preparation checks passed. M02 reproduced Table 1, selected cohort memberships and empirical modality availability; four antenatal recruitment/disposition nodes are explicitly unresolved. See PREPARATION.md for the inherited descriptive recodes and upstream input boundary. Runtime fingerprints, artifact verification, two-directory locks and atomic preparation publication are implemented. All five original review roles contributed. Detailed review evidence remains private.
+
+M04 used those validated contracts for twelve independently checked fresh fits, all 288 reference comparisons, complete-posterior diagnostic recomputation and selected global trace review.
+
+M05 added 28 selected modified-Poisson GEE fits with complete robust covariance and explicit boundary statuses; 8,006 independent reconstructed-output checks and 499 archived-reference checks passed.
+
+M06 added four independently validated full/parallel trajectory pairs; 5,480 reconstructed-output checks, 3,412 historical-reference checks and 58 manuscript checks passed. The completed M14 baseline contains 868 passing synthetic tests, including 102 preparation regression tests; each release requires its complete test suite. Cumulative execution and identical copied-source resume are required for each completed module; earlier primary draws and binary scientific outputs remain unchanged.
+
+M07 added six independently validated joint mechanics fits and six derived shared-factor associations; all 180 prespecified scientific comparisons passed, with full-posterior diagnostics and exact source/sample checks.
+
+M08 added seven independently validated joint MMEF/X6 fits and ten supporting component fits; all 108 unchanged Monte Carlo comparison gates and 6,995 independent deterministic checks passed. The documented initialization repair and single precision extension preserve the selected likelihoods and acceptance gates.
+
+M09 reproduced all 17 archived Cox models, all 51 coefficients and all 306 covariance cells. Independent review also quantifies an inherited score-membership limitation affecting uncertainty; computational agreement does not close G08 statistically.
+
+M10 added two independently seeded wheeze joint fits and exact source graph parity checks, with all 81 frozen posterior comparisons passing. It retains 12 conditional effects, 12 age contrasts, four global age summaries, 44 support cells, 44 predictive cells and three primary standardized probability ratios. Complete posterior diagnostics cover 2,175 scalars, including child effects; all 44 conditional predictive simulation checks passed.
+
+M11 implemented all eleven selected log-FeNO regressions: five main and six supplementary models. All 2,368 independent full-precision checks across 65,293 cells passed; outputs retain 11 selected estimates, 63 coefficients, 726 covariance cells and 33 support rows. Source selection, nominal-visit exceptions, comparison groups and manuscript rounding are independently checked. Original-source and copied-source cumulative execution through M11 passed.
+
+M12 was implemented and independently validated: ten new fits, two reused M04 ratios and both reused M10 scenarios, with distinct early/all-age estimands. All 267 frozen new-fit comparisons passed at 3,200 retained draws per chain; no precision extension was needed. Full-posterior diagnostics cover 31,910 scalars. The module retains 64 effect rows, 25 hazard rows, 300 support rows and 46 selected sensitivity table-input rows. Final M12 original-source and copied-source cumulative replays passed.
+
+M13 was implemented and independently validated across all 304 classified locations, 261 scientific cells and 42 sentence templates. The cumulative M01-M13 command passed, and its published DOCX was identical to the independently inspected ten-page artifact. Final-source original and copied-source M13 replays passed and all five review receipts bind that historical delivery.
+
+M14 implemented all selected figures and the approved separate G08 uncertainty correction; the 868-test suite, independent visual/font review and final-source original/copied cumulative replays passed.
+
+M15 implemented distinct full/render modes and source-release controls. Its final clean-reconstruction, extracted-package and remote-delivery results are established by separate private acceptance receipts, without changing scientific thresholds or the frozen Stage 1 baseline.

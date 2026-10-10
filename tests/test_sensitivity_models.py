@@ -105,7 +105,7 @@ def independent_factors(contract, target, values):
     result['obs_lci'] = float(np.sum(normal_logp(frame.y_std, mu, values['sigma_lci'])))
     frame = contract['frames']['target']
     current = values['mechanics'][frame.child_index] + values['shift_mechanics'] * frame.post_before5 + values['shift_mechanics_infancy'] * frame.post_infancy
-    mu = values['loading_ratio_mechanics'] * current + values['direct_ratio'] * frame.post_before5 + values['direct_ratio_infancy'] * frame.post_infancy
+    mu = values['loading_ratio_mechanics'] * current + values['tau_target'] * values['target_raw'][frame.child_index] + values['direct_ratio'] * frame.post_before5 + values['direct_ratio_infancy'] * frame.post_infancy
     result['obs_fev1_fvc'] = float(np.sum(normal_logp(frame.y_std, mu, values['sigma_ratio'])))
     eta = values['assoc_mechanics'] * values['mechanics'] + values['hazard_male'] * contract['children'].male.to_numpy()
     for variable, column in spec['hazard_variable_columns'].items():
@@ -139,8 +139,8 @@ class SensitivityContractTests(unittest.TestCase):
     def test_covariate_complete_case_population_and_exploratory_hazard_exclusion(self):
         frame = fabricated_pft()
         frame.loc[frame.pid_child.eq('invented_23'), 'birthweight_z'] = np.nan
-        core = joint_inputs(frame, ('fev1_fvc', 100.), family='early')
-        adjusted = joint_inputs(frame, ('fev1_fvc', 100.), family='early', covariates=('maternal_hiv', 'maternal_smoking', 'birthweight_z', 'ever_lrti'))
+        core = joint_inputs(frame, ('fev1_fvc', 100.), family='early', event_end='2007-01-01')
+        adjusted = joint_inputs(frame, ('fev1_fvc', 100.), family='early', event_end='2007-01-01', covariates=('maternal_hiv', 'maternal_smoking', 'birthweight_z', 'ever_lrti'))
         self.assertEqual(sensitivity.validate_contract(core, 'early_core')['joint_children'], 24)
         self.assertEqual(sensitivity.validate_contract(adjusted, 'early_all_four')['joint_children'], 23)
         spec = sensitivity.fit_spec('early_all_four')
@@ -202,7 +202,7 @@ class SensitivityContractTests(unittest.TestCase):
     def test_float32_native_multiplication_is_preserved(self):
         frame = fabricated_pft()
         frame['fev1_fvc'] = frame.fev1_fvc.astype('float32')
-        contract = joint_inputs(frame, ('fev1_fvc', 100.), family='early')
+        contract = joint_inputs(frame, ('fev1_fvc', 100.), family='early', event_end='2007-01-01')
         sensitivity.validate_contract(contract, 'early_core')
         target = contract['frames']['target']
         self.assertGreater(np.max(np.abs(target.outcome_value.to_numpy(float) - target.fev1_fvc.to_numpy(float) * 100.)), 0.)
@@ -212,7 +212,7 @@ class SensitivityContractTests(unittest.TestCase):
         self.assertEqual(validate_sampling(config), config)
         for target in sensitivity.DEFAULT_TARGETS:
             spec = sensitivity.fit_spec(target); controls = resolved_sampling(target, config)
-            self.assertEqual(controls['draws'], config['draws'])
+            self.assertEqual(controls['draws'], config.get('draws_by_target', {}).get(target, config['draws']))
             self.assertEqual(controls['tune'], config['tune'])
             self.assertEqual(controls['random_seed'], spec['sampling']['random_seed'] + 104729)
             self.assertEqual(controls['init'], 'adapt_diag')

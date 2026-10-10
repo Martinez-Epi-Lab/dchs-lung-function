@@ -2,6 +2,10 @@
 
 Reproducible Python code for the DCHS lung-function manuscript and appendix. The workflow imports authorized study extracts, rebuilds the selected samples, fits all 37 joint models and the deterministic analyses, and generates eight numbered tables, numerical text and nine publication figures. Study data, local configuration, raw posteriors and generated study results remain outside this source package.
 
+**Current status: corrective revision under review; not ready for release.** The [corrective specification](docs/CORRECTIVE_REVISION.md) adds independent target child intercepts, bounds threshold-model TB follow-up by observed exit, and requires conditional covariance checks and explicit Table S1 Monte Carlo precision. In the preserved V3 reconstruction, all twelve primary fits passed sampler diagnostics and target-outcome covariance checks. Five of six mechanics fits failed the covariance screen, stopping the run before M08. Exploratory checks also found age-dependent covariance problems in auxiliary mechanics processes. Passing the primary target checks does not establish adequacy of the complete joint model.
+
+A broader covariance-model comparison awaits a decision on the statistical specification. Revised supporting and sensitivity results, final tables and figures, and full-release acceptance remain pending. Earlier source-reproduction receipts describe the previous models and do not establish acceptance of this revision.
+
 ## Prerequisites
 
 The reference scientific environment uses Python 3.12.14 on macOS ARM64, with 41 exact dependency pins in `requirements-models.lock.txt`. Bayesian sampling requires a working C++ compiler. Supply the authorized study extracts and reference lookup listed in [INPUTS.md](docs/INPUTS.md), licensed actual Arial/Arial Bold font files, and a separately installed `pdffonts` executable. The standard-library DOCX renderer needs no `python-docx`; its configured interpreter can be the scientific interpreter.
@@ -59,7 +63,7 @@ Only `--resume` may be added. This regenerates editable tables, numerical text, 
 ../dchs-runtime/bin/python -B tests/run_tests.py
 ```
 
-Tests use fabricated data and reject empty discovery. The smaller preparation lock supports `tests/run_tests.py --preparation-only`. Hosted macOS/Linux synthetic checks are separate from confidential-data reconstruction; local acceptance and actual remote CI outcomes have distinct receipts.
+Tests use fabricated data and reject empty discovery. The original M15 release passed 946 tests; the V3 corrective source passed its 1,023-test suite locally and on hosted macOS. Hosted Linux checks passed with the one external-Arial metric check skipped. Each run reports its actual discovered count. The smaller preparation lock supports `tests/run_tests.py --preparation-only`. Synthetic checks do not establish scientific model adequacy or acceptance of the confidential-data reconstruction.
 
 Private work holds typed participant-level intermediates, complete posterior arrays, manifests and pointers. The separate output root holds aggregate results and publications. Full completion is recorded in `full_reconstruction/<fingerprint>/receipt.json`; render-only results use `render_only/<fingerprint>/`. Input/source/runtime hashes, locks, staged writes and complete inventories govern reuse. Independent scientific checks remain additional to command-level diagnostic acceptance.
 
@@ -77,6 +81,7 @@ Private work holds typed participant-level intermediates, complete posterior arr
 | Wheeze and standardized probability ratios | [Wheeze models](docs/WHEEZE_MODELS.md) |
 | Visit-specific FeNO | [FeNO models](docs/FENO_MODELS.md) |
 | Designated sensitivity analyses | [Sensitivity models](docs/SENSITIVITY_MODELS.md) |
+| Revised covariance, censoring and precision requirements | [Corrective revision](docs/CORRECTIVE_REVISION.md) |
 | Tables, numerical prose and publication figures | [Reporting](docs/MANUSCRIPT_REPORTING.md), [figures](docs/PUBLICATION_FIGURES.md) |
 
 Four upstream antenatal counts and the combined antenatal/pregnancy-loss fact remain explicitly unavailable. They are not inferred or treated as zero. Exact aggregate values remain reportable when N is 1–9; participant-level material stays private.

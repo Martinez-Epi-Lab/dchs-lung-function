@@ -1,4 +1,4 @@
-"""One keyed interface for full-precision, participant-free aggregate results.
+"""Keyed access to full-precision aggregate results.
 
 The source adapters name row coordinates and the meaning of interval fields.
 Rows retain their original numerical values. Tables and prose reference the
@@ -21,7 +21,7 @@ def _schema(source):
     if family == 'preparation':
         keys = {'table1_statistics':['variable','group'], 'flow':['node'],
                 'cohort_ledger':['population','outcome','step'],
-                'modality_schedule':['modality','visit']}[table]
+                'modality_schedule':['modality','visit'], 'reporting_context':['field']}[table]
     elif family == 'facts':
         keys = {'early_tb_age':['population','diagnosis_group'],
                 'early_tb_distribution':['fact'], 'unavailable_flow':['node']}[table]
@@ -79,7 +79,7 @@ def _semantics(source, row):
         if table == 'hazard':
             value['point_estimators']['mean'] = 'posterior mean hazard ratio'
     if family in {'primary','mechanics','supporting','sensitivity_model'} and table == 'hazard':
-        value['limitations'].append('Probability fields ending below_zero/above_zero use zero, not the hazard-ratio null of one.')
+        value['limitations'].append('Hazard-ratio probability fields compare posterior draws with the null of one.')
     if family == 'sensitivity':
         field = 'posterior_median' if table=='table_s4' else 'mean'
         value['point_estimators'] = {field:'posterior median' if table=='table_s4' else 'posterior mean'}
@@ -151,7 +151,7 @@ class ResultRegistry:
         self._schema_contract = json.loads((Path(__file__).resolve().parents[3]/'config/reporting_schemas.json').read_text())
 
     def add(self, source, frame, provenance=None):
-        """Register a whitelisted aggregate table, with unique semantic row keys."""
+        """Register an allowed aggregate table with unique semantic row keys."""
         if source in self._sources:
             raise ReportingError('An aggregate source was registered twice.')
         contract = self._schema_contract

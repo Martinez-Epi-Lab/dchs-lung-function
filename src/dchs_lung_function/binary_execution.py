@@ -302,7 +302,7 @@ def run_binary(root, config_file, analysis_file, sampling_file, *, jobs=1, resum
     from .primary_execution import run_primary
     sampling_hash = file_hash(Path(sampling_file))
     primary = run_primary(root, config_file, analysis_file, sampling_file, jobs=jobs, resume=resume)
-    if not primary['all_twelve_models'] or not primary['diagnostics_passed']:
+    if not primary['all_twelve_models'] or not primary['diagnostics_passed'] or primary.get('covariance_ppc_passed') is not True:
         raise ValidationError('Cumulative M05 requires diagnostic acceptance of all twelve primary fits.')
     configuration = read_json(config_file, 'Local configuration')
     _, directories = resolve_paths(configuration, config_file)

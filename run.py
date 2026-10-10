@@ -8,6 +8,9 @@ ROOT = Path(__file__).resolve().parent
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT / "src"))
 
+from dchs_lung_function.runtime_bootstrap import bootstrap
+bootstrap()
+
 from dchs_lung_function.pipeline import main
 
 

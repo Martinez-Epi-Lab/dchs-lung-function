@@ -1,9 +1,9 @@
-"""Selected shared-mechanics associations derived from primary posterior draws.
+"""Shared-mechanics associations derived from primary posterior draws.
 
 These six results reuse the primary spirometry models. One unit of the primary
 mechanics factor is one model-defined between-child SD. Negating its target
 loading and multiplying once by the target residual scale gives the association
-with one SD poorer mechanics in GLI z-score units. No sampling or file I/O occurs.
+with one SD poorer mechanics in GLI z-score units.
 """
 from __future__ import annotations
 
@@ -97,7 +97,7 @@ def derive_shared_factor_draws(posterior, contract, target: str) -> np.ndarray:
 
 
 def summarize_shared_factor(posterior, contract, target: str, *, compute_mcse: bool = True) -> SharedFactorResult:
-    """Return a full-precision selected estimate and an explicit derivation audit.
+    """Return the estimate, Monte Carlo error, and derivation metadata.
 
     ``compute_mcse=False`` is for algebra tests and leaves Monte Carlo errors
     missing. The calling runner verifies source-fit diagnostics and provenance;

@@ -2999,9 +2999,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 1
       }
     },
@@ -3023,9 +3024,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 1
       }
     },
@@ -3047,9 +3049,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 1
       }
     },
@@ -3174,9 +3177,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 0
       }
     },
@@ -3198,9 +3202,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 0
       }
     },
@@ -3222,9 +3227,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 0
       }
     },
@@ -3529,9 +3535,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 1
       }
     },
@@ -3553,9 +3560,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 1
       }
     },
@@ -3577,9 +3585,10 @@
         },
         "fields": [
           "mean",
-          "sd"
+          "sd",
+          "n_nonmissing"
         ],
-        "style": "mean_sd",
+        "style": "mean_sd_n",
         "digits": 1
       }
     },
@@ -4142,9 +4151,10 @@
         "fields": [
           "median",
           "q1",
-          "q3"
+          "q3",
+          "n_nonmissing"
         ],
-        "style": "median_iqr",
+        "style": "median_iqr_n",
         "digits": 0
       }
     },
@@ -4167,9 +4177,10 @@
         "fields": [
           "median",
           "q1",
-          "q3"
+          "q3",
+          "n_nonmissing"
         ],
-        "style": "median_iqr",
+        "style": "median_iqr_n",
         "digits": 0
       }
     },
@@ -4192,9 +4203,10 @@
         "fields": [
           "median",
           "q1",
-          "q3"
+          "q3",
+          "n_nonmissing"
         ],
-        "style": "median_iqr",
+        "style": "median_iqr_n",
         "digits": 0
       }
     },
@@ -5652,10 +5664,13 @@
           "contrast": "First TB <5 years"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -5700,10 +5715,13 @@
           "contrast": "First TB <1 year"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -5748,10 +5766,13 @@
           "contrast": "First TB <5 years"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -5796,10 +5817,13 @@
           "contrast": "First TB <1 year"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -5844,10 +5868,13 @@
           "contrast": "First TB <5 years"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -5892,10 +5919,13 @@
           "contrast": "First TB <1 year"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -5940,10 +5970,13 @@
           "contrast": "First TB <5 years"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -5988,10 +6021,13 @@
           "contrast": "First TB <1 year"
         },
         "fields": [
-          "attenuation_percent"
+          "attenuation_percent",
+          "attenuation_mcse_bound_pp",
+          "attenuation_status",
+          "attenuation_precision_passed"
         ],
-        "style": "percent",
-        "digits": 1
+        "style": "attenuation",
+        "digits": 0
       }
     },
     {
@@ -6718,8 +6754,19 @@
       "reference_column": 1,
       "classification": "context",
       "colspan": 1,
-      "label": "Core early-TB model; restricted follow-up",
-      "classification_note": "Configured follow-up restriction; calendar value belongs to the local analysis configuration."
+      "classification_note": "Restricted endpoint is bound to the verified preparation identity settings.",
+      "prefix": "Core early-TB model; restricted follow-up through ",
+      "binding": {
+        "source": "preparation/reporting_context",
+        "where": {
+          "field": "event_end"
+        },
+        "fields": [
+          "value"
+        ],
+        "style": "date",
+        "digits": 0
+      }
     },
     {
       "id": "appendix_T03_R12C02",
@@ -6879,8 +6926,19 @@
       "reference_column": 1,
       "classification": "context",
       "colspan": 1,
-      "label": "Expanded restricted follow-up; pre-bronchodilator",
-      "classification_note": "Configured follow-up restriction; calendar value belongs to the local analysis configuration."
+      "classification_note": "Restricted endpoint is bound to the verified preparation identity settings.",
+      "prefix": "Expanded restricted follow-up; pre-bronchodilator through ",
+      "binding": {
+        "source": "preparation/reporting_context",
+        "where": {
+          "field": "event_end"
+        },
+        "fields": [
+          "value"
+        ],
+        "style": "date",
+        "digits": 0
+      }
     },
     {
       "id": "appendix_T03_R15C02",
@@ -7040,8 +7098,19 @@
       "reference_column": 1,
       "classification": "context",
       "colspan": 1,
-      "label": "Expanded restricted follow-up; post-bronchodilator",
-      "classification_note": "Configured follow-up restriction; calendar value belongs to the local analysis configuration."
+      "classification_note": "Restricted endpoint is bound to the verified preparation identity settings.",
+      "prefix": "Expanded restricted follow-up; post-bronchodilator through ",
+      "binding": {
+        "source": "preparation/reporting_context",
+        "where": {
+          "field": "event_end"
+        },
+        "fields": [
+          "value"
+        ],
+        "style": "date",
+        "digits": 0
+      }
     },
     {
       "id": "appendix_T03_R17C02",
@@ -12205,7 +12274,7 @@
       "locator": "P135",
       "section": "Results",
       "classification": "computed_results",
-      "template": "Restricting the expanded model to the configured follow-up window yielded corresponding differences of {before_five} and {infancy} percentage points (posterior mean and 95% CrI; Table S3).",
+      "template": "Restricting the expanded model to observations through {window_end} (inclusive) yielded corresponding differences of {before_five} and {infancy} percentage points (posterior mean and 95% CrI; Table S3).",
       "tokens": {
         "before_five": {
           "source": "sensitivity/table_s3",
@@ -12234,6 +12303,17 @@
           ],
           "style": "interval",
           "digits": 2
+        },
+        "window_end": {
+          "source": "preparation/reporting_context",
+          "where": {
+            "field": "event_end"
+          },
+          "fields": [
+            "value"
+          ],
+          "style": "date",
+          "digits": 0
         }
       },
       "context_numbers": [

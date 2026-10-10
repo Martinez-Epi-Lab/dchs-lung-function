@@ -30,7 +30,7 @@
             "No recorded TB": {
               "label": "No recorded TB",
               "color": "#7A8189",
-              "line": "solid"
+              "line": "dashed"
             },
             "First TB <1 years": {
               "label": "First TB <1 year",
@@ -64,7 +64,8 @@
           "y_axis": {
             "label": "FEV₁/FVC (%)",
             "scale": "linear",
-            "null": null
+            "null": null,
+            "shared_group": "native_ratio"
           },
           "estimate": "model-predicted mean",
           "interval": "95% confidence interval",
@@ -95,7 +96,7 @@
             "No recorded TB": {
               "label": "No recorded TB",
               "color": "#7A8189",
-              "line": "solid"
+              "line": "dashed"
             },
             "First TB <5 years": {
               "label": "First TB <5 years",
@@ -129,7 +130,8 @@
           "y_axis": {
             "label": "FEV₁/FVC (%)",
             "scale": "linear",
-            "null": null
+            "null": null,
+            "shared_group": "native_ratio"
           },
           "estimate": "model-predicted mean",
           "interval": "95% confidence interval",
@@ -160,7 +162,7 @@
             "No recorded TB": {
               "label": "No recorded TB",
               "color": "#7A8189",
-              "line": "solid"
+              "line": "dashed"
             },
             "First TB <1 years": {
               "label": "First TB <1 year",
@@ -194,7 +196,8 @@
           "y_axis": {
             "label": "FEV₁/FVC (GLI z-score)",
             "scale": "linear",
-            "null": null
+            "null": null,
+            "shared_group": "gli_ratio"
           },
           "estimate": "model-predicted mean",
           "interval": "95% confidence interval",
@@ -225,7 +228,7 @@
             "No recorded TB": {
               "label": "No recorded TB",
               "color": "#7A8189",
-              "line": "solid"
+              "line": "dashed"
             },
             "First TB <5 years": {
               "label": "First TB <5 years",
@@ -259,7 +262,8 @@
           "y_axis": {
             "label": "FEV₁/FVC (GLI z-score)",
             "scale": "linear",
-            "null": null
+            "null": null,
+            "shared_group": "gli_ratio"
           },
           "estimate": "model-predicted mean",
           "interval": "95% confidence interval",
@@ -268,7 +272,7 @@
         }
       ],
       "caption": {
-        "template": "Lines show model-predicted mean FEV₁/FVC, with 95% confidence bands. Upper panels show percentages and lower panels show GLI-Global 2022 z-scores. Separate child-random-intercept models were fitted for first tuberculosis (TB) before age one and before age five, using child-cluster-robust standard errors. Exact age from 5–10 years was modeled with a three-degree-of-freedom natural cubic spline, interacting the early-TB indicator with all spline terms. Models adjusted for current height, sex, future TB and post-TB measurements following first TB outside the target cutoff. Predictions use the analytic sex distribution and age-specific expected height, with other TB-timing indicators set to zero. Early-TB curves represent post-diagnosis measurements; the reference comprises children with no recorded TB. The common sample contains {measurements} measurements from {children} children. Bands describe uncertainty in the estimated mean, not individual prediction intervals.",
+        "template": "Lines show model-predicted mean FEV₁/FVC, with pointwise 95% confidence bands. Upper panels show percentages and lower panels show GLI-Global 2022 z-scores. Separate child-random-intercept models were fitted for first tuberculosis (TB) before age one and before age five, using child-cluster-robust standard errors. Exact age from 5–10 years was modeled with a three-degree-of-freedom natural cubic spline, interacting the early-TB indicator with all spline terms. Models adjusted for current height, sex, future TB and post-TB measurements following first TB outside the target cutoff. Predictions use the analytic sex distribution and age-specific expected height, with other TB-timing indicators set to zero. Early-TB curves represent post-diagnosis measurements; the reference comprises children with no recorded TB. The common sample contains {measurements} measurements from {children} children. Dashed lines denote no recorded TB; solid lines denote the indicated early-TB group. Paired panels with the same outcome use common y-axis limits. Bands are pointwise, not simultaneous, and describe uncertainty in the estimated mean, not individual prediction intervals.",
         "bindings": {
           "measurements": {
             "source": "trajectory/global_tests",
@@ -2285,7 +2289,7 @@
           "estimate": "adjusted geometric mean ratio",
           "interval": "95% confidence interval",
           "annotation": {
-            "show": false,
+            "show": true,
             "style": "interval",
             "digits": 2
           },
@@ -2382,7 +2386,7 @@
           "estimate": "adjusted geometric mean ratio",
           "interval": "95% confidence interval",
           "annotation": {
-            "show": false,
+            "show": true,
             "style": "interval",
             "digits": 2
           },
@@ -2411,7 +2415,7 @@
         }
       ],
       "caption": {
-        "template": "Points show adjusted geometric mean ratios (GMRs) and vertical lines show 95% confidence intervals for fractional exhaled nitric oxide (FeNO), with no recorded tuberculosis (TB) as the reference. TB status is updated at each visit. At 6–10 weeks, the open square compares children who later developed TB with those with no recorded TB; no TB preceded the selected measurements at this visit. At later visits, filled squares compare first TB on or before measurement with no recorded TB, regardless of age at diagnosis. Future-TB measurements enter later models as a separate category and are not plotted. Models adjust for exact age, current height and sex. The dotted line marks GMR=1; larger ratios indicate higher FeNO. Infant tidal-breathing and school-age FeNO used different testing contexts, with no selected assessments between approximately ages two and eight. These are visit-specific associations, not a continuous FeNO trajectory.",
+        "template": "Printed values give GMR (95% CI). Points show adjusted geometric mean ratios (GMRs) and vertical lines show 95% confidence intervals for fractional exhaled nitric oxide (FeNO), with no recorded tuberculosis (TB) as the reference. TB status is updated at each visit. At 6–10 weeks, the open square compares children who later developed TB with those with no recorded TB; no TB preceded the selected measurements at this visit. At later visits, filled squares compare first TB on or before measurement with no recorded TB, regardless of age at diagnosis. Future-TB measurements enter later models as a separate category and are not plotted. Models adjust for exact age, current height and sex. The dotted line marks GMR=1; larger ratios indicate higher FeNO. Infant tidal-breathing and school-age FeNO used different testing contexts, with no selected assessments between approximately ages two and eight. These are visit-specific associations, not a continuous FeNO trajectory.",
         "bindings": {}
       },
       "limitations": [

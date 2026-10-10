@@ -97,9 +97,9 @@ def _bit_hash(matrix):
 def correct_covariance(contract, target, coefficients, model_covariance):
     """Return a corrected 3-by-3 covariance and aggregate validation evidence.
 
-    This pure numerical API accepts a validated interval contract and already
-    fitted coefficients/information. It never invokes an optimizer. Invalid
-    inputs or numerical diagnostics raise ValueError and block publication.
+    Uses the validated intervals, fitted coefficients, and inverse information
+    without refitting. Invalid inputs or numerical diagnostics raise ValueError
+    and block publication.
     """
     validation = source_model.validate_contract(contract, target)
     frame = contract['frame']

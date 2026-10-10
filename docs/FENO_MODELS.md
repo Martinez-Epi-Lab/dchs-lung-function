@@ -2,9 +2,9 @@
 
 M11 implements eleven selected regressions from the verified M03 FeNO
 contracts: five infancy-TB comparisons for Figure 3B and six distinct
-measurement-timing comparisons for Figure S4. Both selected families are implemented and have passed independent
-source/sample and full-precision numerical validation. Figure rendering remains in M14;
-this module does not edit the manuscript or generate figures.
+measurement-timing comparisons for Figure S4. Both families passed independent
+source/sample and full-precision numerical validation in the original release.
+M14 renders their figures.
 
 ## Selected samples and comparisons
 
@@ -123,13 +123,14 @@ All eleven selected fits passed independent numerical validation: 2,368
 checks across 65,293 comparison cells, including complete coefficients and
 covariance matrices. The prior source/reference review passed 365 checks,
 and all 15 rounded main-manuscript estimate/interval values agree with the
-selected calculations. The complete synthetic suite has 621 passing tests.
+selected calculations. The M11 baseline synthetic suite had 621 passing tests.
 Successful cumulative execution from the original source tree and an
 identical source copy remains a delivery acceptance requirement; numerical
 fit validation alone does not establish that replay has completed.
 
-The G08 pre-TB covariance limitation and four unavailable upstream antenatal
-flow counts remain explicit. Infant and school-age FeNO were measured in
+The retained pre-TB covariance limitations and approved Figure S3 membership
+correction are documented in [PRETB_MODELS.md](PRETB_MODELS.md). Four upstream
+antenatal flow counts remain unavailable. Infant and school-age FeNO were measured in
 different testing contexts, with no selected assessments between approximately
 ages two and eight. These visit-specific associations do not describe a
 continuous FeNO trajectory or establish a shared mechanism with wheeze.

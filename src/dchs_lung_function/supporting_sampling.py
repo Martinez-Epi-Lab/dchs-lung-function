@@ -43,7 +43,7 @@ def expected_posterior_shapes(contract,target,chains,draws):
 
 
 def validate_sampling(settings):
-    """Require the conservative common fresh-fit protocol, without relaxing gates."""
+    """Enforce the shared minimum sampling requirements for supporting models."""
     settings=_validate_primary_sampling(settings)
     if settings['draws']<1600 or settings['tune']<2200:
         raise ValueError('Supporting fresh fits require at least 1600 draws and 2200 tuning iterations.')

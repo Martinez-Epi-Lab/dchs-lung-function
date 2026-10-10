@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
 from dchs_lung_function.preparation import (BASE_TB,link_longitudinal,enrich_covariates,
-    normalize_pft,exposure_frame,event_arrays,drop_design_columns,binary_inputs,pretb_cox_inputs)
+    normalize_pft,exposure_frame,event_arrays,drop_design_columns,repeated_design,binary_inputs,pretb_cox_inputs,joint_inputs)
 
 
 def linkage_data():
@@ -79,7 +79,7 @@ class PreparationTests(unittest.TestCase):
 
     def test_survival_interval_boundary_and_censoring(self):
         f=model_frame().drop_duplicates('pid_child').copy()
-        a=event_arrays(f,threshold=5)
+        a=event_arrays(f,threshold=5,event_end='2022-01-01')
         self.assertEqual(int(a['event'].sum()),1)
         np.testing.assert_allclose(a['exposure'].sum(axis=1),a['stop'])
         f.loc[f.index[0],'tb_first_dx']=pd.Timestamp('2030-01-01')
@@ -88,6 +88,78 @@ class PreparationTests(unittest.TestCase):
     def test_required_nonconstant_collinear_exposure_rejected(self):
         x=np.column_stack([np.ones(4),[0.,1.,0.,1.],[0.,1.,0.,1.]])
         with self.assertRaisesRegex(ValueError,'collinear'):drop_design_columns(x,['Intercept','a','b'],{'b'})
+
+    def test_required_constant_terms_fail_but_zero_support_is_explicit(self):
+        for value in (0.,1.):
+            with self.subTest(value=value),self.assertRaisesRegex(ValueError,'constant'):
+                drop_design_columns(np.column_stack([np.ones(4),np.repeat(value,4)]),['Intercept','target'],{'target'})
+        f=model_frame();f['zero_exposure']=0.
+        matrix,terms,dropped=repeated_design(f,['zero_exposure'])
+        self.assertNotIn('zero_exposure',terms)
+        self.assertIn('zero_exposure (constant)',dropped)
+        self.assertEqual(matrix.shape[0],len(f))
+        f['zero_exposure']=1.
+        with self.assertRaisesRegex(ValueError,'constant'):repeated_design(f,['zero_exposure'])
+
+    def test_threshold_followup_requires_endpoint_and_positive_time(self):
+        f=model_frame().drop_duplicates('pid_child').copy()
+        with self.assertRaisesRegex(ValueError,'explicit endpoint'):event_arrays(f,threshold=5)
+        for endpoint in ['2015-01-01','2014-12-31',pd.NaT]:
+            with self.subTest(endpoint=endpoint),self.assertRaises(ValueError):
+                event_arrays(f,threshold=5,event_end=endpoint)
+        f.loc[f.index[-1],'exit_date']=f.child_dob.iloc[-1]
+        with self.assertRaisesRegex(ValueError,'follow-up duration'):event_arrays(f,threshold=5,event_end='2022-01-01')
+
+    def test_threshold_event_and_censor_boundaries(self):
+        # Ages are supplied explicitly because the source TB-age role differs
+        # from the measurement-DOB role. Dates here use a common birth date.
+        birth=pd.Timestamp('2000-01-01');end=pd.Timestamp('2000-10-01')
+        diagnosis=pd.to_datetime([None,None,'2000-07-01','2000-10-01','2000-07-02','2000-10-02','2000-06-01'])
+        f=pd.DataFrame({'child_dob':[birth]*7,'exit_date':pd.to_datetime(['2000-07-01',None,'2000-07-01',None,'2000-07-01',None,None]),
+                        'tb_first_dx':diagnosis,'tb_age_first_years':(diagnosis-birth).days.to_numpy()/365.25})
+        result=event_arrays(f,threshold=1,event_end=end)
+        np.testing.assert_array_equal(result['event'],[0,0,1,1,0,0,1])
+        # Independent hand-specified day durations: both endpoint events count;
+        # the known next-day diagnoses are censored and add no event.
+        np.testing.assert_allclose(result['stop'],np.array([182,274,182,274,182,274,152])/365.25)
+        np.testing.assert_allclose(result['exposure'][:,0],result['stop'])
+        self.assertEqual(result['ascertainment_end'],'2000-10-01')
+        self.assertEqual(int(result['event_interval'].sum()),3)
+
+    def test_exact_threshold_is_not_an_event(self):
+        for threshold in (1,5):
+            f=pd.DataFrame({'child_dob':pd.to_datetime(['2000-01-01']*2),'exit_date':pd.to_datetime([None,None]),
+                'tb_first_dx':pd.to_datetime(['2000-12-31','2004-12-31']),
+                'tb_age_first_years':[float(threshold),float(threshold)-.01]})
+            a=event_arrays(f,threshold=threshold,event_end='2010-01-01')
+            np.testing.assert_array_equal(a['event'],[0,1])
+            np.testing.assert_allclose(a['stop'],[threshold,threshold-.01])
+
+    def test_threshold_malformed_diagnosis_fails(self):
+        f=model_frame().drop_duplicates('pid_child').copy()
+        for date,age in [(pd.Timestamp('2014-01-01'),.5),(pd.Timestamp('2016-01-01'),np.nan),(pd.NaT,.5)]:
+            altered=f.copy();altered.loc[altered.index[0],['tb_first_dx','tb_age_first_years']]=[date,age]
+            with self.subTest(date=date,age=age),self.assertRaisesRegex(ValueError,'chronology'):
+                event_arrays(altered,threshold=5,event_end='2022-01-01')
+
+    def test_joint_process_exit_filter_preserves_admin_independent_observations(self):
+        f=model_frame().copy()
+        for i,col in enumerate(['target','i_lci_2_5','resistance','compliance','xee','ree']):
+            f[col]=np.sin(np.arange(len(f))*.7+i)+np.arange(len(f))*.03
+        # No TB so every process has enough pre/no-TB residual observations.
+        f['tb_first_dx']=pd.NaT;f['tb_age_first_years']=np.nan
+        f.loc[f.pid_child.eq('F'),'exit_date']=pd.Timestamp('2020-06-01')
+        # This row's LCI measurement occurs on exit, while target/mechanics
+        # occur later and must be removed only from their own processes.
+        f.loc[11,'date_of_test_ilf1']=pd.Timestamp('2020-06-01')
+        result=joint_inputs(f,('target',1.),family='early',event_end='2019-01-01')
+        self.assertEqual(len(result['frames']['target']),11)
+        self.assertEqual(len(result['frames']['lci']),12)
+        self.assertEqual(len(result['frames']['resistance']),11)
+        self.assertTrue(result['frames']['lci'].test_date.eq(pd.Timestamp('2020-06-01')).any())
+        self.assertTrue(result['frames']['target'].test_date.gt(pd.Timestamp('2019-01-01')).all())
+        # Event-risk time is nevertheless capped at the earlier admin end.
+        np.testing.assert_allclose(result['event']['stop'],1461/365.25)
 
     def test_cox_two_year_carry_forward_and_event_time(self):
         f=model_frame();r=pretb_cox_inputs(f,'x6_sa_z',-1,True,observation_end='2022-01-01')

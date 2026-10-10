@@ -1,4 +1,4 @@
-"""Selected X6 shared-mechanics/first-TB joint graphs, specification 1.0.0."""
+"""X6 joint graphs with an independent target child effect, version 2.0.0."""
 from __future__ import annotations
 from typing import Mapping
 import numpy as np
@@ -16,7 +16,7 @@ CONTRASTS = {
     'Direct post-TB component':('direct_target','component'),
     'Shared-mechanics component':('mediated_target','component'),
 }
-POSTERIOR_VARIABLES = ('mechanics','loading_mechanics','sigma_mechanics','shift_mechanics','loading_target_mechanics','direct_target','sigma_target','log_baseline_hazard','assoc_mechanics','hazard_male','mediated_target','total_target')
+POSTERIOR_VARIABLES = ('mechanics','target_raw','tau_target','target_process','loading_mechanics','sigma_mechanics','shift_mechanics','loading_target_mechanics','direct_target','sigma_target','log_baseline_hazard','assoc_mechanics','hazard_male','mediated_target','total_target')
 
 
 def fit_spec(target):
@@ -33,13 +33,15 @@ def fit_spec(target):
         'scale_method':'sqrt(training residual SSE / (training observations minus nuisance design column count))',
         'hazard_breaks':breaks,'hazard_labels':labels,
         'log_hazard_prior_mean':np.log(np.repeat(.03,len(labels))).tolist(),'log_hazard_prior_sd':1.25,
-        'priors':{'unit_normal_child':['mechanics'],'half_normal_sd1':['loading_mechanics','sigma_mechanics','sigma_target'],'normal_sd1':['loading_target_mechanics'],'normal_sd0_75':['shift_mechanics','direct_target','assoc_mechanics','hazard_male']},
-        'target_mean':'loading_target_mechanics*(mechanics+shift_mechanics*post_target_tb)+direct_target*post_target_tb',
+        'priors':{'unit_normal_child':['mechanics','target_raw'],'half_normal_sd1':['tau_target','loading_mechanics','sigma_mechanics','sigma_target'],'normal_sd1':['loading_target_mechanics'],'normal_sd0_75':['shift_mechanics','direct_target','assoc_mechanics','hazard_male']},
+        'target_mean':'loading_target_mechanics*(mechanics+shift_mechanics*post_target_tb)+target_process+direct_target*post_target_tb',
+        'target_process':'tau_target*target_raw; independent of mechanics; no hazard coupling',
         'hazard_log_mean':'log_baseline_hazard+assoc_mechanics*mechanics+hazard_male*male',
         'contrasts':{k:list(v) for k,v in CONTRASTS.items()},
-        'posterior_variables':list(POSTERIOR_VARIABLES),'participant_posterior_variables':['mechanics'],
+        'posterior_variables':list(POSTERIOR_VARIABLES),'participant_posterior_variables':['mechanics','target_raw','target_process'],
         'sampling':{'draws':1200,'tune':1800,'chains':4,'cores':2,'target_accept':.93,'random_seed':20260815+threshold,'init':'jitter+adapt_diag','initvals':None},
         'sampling_provenance':'Source wrapper defaults; selected saved arrays confirm four chains and 1200 retained draws. Historical seed, tune and target acceptance require separately retained execution evidence.',
+        'sampling_authority':'Non-authoritative historical defaults; supporting_sampling.resolved_sampling and the active configuration determine executed controls and initialization.',
         'fresh_sampling':'Configured separately with full-posterior diagnostic gates and a recorded seed offset relative to the wrapper default.'}
 
 
@@ -47,7 +49,7 @@ def validate_contract(contract,target):
     return _validate_shared_contract(contract,fit_spec(target))
 
 def build_model(prepared: Mapping, target: str):
-    """Build the explicit threshold-specific X6 graph without fitting."""
+    """Build the X6 model for the specified TB age threshold."""
     validate_contract(prepared,target)
     labels=fit_spec(target)['hazard_labels']
     import pymc as pm
@@ -64,6 +66,9 @@ def build_model(prepared: Mapping, target: str):
     }
     with pm.Model(coords=coords) as model:
         mechanics = pm.Normal("mechanics", 0.0, 1.0, dims="child")
+        target_raw = pm.Normal("target_raw", 0.0, 1.0, dims="child")
+        tau_target = pm.HalfNormal("tau_target", 1.0)
+        target_process = pm.Deterministic("target_process", tau_target * target_raw, dims="child")
         loading_mechanics = pm.HalfNormal(
             "loading_mechanics", 1.0, dims="mechanics_indicator"
         )
@@ -93,6 +98,7 @@ def build_model(prepared: Mapping, target: str):
         current_target_mechanics = mechanics[target_idx] + shift_mechanics * target_post
         target_mu = (
             loading_target_mechanics * current_target_mechanics
+            + target_process[target_idx]
             + direct_target * target_post
         )
         pm.Normal(

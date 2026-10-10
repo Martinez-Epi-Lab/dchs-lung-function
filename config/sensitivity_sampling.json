@@ -6,5 +6,12 @@
   "cores": 2,
   "target_accept": 0.95,
   "max_treedepth": 10,
-  "seed_offset": 104729
+  "seed_offset": 104729,
+  "draws_by_target": {
+    "early_core": 12800,
+    "early_maternal_hiv": 12800,
+    "early_maternal_smoking": 12800,
+    "early_birthweight": 12800,
+    "early_all_baseline": 12800
+  }
 }

@@ -1,11 +1,11 @@
-"""Draw-wise mechanics contrasts and aggregate support on explicit scales."""
+"""Mechanics contrasts on standardized, native, and reported scales."""
 from __future__ import annotations
 
 from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from .primary_results import (_scalar_draws, _prepared_summary, _sample_counts, _summarize)
+from .primary_results import (_scalar_draws, _prepared_summary, _sample_counts, _summarize, _summarize_ratio)
 from ..models.mechanics import CONTRASTS, fit_spec, validate_contract
 
 
@@ -90,7 +90,7 @@ def summarize_mechanics(posterior, contract, target, *, compute_mcse=True):
         raise ValueError('Mechanics hazard and outcome draws have inconsistent dimensions.')
     hazard = {'target':target, 'outcome':spec['outcome'],
               'contrast':'First-TB hazard per between-child SD poorer mechanics',
-              'unit':'hazard ratio', **_summarize(hr, compute_mcse)}
+              'unit':'hazard ratio', **_summarize_ratio(hr, compute_mcse)}
     counts = _sample_counts(contract)
     counts.insert(0, 'target', target)
     return MechanicsResults(pd.DataFrame(rows), pd.DataFrame([hazard]), counts,

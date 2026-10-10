@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import fields, is_dataclass
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from datetime import datetime, timezone
 import hashlib
 import importlib.metadata
@@ -14,6 +14,7 @@ import shutil
 import tempfile
 
 from .pipeline import ValidationError, read_json, validate_config
+from .lifecycle import directory_locks, rename_noreplace, sync_directory, sync_tree
 
 
 def file_hash(path):
@@ -33,9 +34,15 @@ def write_json(path, value):
 
 
 def runtime_identity():
+    from .runtime_bootstrap import bootstrap
+    controls=bootstrap()
+    import numpy as np
     packages = ["numpy", "pandas", "scipy", "patsy", "statsmodels", "rdata", "pyarrow"]
     return {"python":platform.python_version(), "system":platform.system(), "machine":platform.machine(),
-            "packages":{name:importlib.metadata.version(name) for name in packages}}
+            "packages":{name:importlib.metadata.version(name) for name in packages},
+            "os_release":platform.release(), "os_version":platform.version(),
+            "macos_version":platform.mac_ver()[0], "requested_thread_environment":controls,
+            "numpy_blas":np.show_config(mode="dicts").get("Build Dependencies",{}).get("blas",{})}
 
 
 def resolve_paths(configuration, local_path):
@@ -230,20 +237,71 @@ def compute_preparation(configuration, local_path, paths, settings, through):
 
 @contextmanager
 def preparation_locks(work, output):
-    owned = []
-    try:
-        for directory in sorted({Path(work).resolve(),Path(output).resolve()}):
-            lock = directory/".preparation.lock"
-            try:
-                handle = os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY,0o600)
-            except FileExistsError:
-                raise ValidationError("Another preparation run holds a work or output lock.") from None
-            os.close(handle)
-            owned.append(lock)
+    with ExitStack() as stack:
+        try:
+            stack.enter_context(directory_locks((work, output), legacy_name='.preparation.lock'))
+        except (BlockingIOError, ValueError) as error:
+            raise ValidationError('Another preparation run holds a work or output lock, or lock ownership is unsafe.') from error
         yield
-    finally:
-        for lock in reversed(owned):
-            lock.unlink(missing_ok=True)
+
+
+def _verify_preparation_pair(work, output, fingerprint, identity, through, receipt_hash=None):
+    if work.is_symlink() or output.is_symlink():
+        raise ValidationError('Preparation directories cannot be symlinks.')
+    receipt_path = work/'receipt.json'
+    if receipt_path.is_symlink() or (receipt_hash and file_hash(receipt_path)!=receipt_hash):
+        raise ValidationError('Preparation transaction receipt changed.')
+    receipt = read_json(receipt_path, 'Preparation receipt')
+    if (receipt.get('fingerprint')!=fingerprint or receipt.get('identity')!=identity
+            or receipt.get('status')!='prepared' or receipt.get('through')!=through):
+        raise ValidationError('Preparation cache identity does not match this run.')
+    if (work/'artifacts.json').is_symlink() or file_hash(work/'artifacts.json')!=receipt.get('artifact_manifest_sha256'):
+        raise ValidationError('Preparation artifact manifest changed.')
+    manifest = verify_artifacts(work)
+    if {p.name for p in work.iterdir()}!={'receipt.json','artifacts.json',*manifest['files']}:
+        raise ValidationError('Preparation private file inventory changed.')
+    outputs = receipt.get('aggregate_files')
+    if not isinstance(outputs,dict) or 'summary.json' not in outputs:
+        raise ValidationError('Preparation receipt lacks aggregate output identities.')
+    if {p.name for p in output.iterdir()}!=set(outputs):
+        raise ValidationError('Preparation aggregate file inventory changed.')
+    for name,expected in outputs.items():
+        path = output/name
+        if Path(name).name!=name or path.is_symlink() or not path.is_file() or file_hash(path)!=expected:
+            raise ValidationError('Aggregate preparation output is missing or changed.')
+    summary = read_json(output/'summary.json','Preparation summary')
+    if receipt.get('summary')!=summary:
+        raise ValidationError('Preparation receipt and verified aggregate summary disagree.')
+    return summary
+
+
+def _recover_preparation(journal, work, output, fingerprint, identity, through, unchanged):
+    if journal.is_symlink(): raise ValidationError('Preparation journal cannot be a symlink.')
+    state = read_json(journal, 'Preparation transaction journal')
+    keys = {'schema_version','fingerprint','stage_work','stage_output','receipt_sha256'}
+    if (not isinstance(state,dict) or set(state)!=keys or type(state['schema_version']) is not int
+            or state['schema_version']!=1 or state['fingerprint']!=fingerprint):
+        raise ValidationError('Invalid preparation recovery journal.')
+    candidates=[]
+    for parent, key in ((work,'stage_work'),(output,'stage_output')):
+        name=state[key]
+        if not isinstance(name,str) or Path(name).name!=name or not name.startswith('.staging-'):
+            raise ValidationError('Invalid preparation recovery staging location.')
+        stage, final = parent/name, parent/fingerprint
+        if stage.is_symlink() or final.is_symlink() or stage.exists()==final.exists():
+            raise ValidationError('Preparation recovery has ambiguous or unsafe directories.')
+        candidate = final if final.exists() else stage
+        if not candidate.is_dir(): raise ValidationError('Preparation recovery staging is missing.')
+        candidates.append((candidate,final))
+    _verify_preparation_pair(candidates[0][0],candidates[1][0],fingerprint,identity,through,state['receipt_sha256'])
+    unchanged()
+    for candidate,final in reversed(candidates):
+        if candidate!=final:
+            rename_noreplace(candidate,final)
+            sync_directory(final.parent)
+    _verify_preparation_pair(work/fingerprint,output/fingerprint,fingerprint,identity,through,state['receipt_sha256'])
+    unchanged()
+    journal.unlink();sync_directory(work)
 
 
 def write_pointer(pointer, value):
@@ -252,7 +310,9 @@ def write_pointer(pointer, value):
     temp = Path(name)
     try:
         write_json(temp,value)
+        with temp.open("rb") as stream: os.fsync(stream.fileno())
         os.replace(temp,pointer)
+        sync_directory(pointer.parent)
     finally:
         temp.unlink(missing_ok=True)
 
@@ -287,26 +347,15 @@ def run_preparation(root, config_file, analysis_file, through, *, resume=False):
                 or preparation_identity(root,configuration,paths,settings,through)[0]!=fingerprint):
             raise ValidationError("Source, inputs or settings changed while preparation was running.")
     with preparation_locks(work,out):
+        journal = work/('.transaction-'+fingerprint+'.json')
+        if journal.exists() or journal.is_symlink():
+            if not resume: raise ValidationError('An interrupted preparation transaction exists; use --resume.')
+            _recover_preparation(journal,work,out,fingerprint,identity,through,assert_unchanged)
         if resume and final_work.is_dir() and final_output.is_dir():
-            receipt = read_json(final_work/"receipt.json","Preparation receipt")
-            if (receipt.get("fingerprint")!=fingerprint or receipt.get("identity")!=identity
-                    or receipt.get("status")!="prepared" or receipt.get("through")!=through):
-                raise ValidationError("Preparation cache identity does not match this run.")
-            if file_hash(final_work/"artifacts.json")!=receipt.get("artifact_manifest_sha256"):
-                raise ValidationError("Preparation artifact manifest changed.")
-            verify_artifacts(final_work)
-            outputs = receipt.get("aggregate_files")
-            if not isinstance(outputs,dict) or "summary.json" not in outputs:
-                raise ValidationError("Preparation receipt lacks aggregate output identities.")
-            for name,expected in outputs.items():
-                if Path(name).name!=name or not (final_output/name).is_file() or file_hash(final_output/name)!=expected:
-                    raise ValidationError("Aggregate preparation output is missing or changed.")
-            verified_summary = read_json(final_output/"summary.json","Preparation summary")
-            if receipt.get("summary")!=verified_summary:
-                raise ValidationError("Preparation receipt and verified aggregate summary disagree.")
+            verified_summary = _verify_preparation_pair(final_work,final_output,fingerprint,identity,through)
             assert_unchanged()
-            write_pointer(pointer,{"fingerprint":fingerprint,"through":through,"status":"prepared"})
-            return {"fingerprint":fingerprint,"through":through,"resumed":True,"summary":verified_summary}
+            write_pointer(pointer,{'fingerprint':fingerprint,'through':through,'status':'prepared'})
+            return {'fingerprint':fingerprint,'through':through,'resumed':True,'summary':verified_summary}
         stages = []
         published = []
         try:
@@ -336,17 +385,26 @@ def run_preparation(root, config_file, analysis_file, through, *, resume=False):
                        "artifact_manifest_sha256":file_hash(stage_work/"artifacts.json"),"aggregate_files":aggregate_files,
                        "completed_at":datetime.now(timezone.utc).isoformat()}
             write_json(stage_work/"receipt.json",receipt)
-            verify_artifacts(stage_work)
-            if final_work.exists() or final_output.exists():
+            _verify_preparation_pair(stage_work,stage_output,fingerprint,identity,through)
+            if final_work.exists() or final_output.exists() or final_work.is_symlink() or final_output.is_symlink():
                 raise ValidationError("An identical run exists; use --resume after verifying its artifacts, or choose fresh output directories.")
+            sync_tree(stage_work);sync_tree(stage_output)
+            write_pointer(journal,{'schema_version':1,'fingerprint':fingerprint,
+                'stage_work':stage_work.name,'stage_output':stage_output.name,
+                'receipt_sha256':file_hash(stage_work/'receipt.json')})
+            sync_directory(work)
             for stage,final in [(stage_output,final_output),(stage_work,final_work)]:
-                os.replace(stage,final);published.append((final,stage))
+                rename_noreplace(stage,final);published.append((final,stage))
+                sync_directory(final.parent)
+            assert_unchanged()
             write_pointer(pointer,{"fingerprint":fingerprint,"through":through,"status":"prepared"})
+            journal.unlink();sync_directory(work)
             return {"fingerprint":fingerprint,"through":through,"resumed":False,"summary":summary}
         except BaseException:
             for final,stage in reversed(published):
-                os.replace(final,stage)
+                rename_noreplace(final,stage)
+            journal.unlink(missing_ok=True)
             raise
         finally:
             for stage in stages:
-                if stage.exists():shutil.rmtree(stage)
+                if stage.exists() and not journal.exists():shutil.rmtree(stage)

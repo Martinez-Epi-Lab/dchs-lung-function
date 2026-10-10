@@ -1,8 +1,7 @@
-"""Pure longitudinal linkage and explicit PFT analysis sample contracts.
+"""Longitudinal linkage and PFT analysis sample contracts.
 
 Returned frames contain confidential records and belong only in configured
-private work storage. ``audit`` mappings contain aggregate metadata. No model
-is fitted, and no archival source code is imported or rewritten.
+private work storage. ``audit`` mappings contain aggregate metadata.
 """
 from __future__ import annotations
 import numpy as np
@@ -164,23 +163,45 @@ def residualize(frame,*,covariates=(),scale_method='std'):
 
 
 def event_arrays(children,*,threshold=None,event_end=None):
+    """First-TB risk stops at observed follow-up, optionally capped by age.
+
+    Diagnosis on the exit/admin date is observed. A threshold is a strict
+    diagnosis-age estimand, not evidence of surveillance after study exit.
+    Known diagnoses after observed follow-up do not become threshold events.
+    """
+    if event_end is None:raise ValueError('Event preparation needs an explicit endpoint.')
+    endpoint=pd.Timestamp(event_end)
+    if pd.isna(endpoint):raise ValueError('Event endpoint is missing.')
+    censor=pd.concat([children.exit_date,pd.Series(endpoint,index=children.index)],axis=1).min(axis=1)
+    censor_age=(censor-children.child_dob).dt.days.to_numpy(float)/365.25
     age=children.tb_age_first_years.to_numpy(float)
+    diagnosed=children.tb_first_dx.notna().to_numpy()
+    if (children.child_dob.isna().any() or (~np.isfinite(censor_age)).any()
+            or (censor_age<=0).any()):raise ValueError('Invalid event follow-up duration.')
+    if (children.tb_first_dx.lt(children.child_dob).any()
+            or (diagnosed & (~np.isfinite(age) | (age<0))).any()
+            or (~diagnosed & ~np.isnan(age)).any()):
+        raise ValueError('First diagnosis chronology or age is malformed.')
     if threshold is not None:
-        event=(age<threshold).astype(int);stop=np.where(event,age,threshold)
+        if isinstance(threshold,(bool,np.bool_)) or threshold not in (1,5):
+            raise ValueError('Threshold must be one or five years.')
+        event=(diagnosed & (age<threshold) & children.tb_first_dx.le(censor).to_numpy()).astype(int)
+        stop=np.minimum(censor_age,float(threshold))
+        stop=np.where(event,np.minimum(age,stop),stop)
         breaks=np.array([x for x in [0.,1.,3.,5.] if x<=threshold])
     else:
-        if event_end is None:raise ValueError('All-age event preparation needs an explicit endpoint.')
-        censor=pd.concat([children.exit_date,pd.Series(pd.Timestamp(event_end),index=children.index)],axis=1).min(axis=1)
-        event=children.tb_first_dx.notna().to_numpy(int)
+        event=diagnosed.astype(int)
         valid=children.tb_first_dx.isna() | (children.tb_first_dx.ge(children.child_dob)&children.tb_first_dx.le(censor))
         if not valid.all():raise ValueError('First diagnosis lies outside configured event follow-up.')
-        stop=np.where(event,age,(censor-children.child_dob).dt.days.to_numpy()/365.25)
+        stop=np.where(event,age,censor_age)
         breaks=np.array([0.,1.,3.,5.,8.,10.,20.])
     if (stop<=0).any() or (stop>breaks[-1]).any():raise ValueError('Invalid event follow-up duration.')
     exposure=np.maximum(0.,np.minimum(stop[:,None],breaks[1:])-breaks[:-1])
     interval=event[:,None]*((stop[:,None]>=breaks[:-1])&(stop[:,None]<breaks[1:]))
     if not np.allclose(exposure.sum(1),stop) or not np.array_equal(interval.sum(1),event):raise ValueError('Event intervals do not reconcile.')
-    return {'event':event,'stop':stop,'exposure':exposure,'event_interval':interval,'breaks':breaks}
+    result={'event':event,'stop':stop,'exposure':exposure,'event_interval':interval,'breaks':breaks}
+    if threshold is not None:result['ascertainment_end']=endpoint.date().isoformat()
+    return result
 
 
 def joint_inputs(p,target,*,family='primary',event_end=None,observation_end=None,covariates=(),threshold=5):
@@ -197,7 +218,7 @@ def joint_inputs(p,target,*,family='primary',event_end=None,observation_end=None
         specs={'lci':('i_lci_2_5','date_of_test_ilf1',-1.),**MECHANICS,'target':(col,'date_of_test',orientation)}
     frames={};designs={};audits={}
     for key,(column,date,orientation) in specs.items():
-        f=exposure_frame(p,column,date,orientation=orientation,observation_end=observation_end,respect_exit=allage,threshold=None if allage else threshold,age_range=(3,17) if family=='x6' and key=='target' else None,required_covariates=covariates)
+        f=exposure_frame(p,column,date,orientation=orientation,observation_end=observation_end,respect_exit=True,threshold=None if allage else threshold,age_range=(3,17) if family=='x6' and key=='target' else None,required_covariates=covariates)
         f,x,a=residualize(f,covariates=covariates,scale_method='sse' if family=='x6' else 'std')
         f['child_index']=f[ID].map(indices).astype(int)
         frames[key]=f;designs[key]=x;audits[key]=a
@@ -217,6 +238,7 @@ def drop_design_columns(x,names,required=()):
     for j,name in enumerate(names):
         col=x[:,j]
         if name!='Intercept' and np.std(col)<1e-12:
+            if name in required:raise ValueError('A required exposure term is constant.')
             dropped.append(name+' (constant)');continue
         candidate=np.column_stack(kept+[col])
         if np.linalg.matrix_rank(candidate,tol=1e-10)<candidate.shape[1]:
@@ -232,7 +254,11 @@ def repeated_design(frame,exposure_terms):
     present=[v for v in VISITS if frame.visit_label.eq(v).any()]
     present+=sorted(set(frame.visit_label)-set(present))
     for visit in present[1:]:columns.append(frame.visit_label.eq(visit).to_numpy(float));terms.append('visit:'+visit)
-    return drop_design_columns(np.column_stack(columns),terms,set(exposure_terms))
+    # Zero-support categories intentionally yield no coefficient and are marked
+    # nonestimable by the downstream model. A supported exposure is required;
+    # a constant nonzero or collinear column must not disappear silently.
+    required={term for term in exposure_terms if frame[term].ne(0).any()}
+    return drop_design_columns(np.column_stack(columns),terms,required)
 
 
 def binary_inputs(p,*,stage='pre',outcome='ratio_LLN',observation_end=None):
@@ -308,9 +334,9 @@ def prepare_model_inputs(pft,baseline,*,event_end,observation_end=None):
         for outcome in ['ratio_LLN','FEV1_LLN','FVC_LLN','obstructive_pattern','possible_restriction','any_abnormal']:
             samples[f'binary/{stage}/{outcome}']=binary_inputs(p,stage=stage,outcome=outcome,observation_end=observation_end)
     for key,column,orient in [('R','resistance',1.),('C','compliance',-1.),('ReE','ree',1.),('ReI','rei',1.),('XeE','xee',-1.),('XeI','xei',-1.)]:samples['mechanics/'+key]=joint_inputs(p,(column,orient),family='mechanics',event_end=event_end,observation_end=observation_end)
-    for key,cov in [('core',()),('maternal_hiv',('maternal_hiv',)),('maternal_smoking',('maternal_smoking',)),('birthweight',('birthweight_z',)),('all_baseline',('maternal_hiv','maternal_smoking','birthweight_z')),('ever_lrti',('ever_lrti',)),('all_four',('maternal_hiv','maternal_smoking','birthweight_z','ever_lrti'))]:samples['sensitivity/'+key]=joint_inputs(p,('fev1_fvc',100.),family='early',covariates=cov)
-    samples['sensitivity/core_window']=joint_inputs(p,('fev1_fvc',100.),family='early',observation_end=event_end)
-    for key,column in [('unpaired','mmef'),('pre_paired','mmef_pre_paired'),('post_paired','mmef_post_paired')]:samples['mmef/'+key]=joint_inputs(p,(column,1.),family='early')
+    for key,cov in [('core',()),('maternal_hiv',('maternal_hiv',)),('maternal_smoking',('maternal_smoking',)),('birthweight',('birthweight_z',)),('all_baseline',('maternal_hiv','maternal_smoking','birthweight_z')),('ever_lrti',('ever_lrti',)),('all_four',('maternal_hiv','maternal_smoking','birthweight_z','ever_lrti'))]:samples['sensitivity/'+key]=joint_inputs(p,('fev1_fvc',100.),family='early',covariates=cov,event_end=event_end)
+    samples['sensitivity/core_window']=joint_inputs(p,('fev1_fvc',100.),family='early',event_end=event_end,observation_end=event_end)
+    for key,column in [('unpaired','mmef'),('pre_paired','mmef_pre_paired'),('post_paired','mmef_post_paired')]:samples['mmef/'+key]=joint_inputs(p,(column,1.),family='early',event_end=event_end)
     f=exposure_frame(p,'mmef');f=f.loc[f.mmef_post.notna()].copy();f['outcome_value']=f.mmef_post-f.mmef
     if f.duplicated([ID,'date_of_test']).any():raise ValueError('Paired MMEF has duplicate child/test-date records.')
     designs={}
@@ -321,7 +347,7 @@ def prepare_model_inputs(pft,baseline,*,event_end,observation_end=None):
         for outcome in ['fev1_fvc','fev1_fvc_gli_z']:samples[f'trajectory/{outcome}/{threshold}']=trajectory_inputs(p,outcome=outcome,threshold=threshold)
         samples[f'trajectory/x6/{threshold}']=trajectory_inputs(p,outcome='x6_sa_z',threshold=threshold,x6=True)
         for outcome in ['x6_sa_z','reactance_6hz']:
-            samples[f'x6_joint/{outcome}/{threshold}']=joint_inputs(p,outcome,family='x6',threshold=threshold)
+            samples[f'x6_joint/{outcome}/{threshold}']=joint_inputs(p,outcome,family='x6',threshold=threshold,event_end=event_end)
             f=exposure_frame(p,outcome,'date_of_test_ilf2',age_range=(3,17));f['target']=(f.post_any.eq(1)&f.tb_age_first_years.lt(threshold)).astype(float);f['later']=(f.post_any.eq(1)&f.tb_age_first_years.ge(threshold)).astype(float)
             x,names,dropped=repeated_design(f,['target','later','future_tb'])
             samples[f'x6_repeated/{outcome}/{threshold}']={'frame':f,'design':x,'terms':names,'audit':{'family':'x6_repeated','n_observations':len(f),'n_children':int(f[ID].nunique()),'terms':names,'dropped_terms':dropped}}

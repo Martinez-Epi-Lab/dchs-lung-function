@@ -101,16 +101,16 @@ def verify_pdf_fonts(directory, tool, fonts):
 
 
 def _reporting_publication(root, directories, prior):
-    expected={'numbered_tables':8,'physical_tables':10,'numeric_cells':304,'scientific_cells':261,
+    expected={'numbered_tables':8,'physical_tables':10,'numeric_cells':304,'scientific_cells':261,'bound_context_cells':3,
               'cell_classifications':{'estimate':186,'count':75,'header':26,'context':17},
-              'sentences':42,'value_tokens':95,'qualitative_bindings':52}
+              'sentences':42,'value_tokens':96,'qualitative_bindings':52}
     upstream={'primary_models_verified':12,'binary_models_verified':28,'trajectory_analyses_verified':4,
               'mechanics_models_verified':6,'shared_factor_rows_verified':6,'supporting_joint_models_verified':7,
               'supporting_deterministic_fits_verified':10,'pretb_models_verified':17,'wheeze_models_verified':2,'feno_models_verified':11}
     require(isinstance(prior,dict) and prior.get('accepted') is True and prior.get('status')=='accepted'
             and prior.get('through')=='M13' and canonical_bytes(prior.get('coverage'))==canonical_bytes(expected)
-            and type(prior.get('registry_records')) is int and prior['registry_records']==3195
-            and type(prior.get('aggregate_sources')) is int and prior['aggregate_sources']==142
+            and type(prior.get('registry_records')) is int and prior['registry_records']==3196
+            and type(prior.get('aggregate_sources')) is int and prior['aggregate_sources']==143
             and type(prior.get('new_model_fits')) is int and prior['new_model_fits']==0
             and type(prior.get('resumed')) is bool
             and canonical_bytes(prior.get('upstream_models'))==canonical_bytes(upstream)

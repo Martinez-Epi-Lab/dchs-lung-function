@@ -27,11 +27,12 @@ def fabricated_posterior(contract=None,target='early_core',*,chains=2,draws=16):
     spec=model.fit_spec(target);n=len(contract['children']);shape=(chains,draws)
     rng=np.random.default_rng(4412)
     result={name:rng.normal(0,.15,shape) for name in spec['posterior_variables']}
-    for name in ('mechanics','lci_raw'):result[name]=rng.normal(0,.2,(*shape,n))
-    for name in ('tau_lci','sigma_lci','sigma_ratio'):result[name]=rng.uniform(.5,1.1,shape)
+    for name in ('mechanics','lci_raw','target_raw'):result[name]=rng.normal(0,.2,(*shape,n))
+    for name in ('tau_lci','tau_target','sigma_lci','sigma_ratio'):result[name]=rng.uniform(.5,1.1,shape)
     for name in ('loading_mechanics','sigma_mechanics'):result[name]=rng.uniform(.4,1.2,(*shape,4))
     result['log_baseline_hazard']=rng.normal(-4,.2,(*shape,6 if spec['family']=='window' else 3))
     result['lci_process']=result['tau_lci'][...,None]*result['lci_raw']
+    result['target_process']=result['tau_target'][...,None]*result['target_raw']
     # Deliberately correlate loading and shift; product-of-means is incorrect.
     ramp=rng.permutation(np.linspace(-.4,1.,chains*draws)).reshape(shape)
     result['loading_ratio_mechanics']=ramp
@@ -54,6 +55,7 @@ def fabricated_posterior(contract=None,target='early_core',*,chains=2,draws=16):
 
 def bound_entry(target,estimates,metadata,counts,index):
     return {'estimates':estimates,'metadata':metadata,'summary':{'target':target,'status':'diagnostics_passed',
+        **({'covariance_ppc_passed':True} if target not in sr.WHEEZE_TARGETS else {}),
         'diagnostics_passed':True,'counts':counts,'fit_fingerprint':format(index,'064x'),
         'validation_fingerprint':format(100+index,'064x')}}
 
@@ -64,12 +66,15 @@ def _table_inputs():
     for i,target in enumerate(model.DEFAULT_TARGETS,1):
         contract=fabricated_contract(target);posterior=fabricated_posterior(contract,target)
         result=sr.summarize_sensitivity(posterior,contract,target,compute_mcse=False)
+        # Selection fixtures supply a declared finite simulation error separately.
+        result.estimates['mcse_mean']=.0001
         new[target]=bound_entry(target,result.estimates,result.metadata,model.validate_contract(contract,target),i)
     for i,target in enumerate(('ratio_pre','ratio_post'),11):
         column='fev1_fvc' if target=='ratio_pre' else 'fev1_fvc_post'
         contract=joint_inputs(fabricated_pft(),(column,100.),family='primary',event_end='2007-01-01')
         posterior=fabricated_posterior(contract,'window_'+target)
         result=primary_results.summarize_primary(posterior,contract,target,compute_mcse=False)
+        result.estimates['mcse_mean']=.0001
         primary[target]=bound_entry(target,result.estimates,result.metadata,spirometry.validate_contract(contract,target),i)
     for i,target in enumerate(sr.WHEEZE_TARGETS,13):
         contract=wheeze_contract(target);posterior=wheeze_posterior(contract,target)
@@ -195,7 +200,8 @@ class SensitivitySummaryTests(unittest.TestCase):
 class AttenuationTests(unittest.TestCase):
     def test_absolute_posterior_mean_ratio_preserves_negative_and_sign_reversal(self):
         for adjusted,core,expected in [(-2.,-4.,50.),(2.,-4.,50.),(-6.,-4.,-50.),(0.,-4.,100.),(4.,4.,0.)]:
-            self.assertEqual(sr.attenuation(adjusted,core),(expected,'estimated'))
+            status='zero_adjusted_mean' if adjusted==0 else 'sign_reversal' if np.sign(adjusted)!=np.sign(core) else 'estimated'
+            self.assertEqual(sr.attenuation(adjusted,core),(expected,status))
 
     def test_exact_zero_core_has_no_epsilon_and_no_posterior_interval(self):
         for adjusted in (0.,1.,-1.):
@@ -235,12 +241,27 @@ class SensitivityTableTests(unittest.TestCase):
                 self.assertAlmostEqual(row.attenuation_percent,100*(1-abs(row.mean)/abs(core)))
                 self.assertEqual(row.attenuation_status,'estimated')
         self.assertEqual(s1.attenuation_percent.notna().sum(),8)
-        self.assertFalse(any('attenuation' in c and c not in ('attenuation_percent','attenuation_status') for c in s1))
+        self.assertTrue(s1.attenuation_precision_passed.all())
+        self.assertTrue(result.metadata['attenuation_precision_passed'])
+        for row in s1.loc[~s1.target.eq('early_core')].itertuples():
+            core=s1.loc[s1.target.eq('early_core') & s1.contrast.eq(row.contrast)].iloc[0]
+            expected=100*row.mcse_mean/abs(core['mean'])+100*abs(row.mean)*core['mcse_mean']/abs(core['mean'])**2
+            self.assertAlmostEqual(row.attenuation_mcse_bound_pp,expected)
 
     def test_s1_exact_zero_core_retains_all_rows_with_explicit_undefined_status(self):
         self.new['early_core']['estimates'].loc[:,'mean']=0.
         result=self.build();adjusted=result.table_s1[~result.table_s1.target.eq('early_core')]
         self.assertTrue(adjusted.attenuation_percent.isna().all());self.assertTrue(adjusted.attenuation_status.eq('undefined_zero_core').all())
+        self.assertFalse(result.metadata['attenuation_precision_passed'])
+
+    def test_mcse_required_and_excess_precision_is_flagged_without_suppressing_estimates(self):
+        self.new['early_maternal_hiv']['estimates']['mcse_mean']=1.
+        result=self.build()
+        self.assertFalse(result.metadata['attenuation_precision_passed'])
+        self.assertEqual(len(result.table_s1),10)
+        self.assertEqual(result.table_s1.attenuation_percent.notna().sum(),8)
+        self.new['early_core']['estimates']['mcse_mean']=np.nan
+        with self.assertRaises(ValueError):self.build()
 
     def test_missing_extra_model_and_reused_fit_selection_are_rejected(self):
         for location in ('new','primary','wheeze'):
@@ -255,6 +276,13 @@ class SensitivityTableTests(unittest.TestCase):
             for field,bad in [('diagnostics_passed',False),('diagnostics_passed',1),('status','failed'),('fit_fingerprint','bad'),('validation_fingerprint','g'*64),('target','wrong')]:
                 self.new,self.primary,self.wheeze=table_inputs();getattr(self,location)[target]['summary'][field]=bad
                 with self.subTest(location=location,field=field),self.assertRaises(ValueError):self.build()
+
+    def test_nonpassing_or_missing_covariance_adequacy_cannot_enter_selected_tables(self):
+        for location,target in [('new','early_core'),('primary','ratio_pre')]:
+            for value in (False,1,None):
+                self.new,self.primary,self.wheeze=table_inputs()
+                getattr(self,location)[target]['summary']['covariance_ppc_passed']=value
+                with self.subTest(location=location,value=value),self.assertRaises(ValueError):self.build()
 
     def test_duplicate_or_wrong_spirometry_selector_and_units_rejected(self):
         for mode in ('duplicate','missing','unit','interval','nonfinite','target','outcome'):
@@ -317,17 +345,21 @@ class SensitivityTableTests(unittest.TestCase):
 class SensitivitySamplingControlTests(unittest.TestCase):
     def test_frozen_default_protocol_and_extension_preserve_seeds_and_initialization(self):
         config=json.loads((Path(__file__).resolve().parents[1]/'config/sensitivity_sampling.json').read_text())
-        self.assertEqual(config,SETTINGS)
+        self.assertEqual({k:v for k,v in config.items() if k!='draws_by_target'},SETTINGS)
+        self.assertEqual(config['draws_by_target'],{t:12800 for t in sr.S1_TARGETS})
         for target in model.DEFAULT_TARGETS:
             selected=sampling.resolved_sampling(target,config)
             expected_seed=20365542 if target.startswith('early_') else 2026197029 if target=='window_ratio_pre' else 2026197031
             self.assertEqual(selected['random_seed'],expected_seed);self.assertEqual(selected['init'],'adapt_diag')
             self.assertEqual(selected['initvals'],[{'loading_ratio_mechanics':v,'loading_mechanics':[v]*4,'sigma_ratio':.9} for v in [.25,.35,.45,.55]])
-            extension=sampling.resolved_sampling(target,{**config,'draws':6400})
+            self.assertEqual(selected['draws'],12800 if target in sr.S1_TARGETS else 3200)
+            extension=sampling.resolved_sampling(target,{**config,'draws_by_target':{t:25600 for t in sr.S1_TARGETS}})
+            self.assertEqual(extension['draws'],25600 if target in sr.S1_TARGETS else 3200)
             self.assertEqual({k:v for k,v in extension.items() if k!='draws'},{k:v for k,v in selected.items() if k!='draws'})
             self.assertTrue(selected['discard_tuned_samples']);self.assertFalse(selected['progressbar'])
             self.assertEqual(selected['nuts_sampler'],'pymc')
-        self.assertEqual(config,SETTINGS)
+        self.assertEqual({k:v for k,v in config.items() if k!='draws_by_target'},SETTINGS)
+        self.assertEqual(config['draws_by_target'],{t:12800 for t in sr.S1_TARGETS})
 
     def test_invalid_controls_boolean_integers_nonfinite_and_extra_keys_rejected(self):
         cases=[{**SETTINGS,k:v} for k,v in [('chains',5),('chains',True),('draws',3199),('draws',True),('tune',2199),('cores',0),('target_accept',np.nan),('max_treedepth',9),('seed_offset',-1)]]

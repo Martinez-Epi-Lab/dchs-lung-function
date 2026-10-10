@@ -1,9 +1,8 @@
-"""Selected three-process age-specific wheeze joint model, version 1.0.0.
+"""Three-process age-specific wheeze joint model, version 1.0.0.
 
 The observed processes are scheduled binary wheeze, recurrent episode counts,
 and first TB. A standard-normal child propensity is shared by all three.
-Construction reads validated in-memory preparation contracts; it never fits,
-loads study files, or changes their measurement and person-time definitions.
+Prepared contracts supply measurement and person-time definitions.
 """
 from __future__ import annotations
 from collections.abc import Mapping
@@ -275,7 +274,7 @@ def validate_contract(contract, target):
 
 
 def build_model(contract, target):
-    """Build the exact selected graph and retain all child and global variables."""
+    """Build the wheeze model with its child effects and population parameters."""
     validate_contract(contract, target)
     import pymc as pm
     import pytensor.tensor as pt

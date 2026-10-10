@@ -1,11 +1,13 @@
 # Publication figures
 
-M14 implements and independently validates all three main and six supplementary
-figures from verified aggregate results, including the user-authorized correction
-of pre-TB score-residual risk membership for Figure S3. Independent numerical and
-caption checks, all rendered pages, actual-font embedding, the 868-test suite and
-final-source original/copied cumulative replays passed. Private acceptance
-receipts bind that evidence. [M15 release instructions](RELEASE.md) describe clean
+M14 implements all three main and six supplementary
+figures from verified aggregate results, including the approved correction
+of pre-TB score-residual risk membership for Figure S3. The original M14 baseline
+passed independent numerical/caption checks, rendered-page and actual-font
+inspection, its 868-test suite, and original/copied cumulative replays. Private
+acceptance receipts bind that historical evidence. Corrective figures require
+fresh numerical, layout and actual-font checks against their revised accepted
+aggregates. [M15 release instructions](RELEASE.md) describe clean
 full reconstruction, aggregate-only rendering and separate code-only delivery
 acceptance.
 
@@ -31,7 +33,7 @@ explicit. No study estimate or private input path is typed into the specificatio
 
 Ratios use logarithmic axes with a null of one; differences use linear axes with
 a null of zero. Figure 1 shows mean trajectories rather than differences and has
-no added p-value annotations. Confidence bands describe uncertainty in the mean,
+no added p-value annotations. The no-TB reference uses a dashed line; paired panels for the same outcome use common y-axis limits derived from all selected intervals. Pointwise 95% confidence bands are not simultaneous bands and describe uncertainty in the mean,
 not individual prediction intervals. Full-precision results determine positions
 and interval endpoints; centralized decimal half-up rounding supplies labels.
 Axis bounds include the complete selected intervals.
@@ -42,7 +44,7 @@ rate ratios; supplementary FeNO samples are not substituted for main FeNO sample
 and shared-factor associations are not TB exposure effects or independent pre-TB
 predictions. Infancy and before-five contrasts overlap by definition. Separate
 pre/post available-case models are not a formal paired bronchodilator test.
-The FeNO age gap is not interpolated. Small aggregate counts remain exact.
+The FeNO age gap is not interpolated. Figure S4 prints all six GMRs and confidence intervals below the visit labels. Small aggregate counts remain exact.
 
 ## Figure S3 uncertainty
 
@@ -123,11 +125,12 @@ accepted. Resume regenerates the uncertainty correction and every figure payload
 checks their complete hashes and inventories, and verifies source/input/runtime
 identity again before updating the pointer. A cached receipt alone is insufficient.
 
+Wrapping and text bounds are measured on the actual 600-dpi canvas. Every text object must stay inside a 0.35-inch content box, and captions must retain at least half-inch horizontal margins. The layout receipt records the measured caption margin and DPI. Actual vector-PDF and 600-dpi raster caption bounds are checked independently; a whole-page low-resolution preview alone is insufficient.
+
 Rendered-page inspection remains separate from successful generation and font
 inspection. Independent review checks every panel, scale, interval, label,
 caption and unavailable-count display. Final-source original/copied cumulative
 replays must reproduce the publication and preserve all earlier scientific
 outputs and raw fits. Generated figures, aggregate data, local configurations
 and review evidence stay outside the code-only source export. No participant
-records are exported, no selected manuscript is edited and no stage report is
-created.
+records are exported, and the selected manuscripts remain unchanged.

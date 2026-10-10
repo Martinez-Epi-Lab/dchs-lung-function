@@ -69,7 +69,7 @@ def _object(value, fields):
 
 
 def _input_boundary(function):
-    """Translate malformed external aggregate structures into a closed failure."""
+    """Reject malformed aggregate input with a validation error."""
     @wraps(function)
     def checked(*args,**kwargs):
         try:return function(*args,**kwargs)
@@ -167,12 +167,12 @@ def _publication(directory,expected_receipt,files,through):
 
 @_input_boundary
 def registry_from_export(exported):
-    """Recreate the defensive registry and require its complete canonical export."""
+    """Recreate the reporting registry and require its complete canonical export."""
     _object(exported,('schema_version','records','sources','record_count'))
     require(type(exported['schema_version']) is int and exported['schema_version']==1
             and isinstance(exported['records'],list) and type(exported['record_count']) is int
-            and exported['record_count']==len(exported['records'])==3195
-            and isinstance(exported['sources'],list) and len(exported['sources'])==142,
+            and exported['record_count']==len(exported['records'])==3196
+            and isinstance(exported['sources'],list) and len(exported['sources'])==143,
             'requires the complete accepted aggregate registry.')
     registry=ResultRegistry();contract=registry._schema_contract
     require(exported['sources']==sorted(contract['sources']),'aggregate source inventory differs.')

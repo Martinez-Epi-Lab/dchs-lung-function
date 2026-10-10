@@ -14,8 +14,9 @@ from .analysis.shared_factor import DEFAULT_TARGETS, summarize_shared_factor
 from .execution import (file_hash, load_artifacts, preparation_locks, write_json)
 from .pipeline import ValidationError, read_json as _read_json
 from .model_runtime import model_runtime_identity, configure_runtime
+from .model_adequacy import evaluate_covariance, verify_covariance
 
-SOURCES = ('shared_factor_execution.py', 'analysis/shared_factor.py', 'primary_execution.py',
+SOURCES = ('lifecycle.py','execution.py','pipeline.py','model_adequacy.py','covariance_ppc.py','runtime_bootstrap.py','shared_factor_execution.py', 'analysis/shared_factor.py', 'primary_execution.py',
            'analysis/primary_results.py', 'diagnostics.py', 'models/spirometry.py',
            'sampling.py', 'model_runtime.py')
 RESULT_FILES = ('estimates.csv', 'metadata.json', 'summary.json')
@@ -48,7 +49,7 @@ def _verified_primary(root, prep, work_root, output_root, settings, target):
         raise ValidationError('Shared-factor primary fit identities are inconsistent.')
     primary.verify_files(raw, raw_receipt.get('files'), ('posterior.npz', 'sample_stats.npz', 'sampling.json'))
     primary.verify_files(validated, validation_receipt.get('files'),
-        ('diagnostics.json', 'summary.json', 'estimates.csv', 'shared_factor.csv', 'sample_counts.csv', 'result_metadata.json'))
+        primary.RESULT_FILES)
     contract = load_artifacts(prep, ('M03', 'pft', 'samples', 'primary/'+target))
     configure_runtime(Path(work_root)/'shared_factor'/'compiler_cache')
     posterior = primary.read_array_archive(raw/'posterior.npz')
@@ -62,6 +63,10 @@ def _verified_primary(root, prep, work_root, output_root, settings, target):
     diagnostics = evaluate_diagnostics(posterior,
         {n:stats[n] for n in ('diverging', 'energy', 'reached_max_treedepth') if n in stats}, primary.CRITERIA)
     summary = read_json(validated/'summary.json', 'Primary summary')
+    covariance=evaluate_covariance(posterior,contract,family='primary',target=target)
+    verify_covariance(validated,summary,diagnostics,covariance)
+    if covariance['accepted'] is not True:
+        raise ValidationError('Shared-factor source primary fit fails covariance adequacy.')
     if (not diagnostics['passed'] or read_json(validated/'diagnostics.json', 'Primary diagnostics') != diagnostics
             or validation_receipt.get('summary') != summary or summary.get('diagnostics_passed') is not True
             or summary.get('status') != 'diagnostics_passed' or summary.get('target') != target

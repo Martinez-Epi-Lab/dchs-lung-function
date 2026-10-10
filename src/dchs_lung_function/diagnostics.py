@@ -1,9 +1,8 @@
-"""Strict posterior diagnostics and Monte Carlo-aware contrast comparisons.
+"""Posterior convergence diagnostics and Monte Carlo contrast comparisons.
 
 Only aggregate diagnostics are returned. Every posterior scalar, including all
 child effects, contributes to the acceptance gates. The caller supplies the
-three required sampler statistics; optional uncomputed statistics should not
-be presented as diagnostic inputs. No fits or file operations occur here.
+three required sampler statistics; uncomputed statistics are omitted.
 """
 from __future__ import annotations
 

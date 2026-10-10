@@ -1,7 +1,6 @@
-"""Construct explicit DCHS populations and aggregate inclusion ledgers.
+"""Construct DCHS analysis populations and aggregate inclusion counts.
 
-Membership frames contain private records and are returned in memory only. This
-module does not write files, load archived results, or fit statistical models.
+Membership frames contain private records and are returned in memory only.
 """
 from __future__ import annotations
 
@@ -13,7 +12,7 @@ import pandas as pd
 
 ID = "pid_child"
 
-# Definitions are variable/date specifications, not expected study results.
+# Population definitions specify variables and dates, without expected counts.
 DESCRIPTIVE_OUTCOMES = {
     "ratio_pre_z": ("fev1_fvc_gli_z", "date_of_test"),
     "resistance": ("resistance", "date_of_test_ilf2"),

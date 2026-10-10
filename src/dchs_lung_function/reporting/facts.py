@@ -1,8 +1,7 @@
 """Aggregate numerical-text facts derived from accepted preparation artifacts.
 
-Only fixed aggregate schemas leave this module. Source identifiers are used to
-check child uniqueness and are never returned. Existing model estimates and
-published cohort counts remain owned by their preceding modules.
+Source identifiers are used to check child uniqueness and are never returned.
+Model estimates and cohort counts come from the preceding analysis modules.
 """
 from pathlib import Path
 

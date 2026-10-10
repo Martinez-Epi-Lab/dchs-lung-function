@@ -101,7 +101,7 @@ class ModelGraphTests(unittest.TestCase):
         cls.point = cls.model.initial_point()
         values = {
             'mechanics': [-.4, .2, .5, -.1, .3], 'lci_raw': [.1, -.2, .3, .4, -.5],
-            'tau_lci': .8, 'loading_mechanics': [.6, .7, .8, .9],
+            'tau_lci': .8, 'tau_target': .45, 'target_raw': [.2, -.5, .4, .1, -.3], 'loading_mechanics': [.6, .7, .8, .9],
             'sigma_mechanics': [.8, .9, 1.1, 1.2], 'sigma_lci': .9,
             'shift_mechanics': -.2, 'shift_mechanics_infancy': -.3,
             'shift_mechanics_late': -.1, 'shift_lci': .15, 'shift_lci_infancy': .25,
@@ -138,7 +138,7 @@ class ModelGraphTests(unittest.TestCase):
         f = p['frames']['target']; z = f[list(POST_TERMS)].to_numpy()
         change = z@np.array([v['shift_mechanics'], v['shift_mechanics_infancy'], v['shift_mechanics_late']])
         direct = z@np.array([v['direct_ratio'], v['direct_ratio_infancy'], v['direct_ratio_late']])
-        mean = v['loading_ratio_mechanics']*(v['mechanics'][f.child_index]+change)+direct
+        mean = v['loading_ratio_mechanics']*(v['mechanics'][f.child_index]+change)+v['tau_target']*v['target_raw'][f.child_index]+direct
         expected['obs_fev1_fvc'] = np.sum(normal_logp(f.y_std.to_numpy(), mean, v['sigma_ratio']))
         log_h = v['log_baseline_hazard'][None, :]+(v['assoc_mechanics']*v['mechanics']+v['hazard_male']*p['children'].male.to_numpy())[:, None]
         expected['first_tb_loglik'] = np.sum(p['event']['event_interval']*log_h-p['event']['exposure']*np.exp(log_h))

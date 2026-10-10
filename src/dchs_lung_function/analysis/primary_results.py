@@ -1,9 +1,8 @@
 """Full-precision aggregate summaries for primary spirometry joint models.
 
 Contrasts are derived draw by draw from model parameters, using the target
-outcome's residual scale and its post-diagnosis child counts. No manuscript
-values, archive paths, participant records, or fitting operations are stored
-or written here.
+outcome's residual scale and its post-diagnosis child counts. Outputs contain
+aggregate estimates and counts only.
 """
 from __future__ import annotations
 
@@ -192,6 +191,20 @@ def _summarize(draws, compute_mcse):
         result["mcse_mean"] = float(az.mcse(az.from_dict(posterior={"effect": draws}), method="mean").effect)
         if not np.isfinite(result["mcse_mean"]) or result["mcse_mean"] < 0:
             raise PrimaryResultsError("Mean MCSE is not finite and nonnegative; inspect the posterior draw history.")
+    return result
+
+
+def _summarize_ratio(draws, compute_mcse):
+    """Summarize a positive ratio against its no-association value of one."""
+    draws = np.asarray(draws)
+    if not np.isfinite(draws).all() or (draws <= 0).any():
+        raise PrimaryResultsError('Ratio summaries require finite positive posterior draws.')
+    result = _summarize(draws, compute_mcse)
+    for direction in ('below', 'above', 'equal'):
+        result.pop('probability_' + direction + '_zero')
+    result.update(probability_below_one=float(np.mean(draws < 1)),
+                  probability_above_one=float(np.mean(draws > 1)),
+                  probability_equal_one=float(np.mean(draws == 1)))
     return result
 
 

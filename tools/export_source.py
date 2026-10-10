@@ -194,14 +194,20 @@ def _snapshot(root, allowlist=None):
     data = _regular_bytes(chosen)
     names = _allowlist(data)
     existing_manifest = (root / MANIFEST).exists()
-    if existing_manifest:
-        verify_tree(root)
+    manifest_data = _regular_bytes(root / MANIFEST) if existing_manifest else None
     _inventory(root, names, development=True, include_manifest=existing_manifest)
     payloads = {n: _regular_bytes(root / n) for n in names}
     _require(payloads[ALLOWLIST] == data, 'The allowlist changed during source selection.')
     _require(sum(map(len, payloads.values())) <= MAX_TOTAL_BYTES, 'The release exceeds the source-size limit.')
     for content in payloads.values():
         _text(content)
+    if manifest_data is not None:
+        # A manifested Git checkout may contain the same development-only
+        # exclusions as any other checkout. Extracted-tree verification stays
+        # strict; here validate the manifest against exactly the export payload.
+        _validate_payloads(payloads, manifest_data)
+        _require(_regular_bytes(root / MANIFEST) == manifest_data,
+                 'The source manifest changed during source selection.')
     _inventory(root, names, development=True, include_manifest=existing_manifest)
     return payloads
 
@@ -311,6 +317,8 @@ def _file_sha(path):
 def verify_tree(root, *, expected_manifest_sha256=None):
     """Verify an extracted package, rejecting all extras including caches/.git."""
     root = _resolve(root)
+    _require((root / MANIFEST).exists() or (root / MANIFEST).is_symlink(),
+             "SOURCE_MANIFEST.json is missing; verify-tree requires an extracted source release, not the development checkout.")
     manifest_data = _regular_bytes(root / MANIFEST)
     manifest = _json(manifest_data)
     _require(isinstance(manifest, dict) and isinstance(manifest.get('files'), dict),

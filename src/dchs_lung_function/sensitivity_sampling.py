@@ -8,16 +8,26 @@ from .sampling import validate_sampling as _validate_primary_sampling
 
 
 def validate_sampling(settings):
-    settings = _validate_primary_sampling(settings)
+    if not isinstance(settings, dict):
+        raise ValueError('Sensitivity sampling configuration must be an object.')
+    overrides = settings.get('draws_by_target', {})
+    base = {k:v for k,v in settings.items() if k != 'draws_by_target'}
+    settings = _validate_primary_sampling(base)
     if settings['draws'] < 3200 or settings['tune'] < 2200:
         raise ValueError('Sensitivity fits require at least 3200 draws and 2200 tuning iterations.')
+    if (not isinstance(overrides, dict) or not set(overrides).issubset(DEFAULT_TARGETS)
+            or any(type(v) is not int or v < settings['draws'] for v in overrides.values())):
+        raise ValueError('Sensitivity draw overrides require selected targets and at least the base draws.')
+    if overrides:
+        settings['draws_by_target'] = dict(overrides)
     return settings
 
 
 def resolved_sampling(target, settings):
     settings = validate_sampling(settings)
     selected = fit_spec(target)['sampling']
-    controls = {k:v for k,v in settings.items() if k not in {'schema_version','seed_offset'}}
+    controls = {k:v for k,v in settings.items() if k not in {'schema_version','seed_offset','draws_by_target'}}
+    controls['draws'] = settings.get('draws_by_target', {}).get(target, settings['draws'])
     controls.update(random_seed=selected['random_seed']+settings['seed_offset'],
         init='adapt_diag', initvals=[{'loading_ratio_mechanics':value,
             'loading_mechanics':[value]*4, 'sigma_ratio':.9} for value in (.25,.35,.45,.55)],

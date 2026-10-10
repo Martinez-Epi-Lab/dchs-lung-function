@@ -6,6 +6,7 @@ nor calculates estimates, intervals, sample counts, or manuscript annotations.
 from __future__ import annotations
 
 from collections import Counter
+import copy
 import hashlib
 import json
 import math
@@ -73,11 +74,11 @@ def _limits(rows, axis):
 
 
 class _Canvas:
-    def __init__(self, width, height, fonts):
+    def __init__(self, width, height, fonts, *, dpi=600):
         from matplotlib.backends.backend_agg import FigureCanvasAgg
         from matplotlib.figure import Figure
         from matplotlib.font_manager import FontProperties
-        self.fig = Figure(figsize=(width, height), dpi=120, facecolor='white')
+        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
         self.canvas = FigureCanvasAgg(self.fig)
         self.width, self.height = width, height
         self.fonts = fonts
@@ -85,6 +86,7 @@ class _Canvas:
         self.bold = FontProperties(fname=str(fonts['arial_bold']))
         self.text_items = []
         self.panel_metadata = []
+        self.caption_artist = None
 
     def font(self, size, bold=False):
         prop = (self.bold if bold else self.regular).copy()
@@ -102,7 +104,9 @@ class _Canvas:
                 prepared = _text(proposed)
                 pixels = renderer.get_text_width_height_descent(prepared, self.font(size, bold),
                                                                ismath='$' in prepared)[0]
-                if line and pixels > width * self.fig.dpi:
+                # Reserve a physical safety allowance for vector-font metrics;
+                # wrapping is measured at the actual raster export resolution.
+                if line and pixels > max(0, width - .08) * self.fig.dpi:
                     result.append(line)
                     line = word
                 else:
@@ -136,6 +140,7 @@ class _Canvas:
         renderer = self.canvas.get_renderer()
         box = self.fig.bbox
         outside = []
+        outside_content = []
         fonts = set()
         for artist in self.fig.findobj(match=Text):
             if not artist.get_visible() or not artist.get_text():
@@ -146,9 +151,19 @@ class _Canvas:
             if bbox.width and bbox.height and (bbox.x0 < box.x0 - 1 or bbox.y0 < box.y0 - 1
                     or bbox.x1 > box.x1 + 1 or bbox.y1 > box.y1 + 1):
                 outside.append(artist.get_text())
+            margin = .35 * self.fig.dpi
+            if bbox.width and bbox.height and (bbox.x0 < box.x0 + margin - 1 or bbox.y0 < box.y0 + margin - 1
+                    or bbox.x1 > box.x1 - margin + 1 or bbox.y1 > box.y1 - margin + 1):
+                outside_content.append(artist.get_text())
             fonts.add(artist.get_fontproperties().get_name())
         if outside:
             raise ValueError('Figure text extends outside the page: ' + repr(outside))
+        if outside_content:
+            raise ValueError('Figure text extends outside the physical content box: ' + repr(outside_content))
+        caption_box = self.caption_artist.get_window_extent(renderer) if self.caption_artist is not None else None
+        if caption_box is not None and (caption_box.x0 < .5*self.fig.dpi-1
+                or caption_box.x1 > (self.width-.5)*self.fig.dpi+1):
+            raise ValueError('Figure caption extends outside its half-inch horizontal margins.')
         if fonts != {'Arial'}:
             raise ValueError('Every figure text object must use actual Arial: ' + repr(fonts))
         for axis in self.fig.axes:
@@ -160,6 +175,10 @@ class _Canvas:
                        for label in axis.get_xticklabels()):
                     raise ValueError('An x-axis title overlaps its tick labels.')
         return {'text_within_page': True, 'text_font_families': sorted(fonts),
+                'text_within_content_box': True, 'content_margin_inches': .35,
+                'caption_horizontal_margin_inches': .5,
+                'caption_right_margin_inches': (self.width-caption_box.x1/self.fig.dpi) if caption_box is not None else None,
+                'measurement_dpi': self.fig.dpi,
                 'x_axis_titles_clear_of_ticks': True,
                 'text_objects_checked': sum(bool(t.get_text()) for t in self.fig.findobj(match=Text))}
 
@@ -298,7 +317,9 @@ def _forest_vertical(canvas, panel, box):
     left, bottom, width, height = box
     rows = panel['rows']
     canvas.label(left, bottom + height, panel['id'] + '  ' + panel['title'], size=12, bold=True, width=width)
-    ax = canvas.axes(left + .62, bottom + .66, width - .78, height - 1.10)
+    annotations = panel['annotation']['show']
+    plot_bottom = bottom + (1.12 if annotations else .66)
+    ax = canvas.axes(left + .62, plot_bottom, width - .78, height - (1.56 if annotations else 1.10))
     _style_axis(ax, canvas, panel['value_axis'], orientation='vertical')
     limits = _limits(rows, panel['value_axis'])
     ax.set_ylim(limits)
@@ -311,6 +332,10 @@ def _forest_vertical(canvas, panel, box):
             ax.plot([i, i], [row['lower'], row['upper']], linestyle='none', marker='_',
                     markersize=8, markeredgewidth=1, color=style['color'], zorder=2)
             ax.plot(i, row['point'], linestyle='none', zorder=3, **style)
+            if annotations:
+                x = left + .62 + (width-.78)*(i+.65)/(len(rows)+.30)
+                canvas.label(x, bottom+.72, row['display'].replace(' (','\n('), size=8.6,
+                             ha='center', va='top', color=style['color'])
         else:
             ax.text(i, .5, _text(row['display']), transform=ax.get_xaxis_transform(),
                     fontproperties=canvas.font(9), ha='center')
@@ -319,6 +344,7 @@ def _forest_vertical(canvas, panel, box):
     canvas.panel_metadata.append({'id': panel['id'], 'kind': 'forest', 'orientation': 'vertical',
         'axis_scale': panel['value_axis']['scale'], 'axis_limits': limits, 'rows': len(rows),
         'drawn_intervals': sum(_drawable(r) for r in rows), 'status_counts': dict(Counter(r['status'] for r in rows)),
+        'numeric_annotations': len(rows) if annotations else 0,
         'interval': panel['interval'], 'estimate': panel['estimate']})
 
 
@@ -489,18 +515,26 @@ def _schedule(canvas, panel, box):
         'row_order': rows, 'column_order': columns})
 
 
-def _build_figure(spec, fonts):
+def _build_figure(spec, fonts, *, dpi=600):
     # Page size follows the amount of content. Captions stay on the same page.
-    ident, panels = spec['id'], spec['panels']
+    ident, panels = spec['id'], copy.deepcopy(spec['panels'])
+    groups = {p['y_axis']['shared_group'] for p in panels if p.get('y_axis',{}).get('shared_group')}
+    for group in groups:
+        shared = [p for p in panels if p.get('y_axis',{}).get('shared_group')==group]
+        if len(shared)<2 or len({(p['y_axis']['label'],p['y_axis']['scale']) for p in shared})!=1:
+            raise ValueError('Shared trajectory axes require at least two panels on the same scale and unit.')
+        limits = _limits([v for p in shared for v in p['points']],shared[0]['y_axis'])
+        for panel in shared:
+            panel['y_axis']['limits'] = limits
     width = 12 if spec['kind'] in ('flow', 'schedule') else 11 if ident == 'main_figure_3' else 10.5
     content_height = {
         'main_figure_1': 7.4, 'main_figure_2': 8.8, 'main_figure_3': 4.1,
         'appendix_figure_s1': 8.8, 'appendix_figure_s2': 4.2,
-        'appendix_figure_s3': 8.1, 'appendix_figure_s4': 4.2,
+        'appendix_figure_s3': 8.1, 'appendix_figure_s4': 4.7,
         'appendix_figure_s5': 3.7, 'appendix_figure_s6': 3.4,
     }[ident]
     # Measure text on the actual Arial canvas before committing the page height.
-    canvas = _Canvas(width, 12, fonts)
+    canvas = _Canvas(width, 12, fonts, dpi=dpi)
     title = canvas.wrap(spec['title'], width - 1, 13, True)
     caption = canvas.wrap(spec['caption']['text'], width - 1, 9.2)
     title_height = len(title.splitlines()) * .235 + .35
@@ -510,10 +544,10 @@ def _build_figure(spec, fonts):
         labels = {p['series_styles'][s]['label'] for p in panels for s in p['series_order']}
         if len(labels) > 1:
             legend_height = .65 if any(len(s) > 48 for s in labels) or sum(map(len, labels)) > 100 else .4
-    height = .5 + title_height + legend_height + content_height + .35 + caption_height + .35
+    height = .6 + title_height + legend_height + content_height + .35 + caption_height + .35
     canvas.fig.set_size_inches(width, height)
     canvas.height = height
-    top = height - .4
+    top = height - .5
     canvas.label(.5, top, title, size=13, bold=True)
     content_top = top - title_height - legend_height
     if legend_height:
@@ -549,7 +583,7 @@ def _build_figure(spec, fonts):
                 canvas.line(.5, box[1] + box[3] + .1, width - .5, box[1] + box[3] + .1)
     caption_top = content_bottom - .23
     canvas.line(.5, caption_top + .10, width - .5, caption_top + .10)
-    canvas.label(.5, caption_top, caption, size=9.2)
+    canvas.caption_artist = canvas.label(.5, caption_top, caption, size=9.2)
     return canvas
 
 
@@ -602,7 +636,7 @@ def render_figures(data, destination, fonts, *, dpi=600):
               'scientific_values_modified': False, 'files': {}}
     with rc_context(rc), PdfPages(destination / 'publication_figures.pdf', metadata=pdfmeta) as combined:
         for spec in data['figures']:
-            canvas = _build_figure(spec, fonts)
+            canvas = _build_figure(spec, fonts, dpi=dpi)
             audit = canvas.audit()
             ident = spec['id']
             metadata = {**pdfmeta, 'Title': spec['title']}

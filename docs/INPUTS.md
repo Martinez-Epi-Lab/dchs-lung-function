@@ -14,7 +14,9 @@ The source contract is `config/input_contract.json`. It defines input roles with
 | `wheeze_dictionary` | Source variable definitions | Optional file-level check |
 | `wheeze_csv_check` | Companion representation for import comparison | Optional; selected local pair verified |
 
-These are neutral roles within the same study dataset. The selected analysis definitions and model-specific samples remain explicit.
+All roles refer to the same study dataset. Each analysis retains its own sample definition.
+
+For `tb_events`, `tbcat` must use the exact nonmissing string vocabulary `Confirmed tb` and `Unconfirmed tb`. Readers reject unknown spelling, whitespace variants and numeric or labelled-numeric encodings. A refreshed extract using another representation requires an explicit reviewed mapping; labels are not inferred or silently substituted. Baseline `tbcat` is a separate source field and does not inherit this episode vocabulary.
 
 ## Local file format
 
@@ -41,12 +43,14 @@ Historical linked, reference-scored, paired and covariate-enriched PFT datasets 
 
 The wheeze binding identified during M01 passes identity and schema checks. Its Stata and CSV representations agree across all 255 fields for 1,082 children under the declared import comparison rules. If a CSV companion is configured, every preparation run repeats the substantive-field comparison. The file-level preflight alone does not establish equivalence.
 
-The GLI lookup is a computational reference dependency. Supply the selected rspiro 0.5 `R/sysdata.rda` containing `GLIgl_lookup`; its package DESCRIPTION records GPL (>= 2). Its contents, sex tables and supported coefficient structure are validated during preparation. The source repository contains no copied lookup or proprietary fonts. A future release may add a separately reviewed acquisition route.
+The GLI lookup is a computational reference dependency. Supply the selected rspiro 0.5 `R/sysdata.rda` containing `GLIgl_lookup`; its package DESCRIPTION records GPL (>= 2). Its contents, sex tables and supported coefficient structure are validated during preparation. The lookup and proprietary fonts must be supplied separately; neither is included in the source repository.
 
 Four antenatal flow counts require an upstream recruitment/disposition source beyond the supplied child records. The flow output retains missing values and an explicit unresolved status for those nodes. They are not filled with manuscript constants.
 
 ## Analysis configuration and checks
 
 Copy `config/analysis.example.json` and set `event_end` and `respiratory_end` to the selected administrative dates in ISO `YYYY-MM-DD` form. These settings are supplied privately and included in the preparation fingerprint. The respiratory observation rules retain their selected strict-before-censor boundary; an endpoint setting does not override that rule.
+
+`event_end` is required for all PFT joint-model event processes, including before-one and before-five threshold families. Their risk time stops at the earliest eligible first TB, the selected age cutoff, recorded study exit or this endpoint. Measurements in every PFT joint process must be on or before exit; only designated window analyses also cap measurements at `event_end`. Thus event ascertainment and lung-function measurement follow-up remain separate concepts.
 
 `--check-config` validates file readability, optional checksums and safe directory separation. `--through M01` additionally checks source format, encoding, required fields, dates, identifier uniqueness, missingness and row preservation. `--through M02` adds linkage, reference scoring and descriptive outputs. `--through M03` adds model-specific samples, designs and follow-up arrays. Participant-level comparisons and intermediate artifacts stay local; console output uses aggregate summaries and neutral role names.

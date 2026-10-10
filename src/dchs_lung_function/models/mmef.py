@@ -1,14 +1,16 @@
-"""Selected early-TB MMEF joint graphs, specification 1.0.0.
+"""Early-TB MMEF joint graphs, specification 2.0.0.
 
 The target and four oriented mechanics indicators share a unit-variance child
-factor. LCI has its own observed process, with no LCI path in the target or
-first-TB hazard. Builders are pure: no data access, fitting, or source loading.
+factor. An independent target child intercept captures remaining target
+persistence. LCI has its own observed process, with no LCI path in the target or
+first-TB hazard.
 """
 from __future__ import annotations
 from typing import Mapping
 import numpy as np
+import pandas as pd
 
-SPEC_VERSION = '1.0.0'
+SPEC_VERSION = '2.0.0'
 MECHANICS = {'resistance': -1., 'compliance': 1., 'xee': 1., 'ree': -1.}
 TARGETS = {
     'mmef_unpaired': {'column':'mmef', 'contract_key':'mmef/unpaired', 'source_target':'mmef_native', 'outcome':'Pre-bronchodilator MMEF (FEF25–75)', 'model_id':'MMEF-UNPAIRED', 'random_seed':20260813},
@@ -24,7 +26,7 @@ CONTRASTS = {
     'Direct component: first TB 1-<5 years': ('direct_ratio','component'),
     'Additional direct infancy component': ('direct_ratio_infancy','component'),
 }
-POSTERIOR_VARIABLES = ('mechanics','lci_raw','tau_lci','lci_process','loading_mechanics','sigma_mechanics','sigma_lci','shift_mechanics','shift_mechanics_infancy','shift_lci','shift_lci_infancy','loading_ratio_mechanics','direct_ratio','direct_ratio_infancy','sigma_ratio','log_baseline_hazard','assoc_mechanics','hazard_male','total_ratio_1to5','total_ratio_infancy','total_ratio_lt5_child_weighted','total_ratio_infancy_difference')
+POSTERIOR_VARIABLES = ('mechanics','lci_raw','tau_lci','lci_process','target_raw','tau_target','target_process','loading_mechanics','sigma_mechanics','sigma_lci','shift_mechanics','shift_mechanics_infancy','shift_lci','shift_lci_infancy','loading_ratio_mechanics','direct_ratio','direct_ratio_infancy','sigma_ratio','log_baseline_hazard','assoc_mechanics','hazard_male','total_ratio_1to5','total_ratio_infancy','total_ratio_lt5_child_weighted','total_ratio_infancy_difference')
 
 
 def fit_spec(target):
@@ -39,15 +41,17 @@ def fit_spec(target):
         'scale_method':'training residual SD with ddof equal to nuisance design column count',
         'hazard_breaks':[0.,1.,3.,5.], 'hazard_labels':['0-<1','1-<3','3-<5'],
         'log_hazard_prior_mean':np.log([.045,.018,.006]).tolist(), 'log_hazard_prior_sd':1.25,
-        'priors':{'unit_normal_child':['mechanics','lci_raw'], 'half_normal_sd1':['tau_lci','loading_mechanics','sigma_mechanics','sigma_lci','sigma_ratio'], 'normal_sd1':['loading_ratio_mechanics'], 'normal_sd0_75':['shift_mechanics','shift_mechanics_infancy','shift_lci','shift_lci_infancy','direct_ratio','direct_ratio_infancy','assoc_mechanics','hazard_male']},
-        'target_mean':'loading_ratio_mechanics*(mechanics + shift_mechanics*post_before5 + shift_mechanics_infancy*post_infancy) + direct_ratio*post_before5 + direct_ratio_infancy*post_infancy',
+        'priors':{'unit_normal_child':['mechanics','lci_raw','target_raw'], 'half_normal_sd1':['tau_lci','tau_target','loading_mechanics','sigma_mechanics','sigma_lci','sigma_ratio'], 'normal_sd1':['loading_ratio_mechanics'], 'normal_sd0_75':['shift_mechanics','shift_mechanics_infancy','shift_lci','shift_lci_infancy','direct_ratio','direct_ratio_infancy','assoc_mechanics','hazard_male']},
+        'target_mean':'loading_ratio_mechanics*(mechanics + shift_mechanics*post_before5 + shift_mechanics_infancy*post_infancy) + target_process + direct_ratio*post_before5 + direct_ratio_infancy*post_infancy',
+        'target_process':'tau_target*target_raw; independent of mechanics and LCI; no hazard coupling',
         'hazard_log_mean':'log_baseline_hazard + assoc_mechanics*mechanics + hazard_male*male',
         'lci_process':'tau_lci*lci_raw; independent of mechanics; no target/hazard loading',
         'contrast_weights':'distinct post-TB target children diagnosed before one or at ages one to before five',
         'contrasts':{k:list(v) for k,v in CONTRASTS.items()},
-        'posterior_variables':list(POSTERIOR_VARIABLES), 'participant_posterior_variables':['mechanics','lci_raw','lci_process'],
+        'posterior_variables':list(POSTERIOR_VARIABLES), 'participant_posterior_variables':['mechanics','lci_raw','lci_process','target_raw','target_process'],
         'sampling':{'draws':1600,'tune':2200,'chains':4,'cores':4,'target_accept':.92,'random_seed':chosen['random_seed'],'init':'jitter+adapt_diag','initvals':None},
         'sampling_provenance':'Source wrapper defaults; selected saved arrays confirm four chains and 1600 retained draws. Historical seed, tune and target acceptance require separately retained execution evidence.',
+        'sampling_authority':'Non-authoritative historical defaults; supporting_sampling.resolved_sampling and the active configuration determine executed controls and initialization.',
         'fresh_sampling':'Configured separately with full-posterior diagnostic gates and a recorded seed offset relative to the wrapper default.'}
 
 
@@ -99,6 +103,8 @@ def _validate_shared_contract(contract,spec):
             actual_post=(f.tb_first_dx.notna() & f.test_date.ge(f.tb_first_dx)).to_numpy(int)
             if f.test_date.isna().any() or not np.array_equal(post,actual_post):
                 raise ValueError('Post-TB indicators disagree with exact measurement/diagnosis dates.')
+            if (f.exit_date.notna() & f.test_date.gt(f.exit_date)).any():
+                raise ValueError('An observed process extends beyond child follow-up.')
             age=np.asarray(f.tb_age_first_years,dtype=float)
             if (post.astype(bool)&(~np.isfinite(age)|(age>=threshold)|(age<0))).any():
                 raise ValueError('A post-TB observation violates the strict first-TB cutoff.')
@@ -134,10 +140,23 @@ def _validate_shared_contract(contract,spec):
             raise ValueError('First-TB hazard breaks differ from the selected cutoff.')
         events=_array(event['event'],(n,),'First-TB events',binary=True)
         stop=_array(event['stop'],(n,),'Hazard stop ages')
-        tb_age=np.asarray(children.tb_age_first_years,dtype=float)
-        expected_event=(tb_age<threshold).astype(int)
-        if not np.array_equal(events,expected_event) or not np.array_equal(stop,np.where(expected_event,tb_age,threshold)) or (stop<=0).any():
-            raise ValueError('Hazard events or censoring disagree with the strict diagnosis-age cutoff.')
+        endpoint = pd.Timestamp(event['ascertainment_end'])
+        if pd.isna(endpoint):
+            raise ValueError('Hazard ascertainment endpoint is missing.')
+        censor = pd.concat([children.exit_date, pd.Series(endpoint, index=children.index)], axis=1).min(axis=1)
+        censor_age = (censor - children.child_dob).dt.days.to_numpy(float) / 365.25
+        tb_age = children.tb_age_first_years.to_numpy(float)
+        diagnosed = children.tb_first_dx.notna().to_numpy()
+        if (children.child_dob.isna().any() or not np.isfinite(censor_age).all() or (censor_age <= 0).any()
+                or children.tb_first_dx.lt(children.child_dob).any()
+                or (diagnosed & (~np.isfinite(tb_age) | (tb_age < 0))).any()
+                or (~diagnosed & ~np.isnan(tb_age)).any()):
+            raise ValueError('Hazard diagnosis chronology or follow-up is invalid.')
+        expected_event = (diagnosed & (tb_age < threshold) & children.tb_first_dx.le(censor).to_numpy()).astype(int)
+        expected_stop = np.minimum(censor_age, threshold)
+        expected_stop = np.where(expected_event, np.minimum(tb_age, expected_stop), expected_stop)
+        if not np.array_equal(events, expected_event) or not np.array_equal(stop, expected_stop) or (stop <= 0).any():
+            raise ValueError('Hazard events or censoring disagree with observed follow-up and the strict age cutoff.')
         exposure=_array(event['exposure'],(n,j),'Hazard exposure')
         interval=_array(event['event_interval'],(n,j),'Event intervals',binary=True)
         if not np.allclose(exposure,np.maximum(0.,np.minimum(stop[:,None],breaks[1:])-breaks[:-1]),rtol=0,atol=1e-12):
@@ -163,7 +182,7 @@ def validate_contract(contract,target):
     return _validate_shared_contract(contract,fit_spec(target))
 
 def build_model(prepared: Mapping, target: str):
-    """Build the explicit selected model; retain original posterior variable names."""
+    """Build the MMEF model, retaining the source posterior variable names."""
     validated = validate_contract(prepared, target)
     import pymc as pm
     import pytensor.tensor as pt
@@ -184,6 +203,9 @@ def build_model(prepared: Mapping, target: str):
         lci_raw = pm.Normal("lci_raw", 0.0, 1.0, dims="child")
         tau_lci = pm.HalfNormal("tau_lci", 1.0)
         lci_process = pm.Deterministic("lci_process", tau_lci * lci_raw, dims="child")
+        target_raw = pm.Normal("target_raw", 0.0, 1.0, dims="child")
+        tau_target = pm.HalfNormal("tau_target", 1.0)
+        target_process = pm.Deterministic("target_process", tau_target * target_raw, dims="child")
 
         loading_mechanics = pm.HalfNormal("loading_mechanics", 1.0, dims="mechanics_indicator")
         sigma_mechanics = pm.HalfNormal("sigma_mechanics", 1.0, dims="mechanics_indicator")
@@ -234,6 +256,7 @@ def build_model(prepared: Mapping, target: str):
         )
         ratio_mu = (
             loading_ratio_mechanics * ratio_current_mechanics
+            + target_process[ratio_idx]
             + direct_ratio * ratio_z0
             + direct_ratio_infancy * ratio_zinf
         )
@@ -260,7 +283,7 @@ def build_model(prepared: Mapping, target: str):
         event_logp = pt.sum(event_interval * log_h - exposure * pt.exp(log_h))
         pm.Potential("first_tb_loglik", event_logp)
 
-        # Derived total associations include the empirically supported mechanics path.
+        # Total associations combine direct and modeled mechanics terms.
         total_ratio_1to5 = pm.Deterministic(
             "total_ratio_1to5",
             direct_ratio

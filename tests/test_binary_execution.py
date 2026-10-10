@@ -411,7 +411,7 @@ class BinaryCumulativeAndCliTests(unittest.TestCase):
         self.sampling = self.base / "sampling.local.json"
         write_json(self.config, {"inputs": {}, "directories": {"work": str(self.work), "outputs": str(self.base / "outputs")}})
         write_json(self.analysis, {"synthetic": True}); write_json(self.sampling, {"synthetic": True})
-        self.primary = {"all_twelve_models": True, "diagnostics_passed": True, "preparation_fingerprint": "a" * 64}
+        self.primary = {"all_twelve_models": True, "diagnostics_passed": True, "covariance_ppc_passed": True, "preparation_fingerprint": "a" * 64}
         self.binary = {"through": "M05", "models": 28, "accepted": True, "status": "accepted",
                        "estimable_rows": 45, "non_estimable_rows": 1, "fingerprint": "b" * 64}
 
@@ -422,7 +422,7 @@ class BinaryCumulativeAndCliTests(unittest.TestCase):
                     return be.run_binary(self.base / "source", self.config, self.analysis, self.sampling, resume=True)
 
     def test_cumulative_m05_requires_all_twelve_accepted_primary_models(self):
-        for field in ["all_twelve_models", "diagnostics_passed"]:
+        for field in ["all_twelve_models", "diagnostics_passed", "covariance_ppc_passed"]:
             original = self.primary[field]; self.primary[field] = False
             with mock.patch.object(be, "fit_prepared_binary") as fitting:
                 with self.assertRaises(ValidationError): self.run_cumulative()

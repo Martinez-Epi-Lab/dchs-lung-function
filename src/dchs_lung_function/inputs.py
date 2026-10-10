@@ -72,6 +72,7 @@ DATE_FIELDS = {
 }
 UNIQUE_CHILD_ROLES = {"baseline", "respiratory_tb_dates", "wheeze_assessments", "wheeze_csv_check"}
 VISIT_CATEGORY_LABELS = {"Scheduled visit": 1, "Pneumonia episode": 2, "Wheeze episode": 3}
+TB_EVENT_CATEGORIES = frozenset({"Confirmed tb", "Unconfirmed tb"})
 MONTHS = {name: str(i).zfill(2) for i, name in enumerate(
     ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), 1)}
 
@@ -304,6 +305,14 @@ def read_input(path: str | Path, input_id: str, expected_sha256: str | None = No
     for column in DATE_FIELDS[input_id]:
         required = column in {"childdob", "child_dob"} or (input_id == "tb_events" and column == "date_tb_diagnosed")
         frame[column] = normalize_dates(frame[column], column, allow_missing=not required)
+    if input_id == "tb_events":
+        categories=frame["tbcat"]
+        if (categories.isna().any()
+                or not categories.map(lambda value:isinstance(value,str)).all()
+                or not categories.isin(TB_EVENT_CATEGORIES).all()):
+            raise InputValidationError("tb_events: tbcat must use the declared nonmissing string vocabulary.")
+        metadata["category_checks"]={"tbcat":{"allowed_values":sorted(TB_EVENT_CATEGORIES),
+                                               "encoding":"exact_string","missing_allowed":False}}
     if input_id == "pulmonary_function":
         for column in set(PFT_FIELDS) - {"pid_child"} - set(DATE_FIELDS[input_id]):
             frame[column] = _number(frame[column], column)

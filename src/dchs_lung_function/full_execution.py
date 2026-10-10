@@ -5,7 +5,7 @@ of that reconstruction) from validation of unrelated pre-existing model caches.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from datetime import datetime, timezone
 import os
 from pathlib import Path
@@ -22,9 +22,11 @@ from .reporting_execution import (assert_loaded, source_hashes, reporting_config
 from .figures_execution import (run_figures, figures_config, figure_runtime,
                                 RESULT_FILES as FIGURE_FILES)
 from .model_runtime import model_runtime_identity
+from .lifecycle import directory_locks, rename_noreplace, sync_directory, sync_tree
 
 ORIGIN = 'full_run_origin.json'
 LOCK = '.full_run.lock'
+ORIGIN_JOURNAL = '.full-origin-transaction.json'
 RAW_COUNTS = {'primary_fits':12, 'mechanics_fits':6, 'supporting_fits':7,
               'wheeze_fits':2, 'sensitivity_fits':10}
 FIGURE_COVERAGE = {'caption_count_bindings':12,'figures':9,'flow_count_bindings':28,
@@ -38,20 +40,37 @@ def _overlap(a, b):
 
 @contextmanager
 def full_locks(directories):
-    """Never remove another process's lock, even when the second lock fails."""
-    owned=[]
-    try:
-        for directory in sorted(directories):
-            path=directory/LOCK
-            try:
-                fd=os.open(path, os.O_CREAT|os.O_EXCL|os.O_WRONLY, 0o600)
-            except FileExistsError:
-                raise ValidationError('Another full run holds a work or output lock.') from None
-            os.close(fd);owned.append(path)
+    with ExitStack() as stack:
+        try:
+            stack.enter_context(directory_locks(directories, legacy_name=LOCK))
+        except (BlockingIOError, ValueError) as error:
+            raise ValidationError('Another full run holds a work or output lock, or lock ownership is unsafe.') from error
         yield
-    finally:
-        for path in reversed(owned):
-            path.unlink(missing_ok=True)
+
+
+def finish_origin_transaction(work, output, identity, fingerprint):
+    """Recover only the pre-analysis paired-origin transaction, never infer it."""
+    journal=work/ORIGIN_JOURNAL
+    no_symlinks(journal)
+    origin=read_json(journal,'Full origin transaction')
+    require(isinstance(origin,dict) and set(origin)=={'schema_version','identity','fingerprint','clean_origin','started_at'}
+            and type(origin['schema_version']) is int and origin['schema_version']==1
+            and origin['clean_origin'] is True and origin['fingerprint']==fingerprint
+            and canonical_bytes(origin['identity'])==canonical_bytes(identity)
+            and isinstance(origin['started_at'],str) and bool(origin['started_at']),
+            'Full origin recovery identity differs.')
+    for directory in (work,output):
+        allowed={ORIGIN,ORIGIN_JOURNAL} if directory==work else {ORIGIN}
+        require({p.name for p in directory.iterdir()}<=allowed,
+                'Full origin recovery found unexpected files before analysis.')
+        path=directory/ORIGIN;no_symlinks(path)
+        if path.exists():
+            require(canonical_bytes(read_json(path,'Full origin'))==canonical_bytes(origin),
+                    'Full origin recovery found a different origin record.')
+        else:
+            write_pointer(path,origin)
+    journal.unlink();sync_directory(work)
+    return origin
 
 
 def raw_inventory(work, *, preparation_fingerprint=None):
@@ -91,16 +110,13 @@ def publish_completion(destination, receipt):
     no_symlinks(destination)
     destination.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
     stage=Path(tempfile.mkdtemp(prefix='.full-completion-',dir=destination.parent))
-    created=False
     try:
         write_json(stage/'receipt.json',receipt)
-        destination.mkdir(mode=0o700);created=True
-        os.link(stage/'receipt.json',destination/'receipt.json')
-    except BaseException:
-        if created and not any(destination.iterdir()):destination.rmdir()
-        raise
+        sync_tree(stage)
+        rename_noreplace(stage,destination)
+        sync_directory(destination.parent)
     finally:
-        shutil.rmtree(stage)
+        if stage.exists(): shutil.rmtree(stage)
 
 
 def run_full(root, config_file, analysis_file, primary_sampling_file,
@@ -164,6 +180,8 @@ def run_full(root, config_file, analysis_file, primary_sampling_file,
                     'a clean full run requires empty work and output roots; use new roots or a matching full --resume.')
     for directory in (work,output):directory.mkdir(parents=True,exist_ok=True,mode=0o700)
     with full_locks((work,output)):
+        if resume and ((work/ORIGIN_JOURNAL).exists() or (work/ORIGIN_JOURNAL).is_symlink()):
+            finish_origin_transaction(work,output,identity,fingerprint)
         if resume:
             origins=[]
             for directory in (work,output):
@@ -178,18 +196,22 @@ def run_full(root, config_file, analysis_file, primary_sampling_file,
                     and isinstance(origin['started_at'],str) and bool(origin['started_at']),
                     'full resume differs from its paired clean-origin identity; start with new empty roots.')
         else:
-            require(all({p.name for p in d.iterdir()}=={LOCK} for d in (work,output)),
+            require(all(not any(d.iterdir()) for d in (work,output)),
                     'full generated roots changed before clean-origin creation.')
             origin={'schema_version':1,'identity':identity,'fingerprint':fingerprint,
                     'clean_origin':True,'started_at':datetime.now(timezone.utc).isoformat()}
             try:
-                for directory in (work,output):write_pointer(directory/ORIGIN,origin)
+                write_pointer(work/ORIGIN_JOURNAL,origin)
+                finish_origin_transaction(work,output,identity,fingerprint)
             except BaseException:
                 # No analysis has started: remove only this exact attempted origin.
                 for directory in (work,output):
                     path=directory/ORIGIN
                     if path.is_file() and not path.is_symlink() and path.read_bytes()==canonical_bytes(origin)+b'\n':
                         path.unlink()
+                journal=work/ORIGIN_JOURNAL
+                if journal.is_file() and not journal.is_symlink() and journal.read_bytes()==canonical_bytes(origin)+b"\n":
+                    journal.unlink()
                 raise
         origin_hashes={d/ORIGIN:file_hash(d/ORIGIN) for d in (work,output)}
         destination=output/'full_reconstruction'/fingerprint

@@ -1,8 +1,8 @@
-"""Selected paired-MMEF GEE and repeated/trajectory X6 models.
+"""Paired-MMEF GEE and repeated-measurement and trajectory X6 models.
 
-M03 supplies verified samples and designs. This module neither reads files nor
-returns participant records. The paired change is calculated from float64
-operands; all source-scale transformations and resampling controls are explicit.
+M03 supplies verified samples and designs. Paired changes use float64 operands;
+source-scale transformations and resampling controls are retained. Returned
+results contain aggregate estimates and counts only.
 """
 from __future__ import annotations
 

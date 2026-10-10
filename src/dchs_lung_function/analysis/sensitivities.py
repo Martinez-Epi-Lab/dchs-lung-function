@@ -1,17 +1,19 @@
-"""Computed sensitivity summaries and selected table inputs, without rendering."""
+"""Sensitivity contrasts and inputs for Tables S1, S3, and S4."""
 from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import pandas as pd
-from .primary_results import (_scalar_draws, _sample_counts, _summarize,
+from .primary_results import (_scalar_draws, _sample_counts, _summarize, _summarize_ratio,
                               derive_primary_contrast_draws)
+from .attenuation_precision import attenuation_precision, MAX_MCSE_BOUND_PP
 from ..models.sensitivity import DEFAULT_TARGETS, fit_spec, validate_contract
 
 SUMMARY_COLUMNS = ['mean','median','lower','upper','probability_below_zero',
                    'probability_above_zero','probability_equal_zero','mcse_mean']
 ESTIMATE_COLUMNS = ['target','model_id','family','observation_window','outcome','contrast',
                     'estimand_type','unit','residual_scale',*SUMMARY_COLUMNS]
-HAZARD_COLUMNS = ['target','model_id','contrast','unit',*SUMMARY_COLUMNS]
+HAZARD_COLUMNS = ['target','model_id','contrast','unit',
+                 *[name.replace('_zero', '_one') for name in SUMMARY_COLUMNS]]
 COUNT_COLUMNS = ['target','process','group','measurements','children']
 FIT_TABLE_COLUMNS = {'estimates':ESTIMATE_COLUMNS,'hazard':HAZARD_COLUMNS,'sample_counts':COUNT_COLUMNS}
 S1_TARGETS = ('early_core','early_maternal_hiv','early_maternal_smoking','early_birthweight','early_all_baseline')
@@ -26,9 +28,10 @@ LABELS = {'early_core':'Core early-TB model','early_maternal_hiv':'Core + matern
     'ratio_post':'Expanded post-BD model; full follow-up','window_ratio_post':'Expanded post-BD model; restricted follow-up'}
 CONTRAST_ORDER = ('First TB <5 years','First TB <1 year')
 SPIROMETRY_TABLE_COLUMNS = ['target','analysis','model_family','observation_window','outcome','contrast',
-    'unit','interval_type','mean','lower','upper','joint_children','target_children','target_observations',
+    'unit','interval_type','mean','lower','upper','mcse_mean','joint_children','target_children','target_observations',
     'fit_fingerprint','validation_fingerprint']
-S1_COLUMNS = [*SPIROMETRY_TABLE_COLUMNS,'attenuation_percent','attenuation_status']
+S1_COLUMNS = [*SPIROMETRY_TABLE_COLUMNS,'attenuation_percent','attenuation_status',
+    'attenuation_mcse_bound_pp','attenuation_mcse_independent_pp','attenuation_precision_passed']
 S4_COLUMNS = ['scenario','analysis','process','age_band','exposure','estimand','measure','interval_type',
     'posterior_median','lower','upper','joint_children','scheduled_children','scheduled_observations',
     'episode_children','episode_intervals','episode_events','fit_fingerprint','validation_fingerprint']
@@ -68,12 +71,15 @@ def validate_posterior(posterior, contract, target):
         a=np.asarray(posterior[name])
         if a.dtype.kind not in 'iuf' or a.shape != (*shape,*tail) or not np.isfinite(a).all():
             raise ValueError('Sensitivity posterior has invalid numeric values or coordinate shapes.')
-    for name in ('tau_lci','loading_mechanics','sigma_mechanics','sigma_lci','sigma_ratio'):
+    for name in ('tau_lci','tau_target','loading_mechanics','sigma_mechanics','sigma_lci','sigma_ratio'):
         if np.any(posterior[name] <= 0):
             raise ValueError('Sensitivity scale/loading draws must be positive.')
     expected=posterior['tau_lci'][...,None]*posterior['lci_raw']
     if not np.allclose(posterior['lci_process'],expected,rtol=1e-11,atol=1e-12):
         raise ValueError('Stored LCI latent transformation disagrees with primitive draws.')
+    expected_target=posterior['tau_target'][...,None]*posterior['target_raw']
+    if not np.allclose(posterior['target_process'],expected_target,rtol=1e-11,atol=1e-12):
+        raise ValueError('Stored target latent transformation disagrees with primitive draws.')
     return spec,info,shape
 
 
@@ -119,7 +125,7 @@ def summarize_sensitivity(posterior, contract, target, *, compute_mcse=True):
             'observation_window':spec['observation_window'],'outcome':spec['outcome'],'contrast':label,
             'estimand_type':kind,'unit':spec['unit'],'residual_scale':info['target_scale'],**_summarize(value,compute_mcse)})
     hazards=[{'target':target,'model_id':spec['model_id'],'contrast':label,'unit':'hazard ratio',
-              **_summarize(value,compute_mcse)} for label,value in derive_hazard_draws(posterior,target).items()]
+              **_summarize_ratio(value,compute_mcse)} for label,value in derive_hazard_draws(posterior,target).items()]
     counts=_sample_counts(contract);counts.insert(0,'target',target)
     metadata={**info,'family':spec['family'],'observation_window':spec['observation_window'],
         'outcome':spec['outcome'],'unit':spec['unit'],'contrasts':list(contrasts),
@@ -142,7 +148,8 @@ def attenuation(adjusted_mean, core_mean):
     if core_mean == 0:return np.nan,'undefined_zero_core'
     value=100*(1-abs(float(adjusted_mean))/abs(float(core_mean)))
     if not np.isfinite(value):raise ValueError('Attenuation calculation is nonfinite.')
-    return value,'estimated'
+    return value,('zero_adjusted_mean' if adjusted_mean == 0 else
+                  'sign_reversal' if np.sign(adjusted_mean) != np.sign(core_mean) else 'estimated')
 
 
 def _binding(entry):
@@ -153,6 +160,8 @@ def _binding(entry):
         raise ValueError('Sensitivity table input fields have invalid types.')
     if summary.get('diagnostics_passed') is not True or summary.get('status')!='diagnostics_passed':
         raise ValueError('Sensitivity table inputs require accepted complete-posterior diagnostics.')
+    if summary.get('target') not in WHEEZE_TARGETS and summary.get('covariance_ppc_passed') is not True:
+        raise ValueError('Sensitivity table inputs require accepted target covariance adequacy.')
     for name in ('fit_fingerprint','validation_fingerprint'):
         value=summary.get(name)
         if not isinstance(value,str) or len(value)!=64 or any(c not in '0123456789abcdef' for c in value):
@@ -163,9 +172,8 @@ def _binding(entry):
 def _build_tables(new_results, reused_primary, reused_wheeze):
     """Select S1/S3/S4 rows from full-precision, verified model summaries.
 
-    Entries contain freshly reconstructed estimates, aggregate metadata and a
-    verified diagnostic completion. Execution checks their receipt identities;
-    this pure function performs no file access or fitting.
+    Entries contain reconstructed estimates, aggregate metadata, and diagnostic
+    completion records. The execution layer verifies their receipt identities.
     """
     if set(new_results)!=set(DEFAULT_TARGETS) or set(reused_primary)!={'ratio_pre','ratio_post'} or set(reused_wheeze)!=set(WHEEZE_TARGETS):
         raise ValueError('Sensitivity tables require all ten selected fits and four reused fits.')
@@ -182,8 +190,8 @@ def _build_tables(new_results, reused_primary, reused_wheeze):
             chosen=est.loc[est[label_column].eq(label)]
             if len(chosen)!=1:raise ValueError('Sensitivity estimate selection must identify exactly one row.')
             row=chosen.iloc[0]
-            values=np.asarray([row['mean'],row['lower'],row['upper']],float)
-            if not np.isfinite(values).all() or values[1]>values[2] or row['unit']!='percentage points':
+            values=np.asarray([row['mean'],row['lower'],row['upper'],row['mcse_mean']],float)
+            if not np.isfinite(values).all() or values[1]>values[2] or values[3]<0 or row['unit']!='percentage points':
                 raise ValueError('Sensitivity table estimate has invalid interval or units.')
             counts=summary['counts'];target_counts=counts['process_counts']['target']
             rows.append({'target':target,'analysis':LABELS[target],
@@ -191,20 +199,24 @@ def _build_tables(new_results, reused_primary, reused_wheeze):
                 'observation_window':'restricted' if restricted else 'full',
                 'outcome':'Post-BD FEV1/FVC' if target in ('ratio_post','window_ratio_post') else 'Pre-BD FEV1/FVC',
                 'contrast':display,'unit':'percentage points','interval_type':'equal-tailed 95% credible interval',
-                'mean':float(values[0]),'lower':float(values[1]),'upper':float(values[2]),
+                'mean':float(values[0]),'lower':float(values[1]),'upper':float(values[2]),'mcse_mean':float(values[3]),
                 'joint_children':counts['joint_children'],'target_children':target_counts['n_children'],
                 'target_observations':target_counts['n_observations'],
                 'fit_fingerprint':summary['fit_fingerprint'],'validation_fingerprint':summary['validation_fingerprint']})
     s3=pd.DataFrame(rows,columns=SPIROMETRY_TABLE_COLUMNS)
     s1=s3.loc[s3.target.isin(S1_TARGETS)].copy().reset_index(drop=True)
-    attenuation_values=[];statuses=[]
+    precision_rows=[]
     for row in s1.itertuples():
-        if row.target=='early_core':value,status=np.nan,'reference'
+        if row.target=='early_core':
+            precision={'attenuation_percent':np.nan,'attenuation_status':'reference',
+                'attenuation_mcse_bound_pp':np.nan,'attenuation_mcse_independent_pp':np.nan,
+                'attenuation_precision_passed':True}
         else:
-            core=float(s1.loc[s1.target.eq('early_core') & s1.contrast.eq(row.contrast),'mean'].iloc[0])
-            value,status=attenuation(row.mean,core)
-        attenuation_values.append(value);statuses.append(status)
-    s1['attenuation_percent']=attenuation_values;s1['attenuation_status']=statuses
+            core=s1.loc[s1.target.eq('early_core') & s1.contrast.eq(row.contrast)].iloc[0]
+            precision=attenuation_precision(row.mean,float(core['mean']),row.mcse_mean,float(core['mcse_mean']))
+        precision_rows.append(precision)
+    for name in precision_rows[0]:
+        s1[name]=[np.nan if row[name] is None else row[name] for row in precision_rows]
     wheeze=[]
     for target in WHEEZE_TARGETS:
         entry=reused_wheeze[target];summary=_binding(entry)
@@ -228,6 +240,9 @@ def _build_tables(new_results, reused_primary, reused_wheeze):
         'rows':{'table_s1':10,'table_s3':24,'table_s4':12},
         'attenuation':'100*(1-abs(adjusted posterior mean)/abs(early core posterior mean))',
         'attenuation_interval':'none; this is a transformation of posterior means',
+        'attenuation_mcse':'first-order covariance-agnostic upper bound from marginal posterior-mean MCSEs',
+        'attenuation_max_mcse_bound_pp':MAX_MCSE_BOUND_PP,
+        'attenuation_precision_passed':bool(s1.attenuation_precision_passed.all()),
         'zero_core':'undefined_zero_core; no epsilon substitution',
         'negative_attenuation':'retained unchanged; increased effect magnitude',
         'reused_fit_count':4,'new_fit_count':10,'rendered_manuscript':False})

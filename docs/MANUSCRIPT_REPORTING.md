@@ -1,12 +1,12 @@
 # Manuscript tables and numerical text
 
-M13 is implemented and independently validated. It assembles the selected
-manuscript tables and numerical prose from verified M01–M12 aggregate results.
-The M13 baseline suite has 802 passing tests, and actual cumulative M01–M13
-execution passes. The published DOCX is identical to the independently
-inspected ten-page document with verified Arial embedding. Final original-source and copied-source cumulative replay against the reviewed
-M13 source manifest passed. Private receipts verify all reporting payloads and
-preservation of prior scientific outputs and raw fits.
+M13 assembles the selected manuscript tables and numerical prose from verified
+M01–M12 aggregate results. The original M13 baseline passed 802 tests, actual
+cumulative execution, and original-source/copied-source replay. Its DOCX matched
+the independently inspected ten-page document with verified Arial embedding;
+private receipts bind those historical outputs and preserved raw fits. Corrective
+publications require their own execution, numerical, document and visual checks
+against the revised source; the original evidence does not certify them.
 
 ## Selected coverage
 
@@ -21,14 +21,16 @@ The 304 original digit-containing cells comprise 186 estimate cells, 75 count
 cells, 26 numeric headers and 17 contextual labels. All 261 scientific cells
 have computed result bindings. The count category includes the three cohort
 size headers and the children/tests pairs in Table S3. Table 1 includes all
-three parity median/IQR summaries. The digit inventory counts ASCII numerals;
+three parity median/IQR summaries. Every continuous summary includes its available n, distinct from the full descriptive group N. The descriptive cohort is the union of eligible spirometry/oscillometry contributors; outcome-specific analysis samples need not have the same membership. Three contextual Table S3 labels additionally bind the configured restriction endpoint from the verified preparation identity. The digit inventory counts ASCII numerals;
 the complete layouts also preserve labels containing only Unicode subscripts.
 
 All 42 retained numerical sentences have explicit templates and classifications,
-with 95 result tokens and 52 qualitative evidence bindings. Age thresholds,
+with 96 result tokens and 52 qualitative evidence bindings. Age thresholds,
 interval coverage, references and contextual dates are distinguished from study
-estimates. The prose file is a generated companion for review; it does not edit
-either selected manuscript. Context-only statements remain classified, and
+estimates. `numerical_text.txt` contains pipeline-verifiable numerical claims
+with result bindings. It is a numerical companion to the manuscript. Authors must review clinical
+interpretation, limitations, causal language and synthesis before using it. It does
+not edit either selected manuscript. Context-only statements remain classified, and
 qualitative statements retain their supporting result selections. An interval
 that no longer supports a null-compatibility statement requires wording review;
 this does not introduce another model-significance or Monte Carlo acceptance
@@ -51,8 +53,8 @@ Reporting preserves these selected distinctions:
 - Tables 2 and S6 use expanded joint-model posterior means and equal-tailed
   credible intervals. Early-TB weighted and infancy contrasts remain distinct.
 - Table S1 attenuation uses the magnitudes of full-precision posterior means;
-  it has no invented posterior interval. Table S3 preserves separate early-TB,
-  all-age and configured follow-up-window specifications and their samples.
+  it is displayed as approximate whole percentages with a conservative MCSE bound in percentage points, never a posterior interval. The displayed bound is rounded upward to 0.1 pp so its ≤ statement remains conservative. The full-precision bound must be at most 1 pp for accepted publication. A sign reversal retains the computed absolute-ratio value but is explicitly marked; a zero core or zero adjusted mean cannot pass the attenuation precision check. Full-precision attenuation and both conservative and independent-error MCSE values remain available. Table S3 preserves separate early-TB,
+  all-age and configured follow-up-window specifications and their samples. Its three restricted rows, footnote, and numerical sentence P135S03 display the actual inclusive endpoint from preparation/reporting_context. The aggregate context is bound to the verified private analysis settings, so render-only runs do not read a private configuration.
 - Table S2 separates paired pre/post joint-model credible intervals from
   cluster-robust paired-change confidence intervals. Numerical prose uses the
   separate available-case MMEF model.
@@ -81,6 +83,16 @@ and sentence wording or contextual numbers can change their numerical order.
 An archived manuscript literal never replaces a computed value. Scientific
 acceptance remains governed by the independently verified upstream definitions,
 diagnostics and frozen numerical/Monte Carlo criteria.
+
+The preserved original-model release comparison is historical evidence, not
+acceptance evidence for the current corrective revision. In that comparison,
+140 of 304 original table cells matched numerically and 164 differed. Matches
+comprised 25/186 estimate cells, 75/75 count cells, 26/26 numeric headers and
+14/17 contextual labels. Of 42 retained sentences, 21/42 had matching numeric
+sequences and 8/42 matched the complete text exactly. These display comparisons
+do not establish that all point estimates or scientific conclusions agreed.
+The corrective release requires its own numerical, diagnostic and reporting
+checks against its frozen source and accepted aggregate outputs.
 
 ## Command and local configuration
 
@@ -142,12 +154,12 @@ Generated tables, text, original reference comparisons, local bindings and
 validation evidence stay outside the code-only repository. Full raw arrays are
 never copied into the reporting artifacts.
 
-The M13 complete test suite, coverage/lineage checks, actual cumulative execution
-and document structure/font and visual checks pass. Final original-source and
-copied-source cumulative execution against the reviewed source manifest also
-passed, preserving prior scientific outputs and raw fits and reproducing the M13
-payloads under recorded identities. These completed outcomes are bound in local
-receipts. Subsequent modules require their own final-source replay evidence.
+The original M13 baseline passed its complete test suite, coverage/lineage checks,
+actual cumulative execution, and document structure/font and visual checks.
+Original-source and copied-source cumulative execution against that reviewed
+manifest also passed, preserving its scientific outputs and raw fits. Local
+receipts bind those historical outcomes. Subsequent modules and the corrective
+revision require their own final-source execution and publication evidence.
 
 Four upstream flow nodes remain unavailable: antenatal enrollment, antenatal
 loss to follow-up, pregnancy loss and exclusion before the child cohort. The
@@ -156,13 +168,13 @@ components are unavailable; they are never summed as zero. Neither missing
 counts nor archived literals are invented to complete the flow.
 
 The inherited [G08 pre-TB Cox covariance behavior](PRETB_MODELS.md) remains
-explicit in the preserved M13 source registry. The user approved a separate
-M14 actual-risk-membership uncertainty correction for Figure S3. It retains the
+explicit in the preserved M13 source registry. A separate M14 actual-risk-membership uncertainty correction was approved
+for Figure S3. It retains the
 M09 coefficients, hazard ratios, sample and source files, while recomputing robust
 covariance and derived inference. M13 does not overwrite or silently relabel its
-source-reproduction rows. [M14 figure publication](PUBLICATION_FIGURES.md) is
-independently validated, including final-source original/copied replays. M15
+source-reproduction rows. The original [M14 figure publication](PUBLICATION_FIGURES.md) passed
+independent validation, including final-source original/copied replays. M15
 provides `--full` clean reconstruction and aggregate-only
 `--render --render-config FILE`; [RELEASE.md](RELEASE.md) defines their distinct
 identities, prerequisites and acceptance evidence, plus separate source/GitHub
-delivery verification. No separate stage report is produced.
+delivery verification.

@@ -121,7 +121,7 @@ class ReaderTests(unittest.TestCase):
             "date_tb_diagnosed": pd.to_datetime(["2020-01-01", "2021-01-01"]),
             "date_tb_investigated": pd.to_datetime(["2019-12-01", None]),
             "childdob": pd.to_datetime(["2010-01-01"] * 2),
-            "tbcat": ["Confirmed tb", "Probable tb"], "tbtrt": ["yes", "yes"],
+            "tbcat": ["Confirmed tb", "Unconfirmed tb"], "tbtrt": ["yes", "yes"],
             "sex": [2, 2]})
         path = self.folder / "events.dta"
         source.to_stata(path, write_index=False, version=118,
@@ -133,6 +133,23 @@ class ReaderTests(unittest.TestCase):
         label_set = result.metadata["variable_label_sets"]["sex"]
         self.assertEqual(result.metadata["value_labels"][label_set][2], "Male")
         self.assertEqual(result.data.date_tb_diagnosed.iloc[1], pd.Timestamp("2021-01-01"))
+        self.assertEqual(result.metadata['category_checks']['tbcat']['encoding'],'exact_string')
+        self.assertEqual(result.data.tbcat.tolist(),source.tbcat.tolist())
+
+    def test_tb_category_rejects_unknown_blank_and_labelled_numeric_values(self):
+        dates={name:'td' for name in ['childdob','date_tb_diagnosed','date_tb_investigated']}
+        for category in ['Probable tb','confirmed tb','Confirmed tb ','',1,np.nan]:
+            source=pd.DataFrame({'pid_child':['synthetic'], 'childdob':pd.to_datetime(['2010-01-01']),
+                'date_tb_diagnosed':pd.to_datetime(['2011-01-01']),
+                'date_tb_investigated':pd.to_datetime(['2011-01-01']), 'tbcat':[category], 'tbtrt':['yes']})
+            path=self.folder/'categories.dta'
+            numeric=not isinstance(category,str)
+            source.to_stata(path,write_index=False,version=118,convert_dates=dates,
+                            value_labels={'tbcat':{1:'Confirmed tb'}} if numeric else None)
+            with self.subTest(category=category),self.assertRaisesRegex(InputValidationError,'string vocabulary') as caught:
+                read_input(path,'tb_events')
+            self.assertNotIn('synthetic',str(caught.exception))
+            self.assertNotIn(str(path),str(caught.exception))
 
     def test_schema_and_missing_identifier_rejected(self):
         path = self.folder / "events.dta"

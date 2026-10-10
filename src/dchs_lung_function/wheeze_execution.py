@@ -1,7 +1,7 @@
-"""Fingerprint, fit, and validate wheeze age-specific wheeze joint models in private output directories.
+"""Fit and validate age-specific wheeze joint models privately.
 
-Raw sampling identity is separate from validation identity: changed reporting
-or diagnostic code rechecks verified draws without pretending to refit them.
+Sampling and validation have separate identities, so verified draws can be
+rechecked when reporting or diagnostic code changes.
 """
 from __future__ import annotations
 
@@ -27,8 +27,8 @@ from .wheeze_sampling import resolved_sampling,sample_contract,expected_posterio
 CRITERIA = {'min_chains':4,'min_draws':1600,'max_rhat':1.01,
             'min_bulk_ess':400,'min_tail_ess':400,'min_bfmi':.3,
             'max_divergences':0,'max_treedepth_hits':0}
-COMPUTE_SOURCES = ('models/wheeze.py','wheeze_sampling.py','sampling.py','model_runtime.py')
-VALIDATION_SOURCES = ('wheeze_execution.py','diagnostics.py','execution.py','pipeline.py',
+COMPUTE_SOURCES = ('models/wheeze.py','wheeze_sampling.py','sampling.py','model_runtime.py','runtime_bootstrap.py')
+VALIDATION_SOURCES = ('lifecycle.py','wheeze_execution.py','diagnostics.py','execution.py','pipeline.py',
                       'analysis/wheeze_results.py','analysis/wheeze_standardization.py')
 _LOADED_RUNNER_HASH = file_hash(Path(__file__))
 TABLES = ('effects','contrasts','global_tests','support_counts','posterior_predictive_cells','standardized_rr')

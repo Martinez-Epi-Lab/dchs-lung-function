@@ -1,10 +1,14 @@
 # Designated sensitivity models
 
-M12 is implemented and independently validated. This module
+M12 implements the selected sensitivity analyses. This module
 produces aggregate inputs for Tables S1, S3 and S4 and the selected sensitivity
 paragraph. Manuscript tables and figures are rendered in M13 and M14. The
 selected scope uses ten new joint fits, two accepted M04 ratio fits and both
 accepted M10 wheeze scenarios. Reused fits are verified rather than resampled.
+The current corrective specification changes the target covariance model and
+early-event censoring. Its acceptance is governed by the frozen
+[corrective protocol](CORRECTIVE_REVISION.md); historical source-reproduction
+results below describe the previous model, not validation of this revision.
 
 ## Selected analyses
 
@@ -27,12 +31,17 @@ The early family excludes every process measurement on or after first TB
 diagnosed at age five or older. Measurements before a future diagnosis remain
 in the pre/no-TB state. Same-day measurements are post-TB; a diagnosis exactly
 at age one is in the age 1–<5 group, and one exactly at five is outside the
-early-TB exposure. The first-TB process ends at first TB before five or at
-age five. It uses three hazard intervals with boundaries 0, 1, 3 and 5 years.
-These selected early models do not introduce the all-age study-exit rule.
+early-TB exposure. The first-TB process ends at eligible first TB, study exit,
+the administrative endpoint or age five, whichever occurs first. A diagnosis
+on exit or the endpoint counts; one at age five does not. It uses three hazard
+intervals with boundaries 0, 1, 3 and 5 years. This observed-follow-up rule
+replaces the source assumption of full follow-up to age five after exit;
+continued post-exit TB ascertainment was not independently established.
+All lung-process measurements are also bounded by study exit, separately
+from the designated administrative measurement-window restriction.
 
 The all-age family retains measurements after later-onset TB and includes
-separate later-TB shifts and direct effects. Its unchanged M04 first-TB process
+separate later-TB shifts and direct effects. Its M04 first-TB process
 uses interval boundaries 0, 1, 3, 5, 8, 10 and 20 years, with event follow-up
 limited by the configured event endpoint and study exit. Full-follow-up ratio
 comparisons reuse M04. The two new window fits additionally require each
@@ -87,7 +96,19 @@ Normal(0, 0.75) priors. The early log-baseline hazard prior has mean
 log(0.045, 0.018, 0.006) and SD 1.25. The first-TB piecewise-exponential
 likelihood links to the mechanics effect and selected baseline covariates.
 The retained LCI process does not enter the FEV1/FVC mean or the hazard.
-The all-age window fits use the unchanged [M04 graph](PRIMARY_MODELS.md).
+A separate target child intercept, `tau_target * target_raw`, is added to the
+FEV1/FVC mean, with `target_raw ~ Normal(0,1)` and
+`tau_target ~ HalfNormal(1)`. It is independent of mechanics in the prior
+and does not enter any other process or the hazard. The all-age window fits
+use the same revised target intercept in the [M04 graph](PRIMARY_MODELS.md).
+
+Second-stage posterior intervals condition on the estimated nuisance
+regressions and residual scales. They do not propagate first-stage estimation
+uncertainty, whose effect need not have a uniform direction across estimands.
+The hazard's higher-mechanics label means better mechanics on a unit-normal
+factor. That factor is informed jointly by mechanics, target and first-TB
+data, including later measurements; it is not a purely prospective pre-TB
+measurement. Hazard probabilities are evaluated relative to a ratio of one.
 
 Let s be the target residual scale, l its mechanics loading, m the early
 mechanics shift, m1 the additional infancy shift, d the direct early effect
@@ -122,10 +143,28 @@ rows and 300 process/exposure support rows. Selected table inputs are:
 Table S1 attenuation is calculated from full-precision posterior means as
 `100 * (1 - abs(adjusted_mean) / abs(core_mean))`. It is a comparison of mean
 magnitudes, not a mean of draw-level ratios. Negative attenuation is retained
-as increased magnitude. A zero core mean is explicitly undefined; nonfinite
-inputs are rejected. The core row is the reference. No attenuation interval
-is invented, and the sign is the reverse of the historical source column
-that described percentage change in magnitude.
+as increased magnitude. Sign reversal is separately flagged rather than
+hidden by the absolute values. A zero core mean is undefined; a zero adjusted
+mean is a nondifferentiable point for the precision calculation. Neither can
+pass the attenuation-precision gate. The core row is the reference.
+
+For adjusted and core posterior means `a` and `c`, and their mean MCSEs
+`SE_a` and `SE_c`, the conservative first-order MCSE bound is
+
+```text
+100 * SE_a / abs(c) + 100 * abs(a) * SE_c / abs(c)^2.
+```
+
+Cauchy's covariance bound makes this valid for any cross-run Monte Carlo
+correlation within the first-order approximation; it does not presume that
+different fits or seed labels are independent. It is an MCSE bound, not an
+exact error bound or posterior interval. All eight adjusted comparisons must
+have a bound at most one percentage point. Reporting uses approximate whole
+percentages alongside the precision bound. Rounding alone does not establish
+Monte Carlo stability. No attenuation credible interval is invented. These
+mean-magnitude comparisons, potentially across different complete-case
+samples, are not causal mediation estimates. Their sign is the reverse of
+the historical source column describing percentage change in magnitude.
 
 Table S4 retains posterior medians and equal-tailed 95% credible intervals
 for scheduled-wheeze conditional odds ratios and recurrent-episode incidence
@@ -137,9 +176,11 @@ Figure 3A. See [wheeze methods](WHEEZE_MODELS.md).
 
 ## Sampling, validation and execution
 
-The initial fresh specification is four chains, 3,200 retained draws per
-chain, 2,200 tuning iterations, target acceptance 0.95 and maximum tree depth
-10. Seeds use the selected source seed or default plus the prespecified
+The revised initial specification is four chains, 2,200 tuning iterations,
+target acceptance 0.95 and maximum tree depth 10. The five Table S1 fits
+(core, maternal HIV, prenatal smoking, birthweight and all three baseline
+covariates) each retain 12,800 draws per chain; the other five new fits retain
+3,200. Seeds use the selected source seed or default plus the prespecified
 offset 104729. `adapt_diag` starts the four mechanics-indicator and target
 loadings at 0.25, 0.35, 0.45 and 0.55, with initial target residual SD 0.9.
 These starts do not constrain the target-loading prior. All realized controls,
@@ -153,41 +194,40 @@ all-age window archives record their sampling controls.
 
 Complete-posterior acceptance requires zero divergences and tree-depth hits,
 maximum R-hat ≤1.01, minimum bulk and tail ESS ≥400 and BFMI ≥0.3, including
-all child effects. The independent protocol freezes 267 comparisons across
-89 estimands: posterior mean and both equal-tailed interval endpoints. Each
-difference must be at most four times the combined fresh/reference Monte
-Carlo standard error for that statistic. No rounding tolerance, additive
-floor or changed threshold replaces this criterion. Manuscript rounding is
-checked as source provenance, not a gate on fresh Monte Carlo estimates.
+all child effects. Each new fit must also pass the fixed conditional target
+covariance screen: 2,000 replicas using actual pre/no-TB child/repeat membership,
+with both observed ICC and within-child mean square inside inclusive central
+99% predictive bounds. At least 20 repeat children and 30 within-child degrees
+of freedom are required; unevaluable samples block completion. This is a
+model-adequacy screen, not a calibrated classical multiple-testing procedure.
 
-The prespecified protocol allowed one common extension to 6,400 retained
-draws only if all ten initial fits passed diagnostics and at least one frozen
-scientific comparison failed. No extension was needed: all ten initial fits
-and all 267 comparisons passed at 3,200 retained draws per chain. Had the
-extension been triggered, the initial results and failed comparisons would
-have been retained. All ten new fits would have kept identical models,
-priors, tuning, seeds, initialization and thresholds. Their complete initial
-posterior and non-timing sampler statistics would have had to match the
-longer sequence's prefix exactly. Reused M04/M10 fits would remain unchanged.
-Any remaining failure would require investigation without further extensions,
-seed selection or relaxed gates. Diagnostic failures are handled separately
-and block acceptance.
+The frozen corrective protocol permits one common extension of all five
+Table S1 fits to 25,600 retained draws per chain only if all five initial fits
+pass sampler and covariance-PPC gates but at least one attenuation MCSE bound
+exceeds one percentage point. The model, priors, seed, tuning, initialization
+and thresholds remain fixed. Every original posterior draw and non-timing
+sampler statistic must match the longer sequence's prefix exactly. Initial
+results and failed precision checks are preserved. Continued failure blocks
+acceptance; no further extension, selected seed or relaxed gate is authorized
+by this rule. The other fits are not extended under this precision provision.
 
-All ten new fits pass independently recomputed diagnostics over 31,910
-posterior scalars, with zero divergences and tree-depth hits. Every one of the
-267 frozen posterior comparisons passes without changing gates or extending
-sampling. Independent review checks the selected 64 effect rows, 25 hazard
-rows, 300 support rows and all 46 table-input rows, including exact prior-fit
-reuse and the eight attenuation calculations. Archived manuscript literals
-and current output selections are checked separately. The completed M12 synthetic
-suite had 729 passing tests; the repository-wide suite is tracked in the README.
+The previous source-reproduction validation passed 267 mean/quantile
+comparisons across 89 estimands and diagnostics over 31,910 posterior scalars.
+Its ten fits used 3,200 retained draws per chain, needed no extension, and its
+M12 synthetic suite had 729 passing tests. These are historical checks of
+the previous model. The revised specification is not required to reproduce
+those estimates. Independent review instead checks the revised 64 effect
+rows, 25 hazard rows, 300 support rows, all 46 table-input rows, exact prior-fit
+reuse, eight attenuation bounds and frozen adequacy criteria. Old-versus-new
+effects, interval widths and null inclusion are descriptive comparisons.
+Archived manuscript rounding remains a provenance check, not a new fit gate.
 
 The cumulative command is `run.py --through M12` with the private input and
 analysis configurations; `--sensitivity-sampling FILE` supplies explicit
 controls, while earlier flags keep their module-specific meanings. Final
-original-source and copied-source cumulative replays passed, preserving reused
-scientific results and reconstructing the complete selected outputs on resume.
-The private acceptance receipts bind those checks to the reviewed final source
-manifest. This module does not resolve
-the [G08 covariance limitation](PRETB_MODELS.md) or the four unavailable
-antenatal flow counts, and it does not establish final release readiness.
+original-source and copied-source cumulative replays passed for the historical
+release. The corrective revision requires its own complete reconstruction and
+independent acceptance receipts bound to its reviewed source. It preserves the
+separately approved [Figure S3 score-membership correction](PRETB_MODELS.md)
+and its remaining tie/boundary conventions. Four antenatal flow counts remain
+unavailable; neither historical nor revised model checks reconstruct them.

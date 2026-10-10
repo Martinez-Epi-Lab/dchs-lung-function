@@ -129,6 +129,70 @@ class ExportSourceTests(unittest.TestCase):
         with self.assertRaises(exporter.ExportError):
             exporter.export_source(self.source, self.base / 'another.zip')
 
+    def test_manifested_git_checkout_exports_exact_payload_but_verify_tree_stays_strict(self):
+        original = self.exported()
+        checkout = self.base / 'checkout'
+        exporter.extract_archive(self.archive, checkout)
+        (checkout / '.git').mkdir()
+        (checkout / '.git/config').write_text('Invented development metadata')
+        cache = checkout / 'tools/__pycache__'
+        cache.mkdir()
+        (cache / 'invented.pyc').write_bytes(b'not exported')
+        (checkout / '.DS_Store').write_bytes(b'not exported')
+        second = self.base / 'checkout.zip'
+        result = exporter.export_source(checkout, second)
+        self.assertEqual(result['source_manifest_sha256'], original['source_manifest_sha256'])
+        self.assertEqual(second.read_bytes(), self.archive.read_bytes())
+        with self.assertRaises(exporter.ExportError):
+            exporter.verify_tree(checkout)
+        with zipfile.ZipFile(second) as archive:
+            self.assertEqual(set(archive.namelist()), set(self.names) | {'SOURCE_MANIFEST.json'})
+        self.assert_clean()
+
+    def test_manifested_checkout_rejects_extra_directory_cache_payload_and_changed_source(self):
+        self.exported()
+        checkout = self.base / 'checkout'
+        exporter.extract_archive(self.archive, checkout)
+        (checkout / '.git').mkdir()
+        destination = self.base / 'rejected.zip'
+        extra = checkout / 'unexpected'
+        extra.mkdir()
+        with self.assertRaises(exporter.ExportError):
+            exporter.export_source(checkout, destination)
+        extra.rmdir()
+        cache = checkout / 'tools/__pycache__'
+        cache.mkdir()
+        extra = cache / 'private.txt'
+        extra.write_text('Invented non-bytecode content')
+        with self.assertRaises(exporter.ExportError):
+            exporter.export_source(checkout, destination)
+        extra.unlink()
+        source = checkout / 'README.md'
+        source.write_bytes(source.read_bytes() + b'Changed source\n')
+        with self.assertRaises(exporter.ExportError):
+            exporter.export_source(checkout, destination)
+        self.assertFalse(destination.exists())
+        self.assert_clean()
+
+    def test_manifest_change_during_manifested_checkout_snapshot_is_rejected(self):
+        self.exported()
+        checkout = self.base / 'checkout'
+        exporter.extract_archive(self.archive, checkout)
+        (checkout / '.git').mkdir()
+        original_read = exporter._regular_bytes
+        manifest = checkout / 'SOURCE_MANIFEST.json'
+        def read(path):
+            data = original_read(path)
+            if Path(path) == checkout / 'README.md':
+                manifest.write_bytes(manifest.read_bytes() + b'\n')
+            return data
+        destination = self.base / 'rejected.zip'
+        with mock.patch.object(exporter, '_regular_bytes', side_effect=read):
+            with self.assertRaisesRegex(exporter.ExportError, 'manifest changed'):
+                exporter.export_source(checkout, destination)
+        self.assertFalse(destination.exists())
+        self.assert_clean()
+
     def test_unsafe_and_private_allowlist_paths_rejected(self):
         invalid = ('../README.md', '/README.md', 'config/../README.md', 'config/a\\b.json',
                    'data/fake.py', 'src/private/fake.py', 'config/paths.local.json', 'config/.env.json',

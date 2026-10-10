@@ -7,6 +7,7 @@ before reading selected aggregate CSVs. It exposes no participant records.
 from __future__ import annotations
 
 import hashlib
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -133,6 +134,17 @@ def collect_sources(root, prep, directories, settings):
     for name in ('flow','table1_statistics','cohort_ledger','modality_schedule'):
         registry.add('preparation/'+name,pd.read_csv(aggregate_prep/(name+'.csv'),float_precision='round_trip'),
                      {'preparation_fingerprint':pr['fingerprint'],'artifact_sha256':inputs[aggregate_prep/(name+'.csv')]})
+    # Public aggregate context is derived from the already verified preparation
+    # identity, so render-only consumers never need the private configuration.
+    event_end = pr.get('identity',{}).get('settings',{}).get('event_end')
+    try:
+        canonical_end = date.fromisoformat(event_end).isoformat()
+    except (ValueError, TypeError) as exc:
+        raise ValidationError('Manuscript reporting requires a valid configured event endpoint.') from exc
+    require(event_end == canonical_end, 'configured event endpoint must be a canonical ISO date.')
+    registry.add('preparation/reporting_context',pd.DataFrame([{'field':'event_end','value':event_end}]),
+                 {'preparation_fingerprint':pr['fingerprint'],'receipt_sha256':inputs[prep/'receipt.json'],
+                  'identity_setting':'event_end'})
     facts = derive_facts(prep)
     for name,frame in facts.items():
         registry.add('facts/'+name.removeprefix('facts/'),frame,
@@ -154,13 +166,20 @@ def collect_sources(root, prep, directories, settings):
             rr = verify_receipt(raw,identity,('posterior.npz','sample_stats.npz','sampling.json'),status='sampled')
             remember(raw,rr)
             aggregate = directories['outputs']/output_name/target/vf
-            expected = (api.RESULT_FILES if hasattr(api,'RESULT_FILES') else
-                ('diagnostics.json','summary.json','result_metadata.json','estimates.csv','shared_factor.csv','sample_counts.csv'))
+            expected = api.RESULT_FILES
             vr = verify_receipt(aggregate,vi,expected,status=None)
             require(vr.get('raw_receipt_sha256')==file_hash(raw/'receipt.json'),
                     'validated aggregates belong to another raw fit.')
             diagnostics = read_json(aggregate/'diagnostics.json','Model diagnostics')
             require(diagnostics.get('passed') is True, 'source diagnostic gate failed.')
+            if family!='wheeze':
+                from ..covariance_ppc import protocol
+                evidence=read_json(aggregate/'covariance_ppc.json','Covariance adequacy evidence')
+                require(vr['summary'].get('covariance_ppc_passed') is True
+                        and evidence.get('accepted') is True and evidence.get('joint_pass') is True
+                        and evidence.get('status')=='passed' and evidence.get('target')==target
+                        and canonical_bytes(evidence.get('protocol'))==canonical_bytes(protocol()),
+                        'source covariance adequacy gate failed.')
             binding = {'target':target,'contract_sha256':descriptor['sha256'],
                        'fit_fingerprint':fp,'validation_fingerprint':vf,
                        'raw_receipt_sha256':file_hash(raw/'receipt.json'),

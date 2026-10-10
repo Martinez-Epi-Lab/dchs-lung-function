@@ -22,17 +22,19 @@ from .execution import (artifact_subtree, canonical_bytes, file_hash, load_artif
 from .pipeline import ValidationError,read_json as _read_json
 from .models.sensitivity import TARGETS, build_model, validate_contract, contract_key, fit_spec
 from .model_runtime import configure_runtime,model_runtime_identity
+from .model_adequacy import evaluate_covariance, adequacy_status, verify_covariance
+from .covariance_ppc import protocol as covariance_protocol
 from .sensitivity_sampling import resolved_sampling,sample_contract,expected_posterior_shapes
 
 CRITERIA = {'min_chains':4,'min_draws':3200,'max_rhat':1.01,
             'min_bulk_ess':400,'min_tail_ess':400,'min_bfmi':.3,
             'max_divergences':0,'max_treedepth_hits':0}
-COMPUTE_SOURCES = ('models/sensitivity.py','models/spirometry.py','sensitivity_sampling.py','sampling.py','model_runtime.py')
-VALIDATION_SOURCES = ('sensitivity_execution.py','diagnostics.py','execution.py','pipeline.py',
+COMPUTE_SOURCES = ('models/sensitivity.py','models/spirometry.py','sensitivity_sampling.py','sampling.py','model_runtime.py','runtime_bootstrap.py')
+VALIDATION_SOURCES = ('lifecycle.py','model_adequacy.py','covariance_ppc.py','sensitivity_execution.py','diagnostics.py','execution.py','pipeline.py',
                       'analysis/sensitivities.py','analysis/primary_results.py')
 _LOADED_RUNNER_HASH = file_hash(Path(__file__))
 TABLES = ('estimates','hazard','sample_counts')
-RESULT_FILES = ('diagnostics.json','summary.json','result_metadata.json',
+RESULT_FILES = ('covariance_ppc.json','diagnostics.json','summary.json','result_metadata.json',
                 *(name+'.csv' for name in TABLES))
 
 
@@ -102,6 +104,7 @@ def sampling_identity(root, descriptor, target, settings):
 def validation_identity(root, fit_fingerprint, criteria):
     identity = {'schema_version':1,'fit_fingerprint':fit_fingerprint,
                 'source':source_hashes(root,VALIDATION_SOURCES),'criteria':criteria,
+                'covariance_ppc_protocol':covariance_protocol(),
                 'runtime':model_runtime_identity()}
     return digest(identity),identity
 
@@ -186,12 +189,16 @@ def validate_results(results, contract, target, posterior):
                             (results.hazard,derive_hazard_draws(posterior,target))):
             if list(frame.contrast)!=list(draws) or not frame.target.eq(target).all() or not frame.model_id.eq(spec['model_id']).all():
                 raise ValueError()
-            if len(frame) and (frame[SUMMARY_COLUMNS].to_numpy().dtype.kind not in 'iuf' or not np.isfinite(frame[SUMMARY_COLUMNS].to_numpy()).all()):
+            hazard = frame is results.hazard
+            numeric_columns = [name.replace('_zero','_one') for name in SUMMARY_COLUMNS] if hazard else SUMMARY_COLUMNS
+            if len(frame) and (frame[numeric_columns].to_numpy().dtype.kind not in 'iuf' or not np.isfinite(frame[numeric_columns].to_numpy()).all()):
                 raise ValueError()
             for index,value in enumerate(draws.values()):
                 row=frame.iloc[index]; flat=value.reshape(-1)
-                observed=row[['mean','median','lower','upper','probability_below_zero','probability_above_zero','probability_equal_zero']].to_numpy(float)
-                actual=[flat.mean(),np.median(flat),*np.quantile(flat,[.025,.975]),np.mean(flat<0),np.mean(flat>0),np.mean(flat==0)]
+                null = 1 if hazard else 0
+                suffix = 'one' if hazard else 'zero'
+                observed=row[['mean','median','lower','upper',*[f'probability_{side}_{suffix}' for side in ('below','above','equal')]]].to_numpy(float)
+                actual=[flat.mean(),np.median(flat),*np.quantile(flat,[.025,.975]),np.mean(flat<null),np.mean(flat>null),np.mean(flat==null)]
                 if not np.allclose(observed,actual,rtol=1e-12,atol=1e-12) or row.mcse_mean<0:raise ValueError()
         if not results.hazard.unit.eq('hazard ratio').all():raise ValueError()
         for key in ('family','observation_window','outcome','unit'):
@@ -210,10 +217,11 @@ def validate_results(results, contract, target, posterior):
         raise ValidationError('Sensitivity result schema or values differ from primitive posterior summaries.') from None
 
 
-def make_summary(target,fingerprint,validation_fp,validated,diagnostics,results):
+def make_summary(target,fingerprint,validation_fp,validated,diagnostics,results,covariance):
     return {'target':target,'fit_fingerprint':fingerprint,'validation_fingerprint':validation_fp,
             'diagnostics_passed':bool(diagnostics['passed']),
-            'status':'diagnostics_passed' if diagnostics['passed'] else 'diagnostics_failed',
+            'covariance_ppc_passed':covariance['accepted'],
+            'status':adequacy_status(bool(diagnostics['passed']),covariance['accepted']),
             'counts':validated,'result_rows':{name:len(getattr(results,name)) for name in TABLES},
             'scientific_reference_comparison':'requires separate independent validation'}
 
@@ -224,15 +232,17 @@ def verify_aggregates(directory, posterior, stats, contract, target, validated, 
     from .analysis.sensitivities import summarize_sensitivity
     essential = {n:stats[n] for n in ('diverging', 'energy', 'reached_max_treedepth') if n in stats}
     diagnostics = evaluate_diagnostics(posterior, essential, CRITERIA)
+    covariance=evaluate_covariance(posterior,contract,family='sensitivity',target=target)
+    verify_covariance(directory,summary,diagnostics,covariance)
     results = summarize_sensitivity(posterior, contract, target)
     validate_results(results,contract,target,posterior)
-    if (canonical_bytes(summary) != canonical_bytes(make_summary(target,summary.get('fit_fingerprint'),summary.get('validation_fingerprint'),validated,diagnostics,results))
+    if (canonical_bytes(summary) != canonical_bytes(make_summary(target,summary.get('fit_fingerprint'),summary.get('validation_fingerprint'),validated,diagnostics,results,covariance))
             or read_json(directory/'diagnostics.json', 'Sensitivity diagnostics') != diagnostics
             or read_json(directory/'result_metadata.json', 'Sensitivity result metadata') != results.metadata
             or summary.get('counts') != validated or summary.get('target') != target
             or summary.get('result_rows') != {name:len(getattr(results,name)) for name in TABLES} or type(summary.get('diagnostics_passed')) is not bool
             or summary['diagnostics_passed'] != diagnostics['passed']
-            or summary.get('status') != ('diagnostics_passed' if diagnostics['passed'] else 'diagnostics_failed')):
+            or summary.get('status') != adequacy_status(diagnostics['passed'],summary.get('covariance_ppc_passed'))):
         raise ValidationError('Sensitivity aggregates disagree with verified posterior draws or diagnostic gates.')
     for name in TABLES:
         try:
@@ -323,7 +333,7 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
             if (type(diagnostic.get('passed')) is not bool
                     or diagnostic['passed']!=summary.get('diagnostics_passed')
                     or diagnostic.get('status')!=('passed' if diagnostic['passed'] else 'failed')
-                    or summary.get('status')!=('diagnostics_passed' if diagnostic['passed'] else 'diagnostics_failed')):
+                    or summary.get('status')!=adequacy_status(diagnostic['passed'],summary.get('covariance_ppc_passed'))):
                 raise ValidationError('Verified diagnostics and sensitivity completion summary disagree.')
             if receipt.get('raw_receipt_sha256')!=file_hash(final/'receipt.json'):
                 raise ValidationError('Validation receipt is not bound to the verified raw fit.')
@@ -338,12 +348,14 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
         from .analysis.sensitivities import summarize_sensitivity
         essential={name:stats[name] for name in ('diverging','energy','reached_max_treedepth') if name in stats}
         diagnostics=evaluate_diagnostics(posterior,essential,CRITERIA)
+        covariance=evaluate_covariance(posterior,contract,family='sensitivity',target=target)
         results=summarize_sensitivity(posterior,contract,target)
         validate_results(results,contract,target,posterior)
-        summary=make_summary(target,fingerprint,validation_fp,validated,diagnostics,results)
+        summary=make_summary(target,fingerprint,validation_fp,validated,diagnostics,results,covariance)
         stage=Path(tempfile.mkdtemp(prefix='.staging-',dir=output))
         try:
             write_json(stage/'diagnostics.json',diagnostics)
+            write_json(stage/'covariance_ppc.json',covariance)
             write_json(stage/'summary.json',summary)
             write_json(stage/'result_metadata.json',results.metadata)
             for name in TABLES:
@@ -411,20 +423,20 @@ def run_sensitivities(root, config_file, analysis_file, primary_sampling_file,
     if (len(results)!=len(selected) or any(not isinstance(r,dict) or not isinstance(r.get('target'),str) for r in results)
             or sorted(r['target'] for r in results)!=sorted(selected)):
         raise ValidationError('Sensitivity execution requires exactly the ten selected new joint fits.')
-    fields={'target','fit_fingerprint','validation_fingerprint','diagnostics_passed','status','counts',
+    fields={'target','fit_fingerprint','validation_fingerprint','diagnostics_passed','covariance_ppc_passed','status','counts',
             'result_rows','scientific_reference_comparison','raw_fit_reused','validation_reused'}
     for result in results:
         spec=fit_spec(result['target']);passed=result.get('diagnostics_passed')
         row_counts={'estimates':spec['result_rows'],'hazard':spec['hazard_rows'],'sample_counts':30}
         if (set(result)!=fields or type(passed) is not bool
-                or result['status']!=('diagnostics_passed' if passed else 'diagnostics_failed')
+                or result['status']!=adequacy_status(passed,result.get('covariance_ppc_passed'))
                 or not isinstance(result.get('result_rows'),dict)
                 or result['result_rows']!=row_counts
                 or any(type(v) is not int for v in result['result_rows'].values())
                 or any(type(result[k]) is not bool for k in ('raw_fit_reused','validation_reused'))):
             raise ValidationError('Sensitivity completion status or aggregate row inventory is inconsistent.')
     results.sort(key=lambda r:selected.index(r['target']))
-    passed=all(r['diagnostics_passed'] for r in results)
+    passed=all(r['diagnostics_passed'] and r['covariance_ppc_passed'] for r in results)
     tables=publish_tables(root,prep,directories,results,settings,primary_settings,wheeze_settings,resume=resume) if passed else None
     if passed:
         table_fields={'fingerprint','accepted','status','rows','new_fit_count','reused_fit_count',
@@ -446,7 +458,7 @@ def run_sensitivities(root, config_file, analysis_file, primary_sampling_file,
     summary={'through':'M12','preparation_fingerprint':prior['preparation_fingerprint'],
         'selected_models':10,'reused_models':4,'sensitivity_models':results,'sensitivity_tables':tables,
         **{k:v for k,v in expected.items() if k.endswith('_verified')},'feno_models_verified':11,
-        'accepted':passed,'status':'accepted' if passed else 'diagnostics_failed',
+        'accepted':passed,'status':'accepted' if passed else ('diagnostics_failed' if not all(r['diagnostics_passed'] for r in results) else 'model_adequacy_failed'),
         'inherited_limitations':['G08: pre-TB source covariance limitation remains unresolved',
                                 'Four upstream antenatal flow counts remain unavailable'],
         'scientific_reference_comparison':'requires separate independent validation'}

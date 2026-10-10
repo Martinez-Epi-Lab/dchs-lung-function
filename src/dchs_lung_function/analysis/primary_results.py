@@ -195,6 +195,20 @@ def _summarize(draws, compute_mcse):
     return result
 
 
+def _summarize_ratio(draws, compute_mcse):
+    """Summarize a positive ratio against its no-association value of one."""
+    draws = np.asarray(draws)
+    if not np.isfinite(draws).all() or (draws <= 0).any():
+        raise PrimaryResultsError('Ratio summaries require finite positive posterior draws.')
+    result = _summarize(draws, compute_mcse)
+    for direction in ('below', 'above', 'equal'):
+        result.pop('probability_' + direction + '_zero')
+    result.update(probability_below_one=float(np.mean(draws < 1)),
+                  probability_above_one=float(np.mean(draws > 1)),
+                  probability_equal_one=float(np.mean(draws == 1)))
+    return result
+
+
 def _sample_counts(prepared):
     rows = []
     for process, frame in prepared["frames"].items():

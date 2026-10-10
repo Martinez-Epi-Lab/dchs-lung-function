@@ -82,6 +82,15 @@ statuses. A missing estimate is not replaced with a risk ratio of one or
 zero. Expected boundary non-estimability is distinguished from a numerical
 failure; numerical failures prevent a successful module completion marker.
 
+An estimable contrast with very few exposed events is still reported with its
+exact counts, risk ratio and interval. Sparse-event normal-Wald inference can
+be unstable even when coefficients and sandwich calculations converge. The
+selected covariance has no finite-cluster adjustment, and numerical agreement
+with an independent calculation does not establish small-sample coverage or
+calibration of a significance threshold. These limitations are not addressed
+by the independent target intercept added to the separate continuous joint
+models; that covariance correction does not change this binary GEE model.
+
 Validation checks the outcome classification, exposure state, model matrix,
 cluster membership and counts before comparing results. Independent
 Poisson score equations and a separately calculated cluster sandwich check
@@ -117,5 +126,6 @@ inventory and its diagnostic status. Changed or missing artifacts fail
 validation. Only an accepted cumulative run writes `binary_current.json` in
 private work. Command success establishes numerical acceptance; agreement
 with the selected scientific reference is independently documented in private
-validation evidence. Final manuscript rendering and GitHub release remain
-later modules.
+validation evidence. Manuscript rendering and source delivery have separate
+acceptance receipts; current reconstruction also requires the preceding
+primary models' covariance-PPC acceptance.

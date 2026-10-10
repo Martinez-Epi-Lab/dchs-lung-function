@@ -431,7 +431,7 @@ def fabricated_figure_registry():
         if source not in present:
             add(source,{k:'unused' for k in _schema(source)})
     counter = 0
-    while len(records)<3195:
+    while len(records)<3196:
         add('primary/ratio_pre/estimates',{'contrast':'unused-'+str(counter)})
         counter += 1
     exported = {'schema_version':1,'sources':sorted(schemas['sources']),
@@ -672,8 +672,8 @@ class FigureExecutionTests(unittest.TestCase):
             'summary':source_summary,'files':{n:file_hash(self.source/n) for n in pretb_execution.RESULT_FILES}})
         self.registry,self.spec,self.correction=deepcopy(self.figure_fixture)
         self.data=deepcopy(self.data_fixture)
-        self.coverage={'numbered_tables':8,'physical_tables':10,'numeric_cells':304,'scientific_cells':261,
-            'cell_classifications':{'estimate':186,'count':75,'header':26,'context':17},'sentences':42,'value_tokens':95,'qualitative_bindings':52}
+        self.coverage={'numbered_tables':8,'physical_tables':10,'numeric_cells':304,'scientific_cells':261,'bound_context_cells':3,
+            'cell_classifications':{'estimate':186,'count':75,'header':26,'context':17},'sentences':42,'value_tokens':96,'qualitative_bindings':52}
         upstream={'primary_models_verified':12,'binary_models_verified':28,'trajectory_analyses_verified':4,
             'mechanics_models_verified':6,'shared_factor_rows_verified':6,'supporting_joint_models_verified':7,
             'supporting_deterministic_fits_verified':10,'pretb_models_verified':17,'wheeze_models_verified':2,'feno_models_verified':11}
@@ -682,7 +682,7 @@ class FigureExecutionTests(unittest.TestCase):
             'source_bindings':[{'family':'pretb','fingerprint':self.source_fp,'receipt_sha256':file_hash(self.source/'receipt.json')}]}
         report_fp=ex.digest(report_identity);self.publication=self.output/'manuscript_reporting'/report_fp;self.publication.mkdir(parents=True)
         summary={'accepted':True,'status':'accepted','through':'M13','fingerprint':report_fp,'preparation_fingerprint':self.prep_fp,
-            'registry_records':3195,'aggregate_sources':142,'new_model_fits':0,'coverage':self.coverage,
+            'registry_records':3196,'aggregate_sources':143,'new_model_fits':0,'coverage':self.coverage,
             'preceding_modules_verified':12,'source_publications_verified':45,'upstream_models':upstream}
         self.prior={**summary,'resumed':True}
         for n in ex.REPORTING_FILES:
@@ -933,6 +933,43 @@ class FigureConfigurationCliAndRendererTests(unittest.TestCase):
         result=self.renderer._text('FEV₁/FVC and R₆–R₁₈ − 1')
         self.assertEqual(result,'FEV$_{1}$/FVC and R$_{6}$-R$_{18}$ - 1')
         self.assertNotIn('₁',result);self.assertNotIn('−',result)
+
+    def test_shared_trajectory_axes_use_complete_intervals_without_mutating_inputs(self):
+        spec=json.loads((ROOT/'config/publication_figures.json').read_text())['figures'][0]
+        for i,panel in enumerate(spec['panels']):
+            panel['points']=[{'point':float(i),'lower':float(i)-1,'upper':float(i)+2}]
+        spec['caption']={'text':'Fabricated caption','bindings':{}}
+        before=deepcopy(spec);canvas=mock.MagicMock()
+        canvas.wrap.side_effect=lambda text,*args:text
+        with mock.patch.object(self.renderer,'_Canvas',return_value=canvas),mock.patch.object(self.renderer,'_trajectory') as draw:
+            self.renderer._build_figure(spec,{})
+        panels=[call.args[1] for call in draw.call_args_list]
+        for left,right in [(0,1),(2,3)]:
+            self.assertEqual(panels[left]['y_axis']['limits'],panels[right]['y_axis']['limits'])
+            self.assertLess(panels[left]['y_axis']['limits'][0],left-1)
+            self.assertGreater(panels[left]['y_axis']['limits'][1],right+2)
+        self.assertEqual(spec,before)
+
+    def test_selected_figure_styles_expose_reference_and_pointwise_mean_bands(self):
+        figures=json.loads((ROOT/'config/publication_figures.json').read_text())['figures']
+        trajectory=figures[0]
+        self.assertTrue(all(p['series_styles']['No recorded TB']['line']=='dashed' for p in trajectory['panels']))
+        self.assertIn('pointwise, not simultaneous',trajectory['caption']['template'])
+        self.assertTrue(all(p['annotation']['show'] is True for p in figures[6]['panels']))
+
+    def test_export_resolution_caption_content_bounds_are_checked(self):
+        fonts={'arial':Path('/System/Library/Fonts/Supplemental/Arial.ttf'),
+               'arial_bold':Path('/System/Library/Fonts/Supplemental/Arial Bold.ttf')}
+        if not all(p.is_file() for p in fonts.values()):self.skipTest('Actual external Arial files are required for this font-metric integration check.')
+        canvas=self.renderer._Canvas(4,3,fonts)
+        text=canvas.wrap('A synthetic caption with enough words to exercise physical wrapping.',3,9.2)
+        canvas.caption_artist=canvas.label(.5,2.5,text,size=9.2)
+        audited=canvas.audit()
+        self.assertEqual(audited['measurement_dpi'],600)
+        self.assertGreaterEqual(audited['caption_right_margin_inches'],.5)
+        canvas.caption_artist.set_text('Unwrapped text '*20)
+        with self.assertRaisesRegex(ValueError,'outside'):canvas.audit()
+        canvas.fig.clear()
 
     def test_rendering_refuses_wrong_dpi_or_order_before_any_figures_are_created(self):
         for dpi in (300,True,600.):

@@ -13,14 +13,14 @@ from test_spirometry import fabricated_contract
 
 def independent_log_density(point, contract):
     """Probability math in value-variable space, independent of graph metadata."""
-    positive = ('tau_lci', 'loading_mechanics', 'sigma_mechanics', 'sigma_lci', 'sigma_ratio')
+    positive = ('tau_target', 'tau_lci', 'loading_mechanics', 'sigma_mechanics', 'sigma_lci', 'sigma_ratio')
     values = {key: np.asarray(value, float) for key, value in point.items() if not key.endswith('_log__')}
     for key in positive:
         values[key] = np.exp(point[key + '_log__'])
     def normal(x, mu, sd):
         return np.sum(-np.log(sd)-.5*np.log(2*np.pi)-.5*((x-mu)/sd)**2)
     total = normal(values['mechanics'], 0., 1.) + normal(values['lci_raw'], 0., 1.)
-    total += normal(values['loading_ratio_mechanics'], 0., 1.)
+    total += normal(values['loading_ratio_mechanics'], 0., 1.) + normal(values['target_raw'], 0., 1.)
     for key in ('shift_mechanics', 'shift_mechanics_infancy', 'shift_mechanics_late',
                 'shift_lci', 'shift_lci_infancy', 'shift_lci_late',
                 'direct_ratio', 'direct_ratio_infancy', 'direct_ratio_late',
@@ -44,7 +44,7 @@ def independent_log_density(point, contract):
             mu = values['tau_lci']*values['lci_raw'][child]+terms @ l_shift
             sd = values['sigma_lci']
         else:
-            mu = values['loading_ratio_mechanics']*(values['mechanics'][child]+terms @ m_shift)+terms @ direct
+            mu = values['loading_ratio_mechanics']*(values['mechanics'][child]+terms @ m_shift)+values['tau_target']*values['target_raw'][child]+terms @ direct
             sd = values['sigma_ratio']
         total += normal(frame.y_std.to_numpy(float), mu, sd)
     log_h = (values['log_baseline_hazard'][None, :]

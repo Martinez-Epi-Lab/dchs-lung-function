@@ -70,18 +70,25 @@ def build_checks(registry, tables, specification):
         if entry['colspan']!=actual.get('colspan',1):
             raise ReportingError('A retained numerical cell has the wrong span.')
         bound=None
-        if entry['classification'] in {'estimate','count'}:
+        if entry['classification'] in {'estimate','count'} or (entry['classification']=='context' and 'binding' in entry):
             bound=bound_cell(registry,entry['binding'])
             if any(bound[k]!=actual[k] for k in ('result_key','fields','style','digits')):
                 raise ReportingError('Table and coverage map use different scientific results.')
+            if entry['classification']=='context' and (actual.get('prefix','')!=entry.get('prefix','')
+                    or actual.get('suffix','')!=entry.get('suffix','')):
+                raise ReportingError('Configured context label decorations differ from the coverage map.')
         elif actual['result_key'] is not None or actual['text']!=entry['label']:
             raise ReportingError('Context/header digits are mislabeled as scientific results or changed.')
         checked.append({'id':entry['id'],'physical_table_id':entry['physical_table_id'],
                         'row':entry['reference_row'],'column':entry['reference_column'],
                         'classification':entry['classification'],'display':actual['text'],
                         'value':bound,'status':'computed' if bound else 'context_label'})
-    scientific={k for k,c in coordinates.items() if c['result_key']}
-    if scientific!={k for k in seen if coordinates[k]['result_key']} or len(scientific)!=261:
+    bound_coordinates={k for k,c in coordinates.items() if c['result_key']}
+    scientific={(e['physical_table_id'],e['reference_row'],e['reference_column']) for e in entries
+                if e['classification'] in {'estimate','count'}}
+    bound_context={(e['physical_table_id'],e['reference_row'],e['reference_column']) for e in entries
+                   if e['classification']=='context' and 'binding' in e}
+    if bound_coordinates!=scientific|bound_context or len(scientific)!=261:
         raise ReportingError('Every scientific table cell must be included in the coverage map.')
     sentences=specification['sentences']
     if len(sentences)!=42 or len({s['id'] for s in sentences})!=42:
@@ -117,7 +124,7 @@ def build_checks(registry, tables, specification):
                          'status':'scientific_wording_review_required' if unsupported else
                                   'contains_explicit_unavailable_facts' if missing else 'resolved'})
     return {'schema_version':1,'coverage':{'numbered_tables':8,'physical_tables':10,'numeric_cells':304,
-            'scientific_cells':261,'cell_classifications':dict(COUNTS),'sentences':42,
+            'scientific_cells':261,'bound_context_cells':len(bound_context),'cell_classifications':dict(COUNTS),'sentences':42,
             'value_tokens':sum(len(s['tokens']) for s in resolved),
             'qualitative_bindings':sum(len(s['qualitative_evidence']) for s in resolved)},
             'cells':checked,'sentences':resolved,

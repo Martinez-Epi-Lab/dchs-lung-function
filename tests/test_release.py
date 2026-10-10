@@ -272,7 +272,7 @@ class FullExecutionTests(SyntheticReleaseCase):
         self.assert_no_completion()
 
     def test_failed_completion_write_can_resume_without_empty_final_directory(self):
-        with mock.patch.object(full.os, 'link', side_effect=OSError('Synthetic disk failure')), self.assertRaises(OSError): self.run_full()
+        with mock.patch.object(full, 'rename_noreplace', side_effect=OSError('Synthetic disk failure')), self.assertRaises(OSError): self.run_full()
         self.assert_no_completion()
         self.assertTrue(self.run_full(resume=True)['accepted'])
 

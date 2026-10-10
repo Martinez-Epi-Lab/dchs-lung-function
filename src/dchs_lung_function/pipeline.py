@@ -494,8 +494,8 @@ def main(argv=None, root=None):
                     arguments.sampling or root/'config/primary_sampling.json',
                     targets=arguments.targets,jobs=arguments.jobs,resume=arguments.resume)
                 passed=sum(model['diagnostics_passed'] for model in result['models'])
-                print("Primary fitting completed: {}/{} models passed diagnostics. Independent scientific comparison is a separate check.".format(passed,result['selected_models']))
-                return 0 if result['diagnostics_passed'] else 2
+                print("Primary fitting completed: {}/{} models passed diagnostics. Covariance adequacy status: {}. Independent scientific comparison is a separate check.".format(passed,result['selected_models'],result.get('status','incomplete')))
+                return 0 if result.get('accepted') is True and result.get('covariance_ppc_passed') is True else 2
             if arguments.sampling or arguments.targets or arguments.jobs!=1:
                 raise ValidationError("Sampling options require --through M04 through M14; --targets applies to M04 only.")
             from .execution import run_preparation

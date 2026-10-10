@@ -22,15 +22,17 @@ from .execution import (artifact_subtree, canonical_bytes, file_hash, load_artif
 from .pipeline import ValidationError,read_json as _read_json
 from .supporting_sampling import (TARGETS, build_model, validate_contract, contract_key, fit_spec)
 from .model_runtime import configure_runtime,model_runtime_identity
+from .model_adequacy import evaluate_covariance, adequacy_status, verify_covariance
+from .covariance_ppc import protocol as covariance_protocol
 from .supporting_sampling import resolved_sampling,sample_contract
 
 CRITERIA = {'min_chains':4,'min_draws':1600,'max_rhat':1.01,
             'min_bulk_ess':400,'min_tail_ess':400,'min_bfmi':.3,
             'max_divergences':0,'max_treedepth_hits':0}
-COMPUTE_SOURCES = ('models/mmef.py','models/x6.py','supporting_sampling.py','sampling.py','model_runtime.py')
-VALIDATION_SOURCES = ('supporting_execution.py','diagnostics.py','analysis/supporting_results.py','analysis/primary_results.py')
+COMPUTE_SOURCES = ('models/mmef.py','models/x6.py','supporting_sampling.py','sampling.py','model_runtime.py','runtime_bootstrap.py')
+VALIDATION_SOURCES = ('lifecycle.py','execution.py','pipeline.py','model_adequacy.py','covariance_ppc.py','supporting_execution.py','diagnostics.py','analysis/supporting_results.py','analysis/primary_results.py')
 _LOADED_RUNNER_HASH = file_hash(Path(__file__))
-RESULT_FILES = ('diagnostics.json', 'summary.json', 'result_metadata.json',
+RESULT_FILES = ('covariance_ppc.json','diagnostics.json', 'summary.json', 'result_metadata.json',
                 'estimates.csv', 'hazard.csv', 'sample_counts.csv')
 
 
@@ -100,6 +102,7 @@ def sampling_identity(root, descriptor, target, settings):
 def validation_identity(root, fit_fingerprint, criteria):
     identity = {'schema_version':1,'fit_fingerprint':fit_fingerprint,
                 'source':source_hashes(root,VALIDATION_SOURCES),'criteria':criteria,
+                'covariance_ppc_protocol':covariance_protocol(),
                 'runtime':model_runtime_identity()}
     return digest(identity),identity
 
@@ -162,13 +165,15 @@ def verify_aggregates(directory, posterior, stats, contract, target, validated, 
     from .analysis.supporting_results import summarize_supporting
     essential = {n:stats[n] for n in ('diverging', 'energy', 'reached_max_treedepth') if n in stats}
     diagnostics = evaluate_diagnostics(posterior, essential, CRITERIA)
+    covariance=evaluate_covariance(posterior,contract,family='supporting',target=target)
+    verify_covariance(directory,summary,diagnostics,covariance)
     results = summarize_supporting(posterior, contract, target)
     if (read_json(directory/'diagnostics.json', 'Supporting diagnostics') != diagnostics
             or read_json(directory/'result_metadata.json', 'Supporting result metadata') != results.metadata
             or summary.get('counts') != validated or summary.get('target') != target
             or summary.get('result_rows') != fit_spec(target)['result_rows'] or type(summary.get('diagnostics_passed')) is not bool
             or summary['diagnostics_passed'] != diagnostics['passed']
-            or summary.get('status') != ('diagnostics_passed' if diagnostics['passed'] else 'diagnostics_failed')):
+            or summary.get('status') != adequacy_status(diagnostics['passed'],summary.get('covariance_ppc_passed'))):
         raise ValidationError('Supporting aggregates disagree with verified posterior draws or diagnostic gates.')
     for name in ('estimates', 'hazard', 'sample_counts'):
         try:
@@ -253,7 +258,7 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
             if (type(diagnostic.get('passed')) is not bool
                     or diagnostic['passed']!=summary.get('diagnostics_passed')
                     or diagnostic.get('status')!=('passed' if diagnostic['passed'] else 'failed')
-                    or summary.get('status')!=('diagnostics_passed' if diagnostic['passed'] else 'diagnostics_failed')):
+                    or summary.get('status')!=adequacy_status(diagnostic['passed'],summary.get('covariance_ppc_passed'))):
                 raise ValidationError('Verified diagnostics and supporting completion summary disagree.')
             if receipt.get('raw_receipt_sha256')!=file_hash(final/'receipt.json'):
                 raise ValidationError('Validation receipt is not bound to the verified raw fit.')
@@ -268,15 +273,18 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
         from .analysis.supporting_results import summarize_supporting
         essential={name:stats[name] for name in ('diverging','energy','reached_max_treedepth') if name in stats}
         diagnostics=evaluate_diagnostics(posterior,essential,CRITERIA)
+        covariance=evaluate_covariance(posterior,contract,family='supporting',target=target)
         results=summarize_supporting(posterior,contract,target)
         summary={'target':target,'fit_fingerprint':fingerprint,'validation_fingerprint':validation_fp,
                  'diagnostics_passed':bool(diagnostics['passed']),
-                 'status':'diagnostics_passed' if diagnostics['passed'] else 'diagnostics_failed',
+                 'covariance_ppc_passed':covariance['accepted'],
+                 'status':adequacy_status(bool(diagnostics['passed']),covariance['accepted']),
                  'counts':validated,'result_rows':len(results.estimates),
                  'scientific_reference_comparison':'requires separate independent validation'}
         stage=Path(tempfile.mkdtemp(prefix='.staging-',dir=output))
         try:
             write_json(stage/'diagnostics.json',diagnostics)
+            write_json(stage/'covariance_ppc.json',covariance)
             write_json(stage/'summary.json',summary)
             write_json(stage/'result_metadata.json',results.metadata)
             for name,frame in [('estimates',results.estimates),('hazard',results.hazard),('sample_counts',results.sample_counts)]:
@@ -334,7 +342,7 @@ def run_supporting(root, config_file, analysis_file, primary_sampling_file,
     for result in results:
         accepted = result.get('diagnostics_passed')
         if (type(accepted) is not bool
-                or result.get('status') != ('diagnostics_passed' if accepted else 'diagnostics_failed')
+                or result.get('status') != adequacy_status(accepted,result.get('covariance_ppc_passed'))
                 or result.get('result_rows') != fit_spec(result['target'])['result_rows']):
             raise ValidationError('Supporting joint completion contradicts its diagnostic status or row inventory.')
     results.sort(key=lambda result:selected.index(result['target']))
@@ -348,14 +356,14 @@ def run_supporting(root, config_file, analysis_file, primary_sampling_file,
     if (verified['fingerprint'] != prior['preparation_fingerprint']
             or [file_hash(p) for p in config_paths] != sampling_hashes):
         raise ValidationError('Preparation or sampling dependencies changed during supporting execution.')
-    passed = all(result['diagnostics_passed'] for result in results) and repeated['accepted']
+    passed = all(result['diagnostics_passed'] and result['covariance_ppc_passed'] for result in results) and repeated['accepted']
     summary = {'through':'M08', 'preparation_fingerprint':prior['preparation_fingerprint'],
                'selected_models':len(results), 'supporting_models':results,
                'deterministic_fits':repeated['fitted_models'], 'supporting_repeated':repeated,
                'primary_models_verified':12, 'binary_models_verified':28,
                'trajectory_analyses_verified':4, 'mechanics_models_verified':6,
                'shared_factor_rows_verified':6, 'accepted':passed,
-               'status':'accepted' if passed else 'fit_or_diagnostics_failed',
+               'status':'accepted' if passed else ('model_adequacy_failed' if all(r['diagnostics_passed'] for r in results) and repeated['accepted'] else 'fit_or_diagnostics_failed'),
                'scientific_reference_comparison':'requires separate independent validation'}
     if passed:
         write_pointer(directories['work']/'supporting_current.json', summary)

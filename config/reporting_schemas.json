@@ -142,7 +142,8 @@
     "wheeze/secondary_sex_smoking_birthweight/global_tests": "wheeze/global_tests",
     "wheeze/secondary_sex_smoking_birthweight/posterior_predictive_cells": "wheeze/posterior_predictive_cells",
     "wheeze/secondary_sex_smoking_birthweight/standardized_rr": "wheeze/standardized_rr",
-    "wheeze/secondary_sex_smoking_birthweight/support_counts": "wheeze/support_counts"
+    "wheeze/secondary_sex_smoking_birthweight/support_counts": "wheeze/support_counts",
+    "preparation/reporting_context": "preparation/reporting_context"
   },
   "schemas": {
     "binary/estimates": [
@@ -297,9 +298,9 @@
       "median",
       "lower",
       "upper",
-      "probability_below_zero",
-      "probability_above_zero",
-      "probability_equal_zero",
+      "probability_below_one",
+      "probability_above_one",
+      "probability_equal_one",
       "mcse_mean"
     ],
     "mechanics/sample_counts": [
@@ -446,13 +447,17 @@
       "mean",
       "lower",
       "upper",
+      "mcse_mean",
       "joint_children",
       "target_children",
       "target_observations",
       "fit_fingerprint",
       "validation_fingerprint",
       "attenuation_percent",
-      "attenuation_status"
+      "attenuation_status",
+      "attenuation_mcse_bound_pp",
+      "attenuation_mcse_independent_pp",
+      "attenuation_precision_passed"
     ],
     "sensitivity/table_s3": [
       "target",
@@ -466,6 +471,7 @@
       "mean",
       "lower",
       "upper",
+      "mcse_mean",
       "joint_children",
       "target_children",
       "target_observations",
@@ -521,9 +527,9 @@
       "median",
       "lower",
       "upper",
-      "probability_below_zero",
-      "probability_above_zero",
-      "probability_equal_zero",
+      "probability_below_one",
+      "probability_above_one",
+      "probability_equal_one",
       "mcse_mean"
     ],
     "sensitivity_model/sample_counts": [
@@ -593,9 +599,9 @@
       "median",
       "lower",
       "upper",
-      "probability_below_zero",
-      "probability_above_zero",
-      "probability_equal_zero",
+      "probability_below_one",
+      "probability_above_one",
+      "probability_equal_one",
       "mcse_mean"
     ],
     "supporting/sample_counts": [
@@ -878,6 +884,10 @@
       "observations_or_intervals",
       "events_or_positive",
       "person_years"
+    ],
+    "preparation/reporting_context": [
+      "field",
+      "value"
     ]
   }
 }

@@ -21,11 +21,11 @@ The 304 original digit-containing cells comprise 186 estimate cells, 75 count
 cells, 26 numeric headers and 17 contextual labels. All 261 scientific cells
 have computed result bindings. The count category includes the three cohort
 size headers and the children/tests pairs in Table S3. Table 1 includes all
-three parity median/IQR summaries. The digit inventory counts ASCII numerals;
+three parity median/IQR summaries. Every continuous summary includes its available n, distinct from the full descriptive group N. The descriptive cohort is the union of eligible spirometry/oscillometry contributors; outcome-specific analysis samples need not have the same membership. Three contextual Table S3 labels additionally bind the configured restriction endpoint from the verified preparation identity. The digit inventory counts ASCII numerals;
 the complete layouts also preserve labels containing only Unicode subscripts.
 
 All 42 retained numerical sentences have explicit templates and classifications,
-with 95 result tokens and 52 qualitative evidence bindings. Age thresholds,
+with 96 result tokens and 52 qualitative evidence bindings. Age thresholds,
 interval coverage, references and contextual dates are distinguished from study
 estimates. The prose file is a generated companion for review; it does not edit
 either selected manuscript. Context-only statements remain classified, and
@@ -51,8 +51,8 @@ Reporting preserves these selected distinctions:
 - Tables 2 and S6 use expanded joint-model posterior means and equal-tailed
   credible intervals. Early-TB weighted and infancy contrasts remain distinct.
 - Table S1 attenuation uses the magnitudes of full-precision posterior means;
-  it has no invented posterior interval. Table S3 preserves separate early-TB,
-  all-age and configured follow-up-window specifications and their samples.
+  it is displayed as approximate whole percentages with a conservative MCSE bound in percentage points, never a posterior interval. The displayed bound is rounded upward to 0.1 pp so its ≤ statement remains conservative. The full-precision bound must be at most 1 pp for accepted publication. A sign reversal retains the computed absolute-ratio value but is explicitly marked; a zero core or zero adjusted mean cannot pass the attenuation precision check. Full-precision attenuation and both conservative and independent-error MCSE values remain available. Table S3 preserves separate early-TB,
+  all-age and configured follow-up-window specifications and their samples. Its three restricted rows, footnote, and numerical sentence P135S03 display the actual inclusive endpoint from preparation/reporting_context. The aggregate context is bound to the verified private analysis settings, so render-only runs do not read a private configuration.
 - Table S2 separates paired pre/post joint-model credible intervals from
   cluster-robust paired-change confidence intervals. Numerical prose uses the
   separate available-case MMEF model.

@@ -311,6 +311,8 @@ def _file_sha(path):
 def verify_tree(root, *, expected_manifest_sha256=None):
     """Verify an extracted package, rejecting all extras including caches/.git."""
     root = _resolve(root)
+    _require((root / MANIFEST).exists() or (root / MANIFEST).is_symlink(),
+             "SOURCE_MANIFEST.json is missing; verify-tree requires an extracted source release, not the development checkout.")
     manifest_data = _regular_bytes(root / MANIFEST)
     manifest = _json(manifest_data)
     _require(isinstance(manifest, dict) and isinstance(manifest.get('files'), dict),

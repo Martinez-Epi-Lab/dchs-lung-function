@@ -2,6 +2,8 @@
 
 Reproducible Python code for the DCHS lung-function manuscript and appendix. The workflow imports authorized study extracts, rebuilds the selected samples, fits all 37 joint models and the deterministic analyses, and generates eight numbered tables, numerical text and nine publication figures. Study data, local configuration, raw posteriors and generated study results remain outside this source package.
 
+The current [corrective specification](docs/CORRECTIVE_REVISION.md) adds independent target child intercepts, bounds threshold-model TB follow-up by observed exit, and requires conditional covariance checks and explicit Table S1 Monte Carlo precision. Prior source-reproduction receipts describe the previous models. Acceptance of this revision requires its own complete reconstruction and independent review; old numerical agreement alone is not a model-adequacy test.
+
 ## Prerequisites
 
 The reference scientific environment uses Python 3.12.14 on macOS ARM64, with 41 exact dependency pins in `requirements-models.lock.txt`. Bayesian sampling requires a working C++ compiler. Supply the authorized study extracts and reference lookup listed in [INPUTS.md](docs/INPUTS.md), licensed actual Arial/Arial Bold font files, and a separately installed `pdffonts` executable. The standard-library DOCX renderer needs no `python-docx`; its configured interpreter can be the scientific interpreter.
@@ -77,6 +79,7 @@ Private work holds typed participant-level intermediates, complete posterior arr
 | Wheeze and standardized probability ratios | [Wheeze models](docs/WHEEZE_MODELS.md) |
 | Visit-specific FeNO | [FeNO models](docs/FENO_MODELS.md) |
 | Designated sensitivity analyses | [Sensitivity models](docs/SENSITIVITY_MODELS.md) |
+| Revised covariance, censoring and precision requirements | [Corrective revision](docs/CORRECTIVE_REVISION.md) |
 | Tables, numerical prose and publication figures | [Reporting](docs/MANUSCRIPT_REPORTING.md), [figures](docs/PUBLICATION_FIGURES.md) |
 
 Four upstream antenatal counts and the combined antenatal/pregnancy-loss fact remain explicitly unavailable. They are not inferred or treated as zero. Exact aggregate values remain reportable when N is 1–9; participant-level material stays private.

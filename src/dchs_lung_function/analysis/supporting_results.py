@@ -3,12 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import pandas as pd
-from .primary_results import _scalar_draws,_sample_counts,_summarize
+from .primary_results import _scalar_draws,_sample_counts,_summarize,_summarize_ratio
 from ..supporting_sampling import fit_spec,validate_contract
 
-HAZARDS={'Higher pre-TB mechanics factor':'assoc_mechanics','Male sex':'hazard_male'}
+HAZARDS={'Higher (better) jointly estimated mechanics factor':'assoc_mechanics','Male sex':'hazard_male'}
 HAZARD_COLUMNS=['target','outcome','estimand','estimand_type','unit','mean','median','lower','upper',
-                'probability_below_zero','probability_above_zero','probability_equal_zero','mcse_mean']
+                'probability_below_one','probability_above_one','probability_equal_one','mcse_mean']
 
 
 @dataclass
@@ -90,7 +90,7 @@ def summarize_supporting(posterior,contract,target,*,compute_mcse=True):
         if value.shape!=next(iter(contrasts.values())).shape:
             raise ValueError('Hazard and effect draws have inconsistent chain/draw dimensions.')
         hazards.append({'target':target,'outcome':'First TB before age five','estimand':label,
-                        'estimand_type':'hazard association','unit':'hazard ratio',**_summarize(value,compute_mcse)})
+                        'estimand_type':'hazard association','unit':'hazard ratio',**_summarize_ratio(value,compute_mcse)})
     counts=_sample_counts(contract);counts.insert(0,'target',target)
     return SupportingResults(pd.DataFrame(rows),pd.DataFrame(hazards,columns=HAZARD_COLUMNS),counts,
         {**validated,'outcome':spec['source_target'],'outcome_label':spec['outcome'],'unit':spec['unit'],

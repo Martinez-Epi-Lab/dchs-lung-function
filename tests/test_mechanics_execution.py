@@ -89,6 +89,10 @@ class MechanicsProtocolTests(unittest.TestCase):
 
 class MechanicsExecutionTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.base = Path(self.temporary.name)
@@ -149,6 +153,36 @@ class MechanicsExecutionTests(unittest.TestCase):
     def assert_no_transient_files(self):
         self.assertEqual(list(self.base.rglob(".staging-*")), [])
         self.assertEqual(list(self.base.rglob(".preparation.lock")), [])
+
+    def test_covariance_failure_retains_raw_fit_and_truthful_diagnostic_status(self):
+        self.covariance.update(status='failed',accepted=False,joint_pass=False)
+        first=self.run_target()
+        self.assertTrue(first['diagnostics_passed'])
+        self.assertFalse(first['covariance_ppc_passed'])
+        self.assertEqual(first['status'],'model_adequacy_failed')
+        raw,validated=self.directories(first)
+        before=(raw/'posterior.npz').read_bytes()
+        self.assertEqual(json.loads((validated/'covariance_ppc.json').read_text()),self.covariance)
+        again=self.run_target(resume=True,compute=lambda *a:self.fail('adequacy failure must not cause an unrequested refit'))
+        self.assertEqual(again['status'],'model_adequacy_failed')
+        self.assertEqual((raw/'posterior.npz').read_bytes(),before)
+
+    def test_unevaluable_covariance_cannot_pass_completion(self):
+        self.covariance.update(status='not_evaluable',accepted=False,joint_pass=False)
+        result=self.run_target()
+        self.assertTrue(result['diagnostics_passed'])
+        self.assertFalse(result['covariance_ppc_passed'])
+        self.assertEqual(result['status'],'model_adequacy_failed')
+
+    def test_repaired_hash_covariance_evidence_is_recomputed_on_resume(self):
+        result=self.run_target();_raw,validated=self.directories(result)
+        path=validated/'covariance_ppc.json'
+        evidence=json.loads(path.read_text());evidence['invented_aggregate']=999
+        write_json(path,evidence)
+        receipt=json.loads((validated/'receipt.json').read_text())
+        receipt['files']['covariance_ppc.json']=file_hash(path)
+        write_json(validated/'receipt.json',receipt)
+        with self.assertRaises(ValidationError):self.run_target(resume=True)
 
     def test_raw_and_validation_roundtrip_and_resume_skip_sampling(self):
         first = self.run_target()
@@ -495,6 +529,10 @@ class MechanicsExecutionTests(unittest.TestCase):
 
 class MechanicsBatchAndCliTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         temporary = tempfile.TemporaryDirectory(); self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name); self.work = self.base / "work"; self.output = self.base / "outputs"
         self.work.mkdir(); self.output.mkdir()
@@ -508,7 +546,7 @@ class MechanicsBatchAndCliTests(unittest.TestCase):
         self.factor = {"accepted":True, "result_rows":6, "fingerprint":"d"*64, "new_fits":0}
 
     def computed(self, root, prep, target, settings, work, output, **kwargs):
-        return {"target":target, "diagnostics_passed":True, "status":"diagnostics_passed",
+        return {"target":target, "diagnostics_passed":True, "covariance_ppc_passed":True, "status":"diagnostics_passed",
                 "fit_fingerprint":"b"*64, "validation_fingerprint":"c"*64}
 
     def batch(self, *, computed=None, preparation=None, factor=None, prior=None, jobs=1):
@@ -529,7 +567,7 @@ class MechanicsBatchAndCliTests(unittest.TestCase):
     def test_failed_mechanics_or_factor_cannot_publish_current_marker(self):
         def failed(*args, **kwargs):
             value = self.computed(*args, **kwargs)
-            if value["target"] == "R": value["diagnostics_passed"] = False
+            if value["target"] == "R": value.update(diagnostics_passed=False,status="diagnostics_failed")
             return value
         self.assertFalse(self.batch(computed=failed)["accepted"])
         self.factor["accepted"] = False; self.assertFalse(self.batch()["accepted"])
@@ -596,6 +634,10 @@ class MechanicsBatchAndCliTests(unittest.TestCase):
 
 class SharedFactorExecutionTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         temporary = tempfile.TemporaryDirectory(); self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name)
         self.root, self.prep = self.base/"source", self.base/"preparation"
@@ -685,7 +727,7 @@ class SharedFactorExecutionTests(unittest.TestCase):
                   "realized_chains":4,"realized_draws_per_chain":1200,"realized_tuning_steps":1600,
                   "posterior_variables":list(posterior),"sample_stat_variables":list(stats)}
         summary={"target":target,"fit_fingerprint":fit_fp,"validation_fingerprint":validation_fp,
-                 "diagnostics_passed":True,"status":"diagnostics_passed"}
+                 "diagnostics_passed":True,"covariance_ppc_passed":True,"status":"diagnostics_passed"}
 
         def publish():
             np.savez_compressed(raw/"posterior.npz",**posterior)
@@ -694,9 +736,10 @@ class SharedFactorExecutionTests(unittest.TestCase):
             write_json(raw/"receipt.json",{"status":"sampled","identity":fit_identity,"fingerprint":fit_fp,
                 "files":{name:file_hash(raw/name) for name in ["posterior.npz","sample_stats.npz","sampling.json"]}})
             write_json(validated/"diagnostics.json",diagnostic);write_json(validated/"summary.json",summary)
+            write_json(validated/"covariance_ppc.json",self.covariance)
             write_json(validated/"result_metadata.json",{"synthetic":True})
             for name in ["estimates.csv","shared_factor.csv","sample_counts.csv"]:(validated/name).write_text("value\n1\n")
-            names=["diagnostics.json","summary.json","result_metadata.json","estimates.csv","shared_factor.csv","sample_counts.csv"]
+            names=list(primary.RESULT_FILES)
             write_json(validated/"receipt.json",{"identity":validation_identity,"fingerprint":validation_fp,"summary":summary,
                 "raw_receipt_sha256":file_hash(raw/"receipt.json"),"files":{name:file_hash(validated/name) for name in names}})
 
@@ -706,6 +749,7 @@ class SharedFactorExecutionTests(unittest.TestCase):
         with mock.patch.object(primary,"sampling_identity",return_value=(fit_fp,fit_identity)), \
              mock.patch.object(primary,"validation_identity",return_value=(validation_fp,validation_identity)), \
              mock.patch.object(primary,"expected_posterior_shapes",return_value=shapes), \
+             mock.patch.object(factor_execution,"evaluate_covariance",side_effect=lambda *a,**k:deepcopy(self.covariance)), \
              mock.patch.object(factor_execution,"configure_runtime",return_value={}), \
              mock.patch.object(factor_execution,"load_artifacts",return_value={"synthetic":True}), \
              mock.patch.object(primary,"sample_one",side_effect=AssertionError("unexpected sampler")) as sampler:

@@ -18,8 +18,9 @@ import pandas as pd
 from .execution import (canonical_bytes, file_hash, load_artifacts,
                         preparation_locks, write_json)
 from .pipeline import ValidationError, read_json as _read_json
+from .model_adequacy import evaluate_covariance, verify_covariance
 
-SOURCES = ('sensitivity_tables_execution.py', 'sensitivity_execution.py',
+SOURCES = ('lifecycle.py','model_adequacy.py','covariance_ppc.py','runtime_bootstrap.py','analysis/attenuation_precision.py','sensitivity_tables_execution.py', 'sensitivity_execution.py',
            'primary_execution.py', 'wheeze_execution.py',
            'analysis/sensitivities.py', 'analysis/primary_results.py',
            'analysis/wheeze_results.py', 'analysis/wheeze_standardization.py',
@@ -31,7 +32,7 @@ TABLES = ('table_s1', 'table_s3', 'table_s4')
 ROWS = {'table_s1':10, 'table_s3':24, 'table_s4':12}
 RESULT_FILES = (*[name+'.csv' for name in TABLES], 'metadata.json', 'summary.json')
 RAW_FILES = ('posterior.npz', 'sample_stats.npz', 'sampling.json')
-PRIMARY_FILES = ('diagnostics.json', 'summary.json', 'result_metadata.json',
+PRIMARY_FILES = ('covariance_ppc.json','diagnostics.json', 'summary.json', 'result_metadata.json',
                  'estimates.csv', 'shared_factor.csv', 'sample_counts.csv')
 _LOADED_SOURCES = {name:file_hash(Path(__file__).parent/name) for name in SOURCES}
 
@@ -184,6 +185,12 @@ def _verified_fit(family, root, prep, directories, settings, target, supplied=No
              and _equal(read_json(aggregate/'diagnostics.json', 'Source diagnostics'), diagnostic),
              'a source fit fails recomputed complete-posterior diagnostics.')
 
+    if family!='wheeze':
+        covariance=evaluate_covariance(posterior,contract,family=family,target=target)
+        source_summary=read_json(aggregate/'summary.json','Source completion')
+        verify_covariance(aggregate,source_summary,diagnostic,covariance)
+        _require(covariance['accepted'] is True,'a source fit fails covariance adequacy.')
+
     if family == 'primary':
         from .analysis.primary_results import summarize_primary
         result = summarize_primary(posterior, contract, target)
@@ -218,6 +225,7 @@ def _verified_fit(family, root, prep, directories, settings, target, supplied=No
                'diagnostics_passed':True, 'status':'diagnostics_passed', 'counts':info,
                'result_rows':row_inventory,
                'scientific_reference_comparison':'requires separate independent validation'}
+    if family!='wheeze': summary['covariance_ppc_passed']=True
     _require(_equal(read_json(aggregate/'summary.json', 'Source completion'), summary)
              and _equal(vr.get('summary'), summary),
              'source completion schema or values differ from verified posterior results.')
@@ -240,12 +248,16 @@ def _verified_fit(family, root, prep, directories, settings, target, supplied=No
 def check_tables(result, expected):
     """Require only the selected aggregate schemas and exact computed content."""
     from .analysis.sensitivities import TABLE_COLUMNS, DEFAULT_TARGETS, WHEEZE_TARGETS
+    from .analysis.attenuation_precision import MAX_MCSE_BOUND_PP
     expected_metadata = {
         'schema_version':1, 'new_model_targets':list(DEFAULT_TARGETS),
         'reused_primary_targets':['ratio_pre','ratio_post'], 'reused_wheeze_targets':list(WHEEZE_TARGETS),
         'rows':dict(ROWS),
         'attenuation':'100*(1-abs(adjusted posterior mean)/abs(early core posterior mean))',
         'attenuation_interval':'none; this is a transformation of posterior means',
+        'attenuation_mcse':'first-order covariance-agnostic upper bound from marginal posterior-mean MCSEs',
+        'attenuation_max_mcse_bound_pp':MAX_MCSE_BOUND_PP,
+        'attenuation_precision_passed':bool(expected.table_s1.attenuation_precision_passed.all()),
         'zero_core':'undefined_zero_core; no epsilon substitution',
         'negative_attenuation':'retained unchanged; increased effect magnitude',
         'reused_fit_count':4, 'new_fit_count':10, 'rendered_manuscript':False}
@@ -326,6 +338,9 @@ def publish_tables(root, prep, directories, new_results, sensitivity_settings,
     # The pure selector is called again so mutable/partial return objects cannot
     # bypass the declared table inventory before publication or cached reuse.
     check_tables(result, build_tables(entries['sensitivity'],entries['primary'],entries['wheeze']))
+    _require(result.metadata['attenuation_precision_passed'] is True,
+             'Table S1 attenuation numerical precision failed its prespecified MCSE bound; '
+             'retain the fits and follow the prespecified common draw-extension protocol.')
     identity = {'schema_version':1, 'selection':selection, 'fits':bindings,
                 'source':source_hashes(root),
                 'environment_lock_sha256':file_hash(root/'requirements-models.lock.txt'),

@@ -21,13 +21,17 @@ from .execution import (artifact_subtree, canonical_bytes, file_hash, load_artif
 from .pipeline import ValidationError,read_json
 from .models.spirometry import TARGETS,build_model,validate_contract
 from .model_runtime import configure_runtime,model_runtime_identity
+from .model_adequacy import evaluate_covariance, adequacy_status, verify_covariance
+from .covariance_ppc import protocol as covariance_protocol
 from .sampling import resolved_sampling,sample_contract
 
 CRITERIA = {'min_chains':4,'min_draws':1200,'max_rhat':1.01,
             'min_bulk_ess':400,'min_tail_ess':400,'min_bfmi':.3,
             'max_divergences':0,'max_treedepth_hits':0}
-COMPUTE_SOURCES = ('models/spirometry.py','sampling.py','model_runtime.py')
-VALIDATION_SOURCES = ('primary_execution.py','diagnostics.py','analysis/primary_results.py')
+COMPUTE_SOURCES = ('models/spirometry.py','sampling.py','model_runtime.py','runtime_bootstrap.py')
+VALIDATION_SOURCES = ('lifecycle.py','execution.py','pipeline.py','model_adequacy.py','covariance_ppc.py','primary_execution.py','diagnostics.py','analysis/primary_results.py')
+RESULT_FILES = ('diagnostics.json','covariance_ppc.json','summary.json','result_metadata.json',
+                'estimates.csv','shared_factor.csv','sample_counts.csv')
 _LOADED_RUNNER_HASH = file_hash(Path(__file__))
 
 
@@ -77,6 +81,7 @@ def sampling_identity(root, descriptor, target, settings):
 def validation_identity(root, fit_fingerprint, criteria):
     identity = {'schema_version':1,'fit_fingerprint':fit_fingerprint,
                 'source':source_hashes(root,VALIDATION_SOURCES),'criteria':criteria,
+                'covariance_ppc_protocol':covariance_protocol(),
                 'runtime':model_runtime_identity()}
     return digest(identity),identity
 
@@ -193,7 +198,9 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
             receipt=read_json(destination/'receipt.json','Validation receipt')
             if receipt.get('identity')!=validation_id or receipt.get('fingerprint')!=validation_fp:
                 raise ValidationError('Validation receipt identity is inconsistent.')
-            verify_files(destination,receipt.get('files'),('diagnostics.json','summary.json','estimates.csv','shared_factor.csv','sample_counts.csv'))
+            verify_files(destination,receipt.get('files'),RESULT_FILES)
+            if set(receipt['files'])!=set(RESULT_FILES):
+                raise ValidationError('Primary validation inventory differs.')
             summary=read_json(destination/'summary.json','Primary summary')
             if receipt.get('summary')!=summary:
                 raise ValidationError('Validation receipt and verified primary summary disagree.')
@@ -201,10 +208,16 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
             if (type(diagnostic.get('passed')) is not bool
                     or diagnostic['passed']!=summary.get('diagnostics_passed')
                     or diagnostic.get('status')!=('passed' if diagnostic['passed'] else 'failed')
-                    or summary.get('status')!=('diagnostics_passed' if diagnostic['passed'] else 'diagnostics_failed')):
+                    or summary.get('status')!=adequacy_status(diagnostic['passed'],summary.get('covariance_ppc_passed'))):
                 raise ValidationError('Verified diagnostics and primary completion summary disagree.')
             if receipt.get('raw_receipt_sha256')!=file_hash(final/'receipt.json'):
                 raise ValidationError('Validation receipt is not bound to the verified raw fit.')
+            from .diagnostics import evaluate_diagnostics
+            recomputed=evaluate_diagnostics(posterior,{n:stats[n] for n in ('diverging','energy','reached_max_treedepth') if n in stats},CRITERIA)
+            if canonical_bytes(recomputed)!=canonical_bytes(diagnostic):
+                raise ValidationError('Saved primary diagnostics differ from verified posterior draws.')
+            covariance=evaluate_covariance(posterior,contract,family='primary',target=target)
+            verify_covariance(destination,summary,diagnostic,covariance)
             unchanged()
             if validation_identity(root,fingerprint,CRITERIA)!=(validation_fp,validation_id):
                 raise ValidationError('Diagnostic or reporting code changed during cached validation.')
@@ -213,15 +226,18 @@ def sample_one(root,preparation_directory,target,settings,work,output,*,resume=F
         from .analysis.primary_results import summarize_primary
         essential={name:stats[name] for name in ('diverging','energy','reached_max_treedepth') if name in stats}
         diagnostics=evaluate_diagnostics(posterior,essential,CRITERIA)
+        covariance=evaluate_covariance(posterior,contract,family='primary',target=target)
         results=summarize_primary(posterior,contract,target)
         summary={'target':target,'fit_fingerprint':fingerprint,'validation_fingerprint':validation_fp,
                  'diagnostics_passed':bool(diagnostics['passed']),
-                 'status':'diagnostics_passed' if diagnostics['passed'] else 'diagnostics_failed',
+                 'covariance_ppc_passed':covariance['accepted'],
+                 'status':adequacy_status(bool(diagnostics['passed']),covariance['accepted']),
                  'counts':validated,'result_rows':len(results.estimates),
                  'scientific_reference_comparison':'requires separate independent validation'}
         stage=Path(tempfile.mkdtemp(prefix='.staging-',dir=output))
         try:
             write_json(stage/'diagnostics.json',diagnostics)
+            write_json(stage/'covariance_ppc.json',covariance)
             write_json(stage/'summary.json',summary)
             write_json(stage/'result_metadata.json',results.metadata)
             for name,frame in [('estimates',results.estimates),('shared_factor',results.shared_factor),('sample_counts',results.sample_counts)]:
@@ -277,11 +293,19 @@ def run_primary(root,config_file,analysis_file,sampling_file,*,targets=None,jobs
     verified=run_preparation(root,config_file,analysis_file,'M03',resume=True)
     if verified['fingerprint']!=preparation['fingerprint']:
         raise ValidationError('Preparation dependencies changed during primary execution.')
+    if len(results)!=len(selected) or sorted(r.get('target','') for r in results)!=sorted(selected):
+        raise ValidationError('Primary completion must contain exactly the selected targets.')
+    for r in results:
+        if r.get('status')!=adequacy_status(r.get('diagnostics_passed'),r.get('covariance_ppc_passed')):
+            raise ValidationError('Primary completion gates disagree.')
     results.sort(key=lambda value:selected.index(value['target']))
-    passed=all(value['diagnostics_passed'] for value in results)
+    mcmc_passed=all(value['diagnostics_passed'] for value in results)
+    covariance_passed=all(value['covariance_ppc_passed'] for value in results)
+    passed=mcmc_passed and covariance_passed
     summary={'through':'M04','preparation_fingerprint':preparation['fingerprint'],
              'selected_models':len(results),'all_twelve_models':set(selected)==set(TARGETS),
-             'diagnostics_passed':passed,'models':results,
+             'diagnostics_passed':mcmc_passed,'covariance_ppc_passed':covariance_passed,
+             'accepted':passed,'status':adequacy_status(mcmc_passed,covariance_passed),'models':results,
              'scientific_reference_comparison':'requires separate independent validation'}
     if passed:
         name='primary_current.json' if summary['all_twelve_models'] else 'primary_selection_current.json'

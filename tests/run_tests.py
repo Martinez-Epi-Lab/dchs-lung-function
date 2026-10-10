@@ -14,6 +14,8 @@ def main():
     args=parser.parse_args()
     here=Path(__file__).resolve().parent
     sys.path[:0]=[str(here),str(here.parent/'src')]
+    from dchs_lung_function.runtime_bootstrap import bootstrap
+    bootstrap()
     if not list((here.parent/'src/dchs_lung_function').rglob('*.py')):
         raise SystemExit('No source files discovered.')
     cache=tempfile.mkdtemp(prefix='dchs-synthetic-tests-')

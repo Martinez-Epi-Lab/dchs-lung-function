@@ -47,9 +47,11 @@ def validate_specification(specification):
     require(type(specification['schema_version']) is int and specification['schema_version']==1
             and isinstance(specification['figures'],list), 'specification schema differs.')
     def axis(value):
-        object_fields(value,('label','scale','null'),('ticks','limits'))
+        object_fields(value,('label','scale','null'),('ticks','limits','shared_group'))
         require(isinstance(value['label'],str) and value['scale'] in ('linear','log')
                 and (value['null'] is None or finite(value['null'])), 'axis schema differs.')
+        if 'shared_group' in value:
+            require(isinstance(value['shared_group'],str) and value['shared_group'], 'shared axis group must be named.')
         for name in ('ticks','limits'):
             if name in value:
                 vals=value[name]
@@ -140,7 +142,7 @@ class AggregateView:
                 and type(exported['schema_version']) is int and exported['schema_version'] == 1
                 and type(exported['record_count']) is int
                 and isinstance(exported['records'],list) and strings(exported['sources'])
-                and exported['record_count'] == len(exported['records']) == 3195,
+                and exported['record_count'] == len(exported['records']) == 3196,
                 'requires the complete current M13 aggregate registry.')
         records = copy.deepcopy(exported['records'])
         for r in records:
@@ -157,7 +159,7 @@ class AggregateView:
         optional_empty={'supporting/'+t+'/hazard' for t in ('x6_z_before1','x6_z_before5','x6_native_before1','x6_native_before5')}
         optional_empty|={'wheeze/secondary_sex_smoking_birthweight/standardized_rr',
                         'sensitivity_model/window_ratio_pre/hazard','sensitivity_model/window_ratio_post/hazard'}
-        require(len(exported['sources']) == len(set(exported['sources'])) == 142
+        require(len(exported['sources']) == len(set(exported['sources'])) == 143
                 and set(exported['sources'])==set(contract['sources'])
                 and {r['source'] for r in records}<=set(exported['sources'])
                 and set(exported['sources'])-{r['source'] for r in records}<=optional_empty, 'source coverage differs.')

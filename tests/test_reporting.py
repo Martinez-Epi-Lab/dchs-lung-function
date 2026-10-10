@@ -47,6 +47,29 @@ def fake_font(style='Regular',family='Arial',flags=0):
 
 
 class ReportingFormattingTests(unittest.TestCase):
+    def test_available_n_is_bound_for_continuous_summaries(self):
+        self.assertEqual(fmt.cell(record(mean=2,sd=.5,n=1),['mean','sd','n'],'mean_sd_n',1)['text'],'2.0 (0.5); n=1')
+        self.assertEqual(fmt.cell(record(median=2,q1=1,q3=3,n=9),['median','q1','q3','n'],'median_iqr_n',0)['text'],'2 [1 to 3]; n=9')
+        for n in (-1,1.5,True,None):
+            with self.assertRaises(fmt.ReportingError):fmt.cell(record(mean=2,sd=.5,n=n),['mean','sd','n'],'mean_sd_n')
+
+    def test_attenuation_reports_numerical_error_and_sign_reversal(self):
+        fields=['value','bound','state','passed']
+        for state,ending in [('estimated',''),('sign_reversal','\nSign reversal')]:
+            c=fmt.cell(record(value=9.2,bound=.36,state=state,passed=True),fields,'attenuation',0)
+            self.assertEqual(c['text'],'≈9%\nMCSE ≤ 0.4 pp'+ending)
+        for bound,text in [(.744,'0.8'),(.7,'0.7'),(.001,'0.1'),(1.,'1.0')]:
+            c=fmt.cell(record(value=9.2,bound=bound,state='estimated',passed=True),fields,'attenuation',0)
+            self.assertIn('MCSE ≤ '+text+' pp',c['text'])
+        for value,bound,state,passed in [(1,1.01,'estimated',True),(1,.1,'estimated',False),
+                (None,None,'undefined_zero_core',False),(0,.1,'zero_adjusted_mean',True)]:
+            with self.assertRaises(fmt.ReportingError):fmt.cell(record(value=value,bound=bound,state=state,passed=passed),fields,'attenuation',0)
+        self.assertEqual(fmt.cell(record(value=None,bound=None,state='reference',passed=True),fields,'attenuation',0)['text'],'Reference')
+
+    def test_restriction_date_is_canonical_and_not_a_hardcoded_calendar_value(self):
+        self.assertEqual(fmt.cell(record(value='2001-02-03'),['value'],'date',0)['text'],'3 February 2001')
+        for value in ('2001-02-30','20010203',None,20010203):
+            with self.assertRaises(fmt.ReportingError):fmt.cell(record(value=value),['value'],'date',0)
     def test_half_up_and_negative_displayed_zero(self):
         for value,digits,expected in [(1.005,2,'1.01'),(-1.005,2,'-1.01'),(-.0049,2,'0.00'),(-.005,2,'-0.01'),(2.5,0,'3'),(-2.5,0,'-3'),(0,3,'0.000')]:
             with self.subTest(value=value):self.assertEqual(fmt.number(value,digits),expected)
@@ -323,13 +346,23 @@ class FabricatedTableRegistry:
         values={'mean':-.015,'lower':-.125,'upper':.095,'reported_mean':-.015,'reported_lower':-.125,'reported_upper':.095,
                 'estimate':-.0015,'ci_low':-.0125,'ci_high':.0095,'median':2,'q1':1,'q3':3,'sd':.5,
                 'posterior_median':1.25,'count':1,'numerator':1,'denominator':9,'percent':100/9,
-                'attenuation_percent':-2.5,'target_children':1,'target_observations':3,**where}
+                'attenuation_percent':-2.5,'attenuation_mcse_bound_pp':.36,'attenuation_status':'estimated','attenuation_precision_passed':True,'n_nonmissing':8,'value':'2001-02-03','target_children':1,'target_observations':3,**where}
         key=source+'#'+json.dumps(where,sort_keys=True);r={'key':key,'values':values,'status':'available','semantics':{}}
         self.records[key]=r;return deepcopy(r)
     def get(self,key):return deepcopy(self.records[key])
 
 
 class ReportingTableLayoutTests(unittest.TestCase):
+    def test_restriction_context_and_continuous_denominators_are_visible(self):
+        registry=FabricatedTableRegistry();built=tables.build_tables(registry)
+        table=built[0]
+        for row in table['rows']:
+            if row['id'] in {'gestational_age_weeks','birthweight_g','maternal_age_birth','parity'}:
+                self.assertTrue(all(c['text'].endswith('; n=8') for c in row['cells'][1:]))
+        restricted=[r for r in built[4]['rows'] if r['id'] in {'early_core_window','window_ratio_pre','window_ratio_post'}]
+        self.assertEqual(len(restricted),3)
+        self.assertTrue(all(r['cells'][0]['text'].endswith('through 3 February 2001') for r in restricted))
+        self.assertTrue(any('3 February 2001 (inclusive)' in f for f in built[4]['footnotes']))
     def test_all_ten_tables_have_unique_physical_coordinates_and_scientific_lineage(self):
         registry=FabricatedTableRegistry();built=tables.build_tables(registry)
         self.assertEqual([t['id'] for t in built],list(nt.TABLE_IDS));self.assertEqual(len({(t['reference_document'],t['reference_table']) for t in built}),10)
@@ -344,7 +377,7 @@ class ReportingTableLayoutTests(unittest.TestCase):
                         scientific+=1;original=registry.get(c['result_key']);actual=fmt.cell(original,c['fields'],c['style'],c['digits'])
                         self.assertEqual(c['text'],c.get('prefix','')+actual['text']+c.get('suffix',''))
             self.assertTrue(t['footnotes'])
-        self.assertEqual(scientific,261)
+        self.assertEqual(scientific,264)
     def test_nested_contrasts_and_pre_post_samples_have_distinct_exact_selectors(self):
         registry=FabricatedTableRegistry();built=tables.build_tables(registry);main=next(t for t in built if t['id']=='main_table_2')
         rows=[r for r in main['rows'] if r['kind']=='data'];self.assertEqual(len(rows),12)

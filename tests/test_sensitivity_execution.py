@@ -32,6 +32,10 @@ def fabricated_result(target):return deepcopy(_fixture(target))
 
 class SensitivityExecutionTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         temporary=tempfile.TemporaryDirectory();self.addCleanup(temporary.cleanup)
         self.base=Path(temporary.name);self.root,self.prep=self.base/'source',self.base/'preparation';self.prep.mkdir()
         self.work,self.output=self.base/'private-work',self.base/'aggregate-output'
@@ -77,6 +81,36 @@ class SensitivityExecutionTests(unittest.TestCase):
         self.assertEqual(list(self.base.rglob('.staging-*')),[])
         self.assertEqual(list(self.base.rglob('.preparation.lock')),[])
 
+    def test_covariance_failure_retains_raw_fit_and_truthful_diagnostic_status(self):
+        self.covariance.update(status='failed',accepted=False,joint_pass=False)
+        first=self.run_target()
+        self.assertTrue(first['diagnostics_passed'])
+        self.assertFalse(first['covariance_ppc_passed'])
+        self.assertEqual(first['status'],'model_adequacy_failed')
+        raw,validated=self.directories(first)
+        before=(raw/'posterior.npz').read_bytes()
+        self.assertEqual(json.loads((validated/'covariance_ppc.json').read_text()),self.covariance)
+        again=self.run_target(resume=True,compute=lambda *a:self.fail('adequacy failure must not cause an unrequested refit'))
+        self.assertEqual(again['status'],'model_adequacy_failed')
+        self.assertEqual((raw/'posterior.npz').read_bytes(),before)
+
+    def test_unevaluable_covariance_cannot_pass_completion(self):
+        self.covariance.update(status='not_evaluable',accepted=False,joint_pass=False)
+        result=self.run_target()
+        self.assertTrue(result['diagnostics_passed'])
+        self.assertFalse(result['covariance_ppc_passed'])
+        self.assertEqual(result['status'],'model_adequacy_failed')
+
+    def test_repaired_hash_covariance_evidence_is_recomputed_on_resume(self):
+        result=self.run_target();_raw,validated=self.directories(result)
+        path=validated/'covariance_ppc.json'
+        evidence=json.loads(path.read_text());evidence['invented_aggregate']=999
+        write_json(path,evidence)
+        receipt=json.loads((validated/'receipt.json').read_text())
+        receipt['files']['covariance_ppc.json']=file_hash(path)
+        write_json(validated/'receipt.json',receipt)
+        with self.assertRaises(ValidationError):self.run_target(resume=True)
+
     def test_raw_and_validation_roundtrip_and_resume_skip_sampling(self):
         first = self.run_target()
         raw, validated = self.directories(first)
@@ -93,7 +127,7 @@ class SensitivityExecutionTests(unittest.TestCase):
         self.assert_no_transient_files()
 
     def test_complete_family_variables_and_child_coordinates_reach_strict_diagnostics(self):
-        self.assertEqual(len(self.posterior), 22)
+        self.assertEqual(len(self.posterior), 25)
         with mock.patch.object(diagnostics, "evaluate_diagnostics", wraps=REAL_DIAGNOSTICS) as checked:
             result = self.run_target()
             self.assertTrue(result["diagnostics_passed"])
@@ -528,6 +562,10 @@ class SensitivityDescriptorTests(unittest.TestCase):
 
 class SensitivityBatchAndCliTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         from dchs_lung_function import feno_execution,sensitivity_tables_execution
         self.feno=feno_execution;self.tables=sensitivity_tables_execution
         temporary=tempfile.TemporaryDirectory();self.addCleanup(temporary.cleanup)
@@ -548,7 +586,7 @@ class SensitivityBatchAndCliTests(unittest.TestCase):
         new,_,_=table_inputs();self.results={}
         for target,entry in new.items():
             spec=model.fit_spec(target)
-            self.results[target]={**entry['summary'],'result_rows':{'estimates':spec['result_rows'],'hazard':spec['hazard_rows'],'sample_counts':30},
+            self.results[target]={**entry['summary'],'covariance_ppc_passed':True,'result_rows':{'estimates':spec['result_rows'],'hazard':spec['hazard_rows'],'sample_counts':30},
                 'scientific_reference_comparison':'requires separate independent validation','raw_fit_reused':True,'validation_reused':True}
         self.table_summary={'fingerprint':'d'*64,'accepted':True,'status':'accepted','rows':{'table_s1':10,'table_s3':24,'table_s4':12},
             'new_fit_count':10,'reused_fit_count':4,'source_fits_verified':14,'reused_primary_models':2,'reused_wheeze_models':2,
@@ -567,6 +605,13 @@ class SensitivityBatchAndCliTests(unittest.TestCase):
         self.assertEqual([r['target'] for r in result['sensitivity_models']],list(model.DEFAULT_TARGETS))
         self.assertEqual(result,json.loads((self.work/'sensitivity_current.json').read_text()))
         self.assertEqual(result['feno_models_verified'],11);self.assertIn('G08',result['inherited_limitations'][0])
+
+    def test_inadequate_model_never_reaches_table_publication(self):
+        self.results['early_core'].update(covariance_ppc_passed=False,status='model_adequacy_failed')
+        result=self.batch(table=lambda *a,**k:self.fail('failed adequacy reached table publication'))
+        self.assertFalse(result['accepted']);self.assertEqual(result['status'],'model_adequacy_failed')
+        self.assertIsNone(result['sensitivity_tables'])
+        self.assertFalse((self.work/'sensitivity_current.json').exists())
 
     def test_failed_diagnostic_retains_failure_and_never_invokes_table_publication(self):
         self.results['early_core'].update(diagnostics_passed=False,status='diagnostics_failed')
@@ -672,6 +717,10 @@ class SensitivityBatchAndCliTests(unittest.TestCase):
 
 class SensitivityTableExecutionTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         from dchs_lung_function import sensitivity_tables_execution as tables,model_runtime
         from types import SimpleNamespace
         self.te=tables;self.runtime=model_runtime
@@ -718,6 +767,13 @@ class SensitivityTableExecutionTests(unittest.TestCase):
     def directory(self,result):return self.output/'sensitivity_tables'/result['fingerprint']
     def clean(self):
         self.assertEqual(list(self.base.rglob('.staging-*')),[]);self.assertEqual(list(self.base.rglob('.preparation.lock')),[])
+
+    def test_precision_failure_blocks_real_table_publication(self):
+        self.proofs[('sensitivity','early_maternal_hiv')]['entry']['estimates']['mcse_mean']=1.
+        with self.assertRaisesRegex(ValidationError,'precision'):self.publish()
+        self.assertEqual(list(self.output.rglob('receipt.json')),[])
+        self.assertFalse((self.work/'sensitivity_current.json').exists())
+        self.clean()
 
     def test_complete_publication_revalidates_all_fourteen_inputs_on_each_resume(self):
         first=self.publish();second=self.publish(resume=True)

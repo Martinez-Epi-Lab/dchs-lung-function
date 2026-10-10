@@ -25,7 +25,14 @@ an additional infancy shift, and a separate shift for diagnosis at five years
 or later. The spirometry target has a Normal(0,1) mechanics loading and direct
 post-TB terms with the same age coding. Each shift, direct term and hazard
 covariate coefficient has a Normal(0,0.75) prior. Target residual SD has a
-HalfNormal(1) prior.
+HalfNormal(1) prior. The target also has a separate child intercept
+`target_process = tau_target * target_raw`, with `target_raw ~ Normal(0,1)`
+and `tau_target ~ HalfNormal(1)`. This effect and the mechanics factor are
+independent in their priors; they need not be independent in the posterior.
+It enters only the target mean, not the mechanics indicators, LCI or TB hazard.
+The added intercept allows repeated target measurements to share variation
+beyond the mechanics factor. It does not change the algebra of the reported
+TB contrasts.
 
 The log hazard contains the mechanics factor, male sex and an interval
 intercept. Its age boundaries are 0, 1, 3, 5, 8, 10 and 20 years. The six
@@ -33,6 +40,17 @@ intercepts have Normal priors with SD 1.25 and means equal to the logarithms
 of 0.045, 0.018, 0.006, 0.006, 0.006 and 0.006. M03 supplies exact exposure
 durations and event indicators. The likelihood sums event log hazards minus
 integrated hazards; it does not treat observed TB ages as Gaussian outcomes.
+Follow-up ends at first TB or the earlier of study exit and the configured
+administrative endpoint. Lung measurements are retained through study exit;
+an additional administrative measurement cutoff applies only to the designated
+restricted-follow-up analyses.
+
+The mechanics factor is estimated jointly using the available mechanics,
+target and first-TB processes, including later measurements. Its hazard
+association is therefore a joint-model association, not a purely prospective
+prediction from a factor measured only before TB. A higher factor represents
+better mechanics. Adding a separate target intercept does not determine the
+direction or size of any change in the loading or TB effects.
 
 Every target total association combines its direct term with the product of
 the target loading and mechanics shift, calculated for each posterior draw.
@@ -43,6 +61,13 @@ conversion. Native FEV1/FVC is already in percentage points at that
 stage. Eight contrast arrays are retained, including three age groups, two
 pooled contrasts and three age-group differences.
 
+Nuisance regressions and their residual scales are estimated in preparation
+and then treated as fixed in the joint fit. Posterior intervals are conditional
+on those first-stage estimates; they do not propagate their estimation
+uncertainty. The direction and magnitude of any omitted uncertainty depend
+on cross-stage covariance and the estimand, so no universal interval-inflation
+factor is applied.
+
 ## Sampling and acceptance
 
 `config/primary_sampling.json` fixes four chains, 1,600 tuning iterations and
@@ -50,7 +75,9 @@ pooled contrasts and three age-group differences.
 10, and `adapt_diag` initialization. The four positive initial loading
 values are 0.25, 0.35, 0.45 and 0.55; initial target SD is 0.9. The selected
 target seeds are versioned in `fit_spec`; the new-run configuration adds a
-fixed 104729 offset for an independent realization. Sampling controls and
+fixed 104729 offset. Reusing a seed does not itself establish biased inference,
+and different seed labels do not establish independence between estimates.
+Sampling controls and
 realized counts are retained with the private draws. Each chain uses one
 BLAS thread; two chains run simultaneously by default.
 
@@ -62,20 +89,39 @@ coordinates and nonfinite diagnostics fail validation. These are this
 repository's prospective acceptance rules; they extend the recorded
 reference-run checks.
 
-The independent scientific comparison checks all 96 target/contrast
+The [corrective protocol](CORRECTIVE_REVISION.md) adds a separate covariance
+adequacy screen. It selects target measurements in the pre/no-TB state and
+verifies that every modeled post-TB term is zero. Using the actual child and
+repeat pattern, it generates 2,000 conditional Gaussian replicas from evenly
+spaced saved posterior draws and a target-specific fixed seed. Both the
+untruncated unequal-repeat ANOVA intraclass correlation and within-child mean
+square must fall inside their inclusive central 99% predictive intervals.
+At least 20 children with repeated measurements and 30 within-child degrees
+of freedom are required. A sample that cannot be evaluated blocks completion;
+it is not a pass. These checks are an adequacy screen, not a calibrated
+multiple-testing procedure or a replacement for convergence diagnostics.
+
+The prior source-reproduction validation checked all 96 target/contrast
 combinations. For each posterior mean and each 95% interval endpoint, the
 allowed absolute difference is four times the square root of the sum of
 the two runs' squared Monte Carlo standard errors. Endpoint checks use
 quantile-specific MCSE, as supported by [ArviZ 0.22.0](https://python.arviz.org/en/v0.22.0/api/generated/arviz.mcse.html).
-This gives 288 prespecified comparisons. Matching rounded manuscript values
+This gave 288 prespecified comparisons for the previous model. Matching rounded manuscript values
 alone is insufficient. Reference posterior arrays contain global variables;
 original latent draws and sampler statistics are unavailable, so historical
 all-parameter diagnostics are supported by their saved audits. All new
 latent draws and sampler statistics are retained privately.
 
+Those historical checks establish source reproduction, not adequacy of the
+previous covariance structure. Revised fits use a changed target likelihood
+and must pass the frozen diagnostics and covariance screen. Old-versus-new
+effect, interval and null-inclusion comparisons are descriptive audits; old
+estimates are not targets that the revised model must match.
+
 If a fit fails, retain its evidence and use a separately fingerprinted,
 reviewed sampling configuration for any longer run. Do not change the model,
-drop difficult parameters or relax the comparison tolerance to obtain a pass.
+drop difficult parameters, choose seeds by their results or relax an acceptance
+threshold to obtain a pass.
 
 ## Runtime and saved runs
 
@@ -95,20 +141,19 @@ acceptance criteria. A changed input, model or sampler cannot reuse the old
 raw fit. A changed diagnostic or reporting implementation can revalidate
 verified raw draws without new sampling.
 
-Raw files have `sampled` status. Aggregate results have `diagnostics_passed`
-or `diagnostics_failed` status. The latter remains explicit and never writes
-a successful batch pointer. A diagnostic pass does not by itself establish
-agreement with the selected scientific reference; that comparison is retained
-in private validation evidence. Full manuscript reconstruction remains a
-later acceptance step.
+Raw files have `sampled` status. Aggregate results retain separate sampler
+diagnostic and covariance-PPC acceptance fields. Either failure remains explicit
+and prevents a successful batch pointer. A convergence pass does not establish
+model adequacy. Complete reconstruction and independent scientific review are
+additional acceptance requirements recorded in private evidence.
 
 `--resume` verifies posterior and sampler archives, metadata, complete model
 variable inventory and result files. It does not continue an interrupted
 chain from its last draw. An interrupted unsaved fit is sampled again.
-Ordinary failures clean staging directories and release locks. After a hard
-process termination, first establish that no process still owns a lock;
-use fresh output locations or deliberately clear the abandoned lock/staging
-files before rerunning. A lock is never broken automatically.
+Directory-descriptor locks remain held by the live owning process and release
+on its exit, including abnormal termination. Lock files from the prior protocol
+require explicit verification before migration; they are not silently removed.
+Incomplete staging output is never accepted as a completed fit.
 
 ## Results
 
@@ -116,6 +161,6 @@ files before rerunning. A lock is never broken automatically.
 credible intervals, probabilities, MCSE and sample/weight metadata. Selection
 fields identify 24 Table 2 estimates, 60 Table S6 estimates and eight
 continuous Figure 2 estimates across the twelve fits. `shared_factor.csv`
-also preserves the loading summaries that M07 will use. M13/M14 still own
+also preserves the loading summaries used by M07. M13/M14 own
 final manuscript rendering; the result interface does not round or edit the
 manuscript. Exact small aggregate counts are retained.

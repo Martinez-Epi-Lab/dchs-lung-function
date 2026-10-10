@@ -113,7 +113,9 @@ def _table_one(registry):
                              [_literal(label, 1), *[_literal('', i) for i in range(2, 5)]], style))
             continue
         fields = {'count_percent': ['numerator', 'denominator', 'percent'],
-                  'mean_sd': ['mean', 'sd'], 'median_iqr': ['median', 'q1', 'q3']}[style]
+                  'mean_sd': ['mean', 'sd', 'n_nonmissing'], 'median_iqr': ['median', 'q1', 'q3', 'n_nonmissing']}[style]
+        if style in {'mean_sd', 'median_iqr'}:
+            style += '_n'
         digits = 0 if variable in ('birthweight_g', 'parity') else 1
         cells = [_literal(label, 1)]
         cells.extend(_value(registry, 'preparation/table1_statistics', {'variable': variable, 'group': group},
@@ -124,7 +126,8 @@ def _table_one(registry):
     return _table('main_table_1',
         'Table 1. Baseline characteristics of children contributing spirometry or oscillometry, by early-childhood tuberculosis status',
         'main', 'T01', [('characteristic', 'Characteristic'), *[(g, label) for g, label, _ in groups]], rows,
-        ['Values are numerator/nonmissing denominator (%), mean (SD), or median [IQR].',
+        ['Values are numerator/nonmissing denominator (%), mean (SD), or median [IQR]. Each continuous summary reports its available n; group header N is the full descriptive group.',
+         'This descriptive cohort is the union of eligible spirometry or oscillometry contributors. Outcome-specific analysis samples require the measurements and covariates used by each model and therefore need not equal the descriptive cohort.',
          'No TB before age five includes children with first TB at older ages. Infancy TB is nested within TB before age five.',
          'Inherited child/birth indicator recodes assign missing source codes to the reference category; direct baseline and categorical fields retain nonmissing denominators. Missingness is retained in the aggregate audit.'])
 
@@ -156,12 +159,15 @@ def _table_s1(registry):
             selector = {'target': target, 'contrast': contrast}
             cells.append(_value(registry, 'sensitivity/table_s1', selector, ['mean', 'lower', 'upper'], column))
             cells.append(_literal('Reference', column + 1) if target == 'early_core' else
-                         _value(registry, 'sensitivity/table_s1', selector, ['attenuation_percent'], column + 1, style='percent', digits=1))
+                         _value(registry, 'sensitivity/table_s1', selector,
+                                ['attenuation_percent','attenuation_mcse_bound_pp','attenuation_status','attenuation_precision_passed'],
+                                column + 1, style='attenuation', digits=0))
         rows.append(_row(target, number, cells))
     return _table('appendix_table_s1', 'Table S1. Sensitivity to confounder adjustment in the early-TB model', 'appendix', 'T01',
         [('model', 'Adjustment'), ('before_five', 'Before five'), ('before_five_attenuation', 'Attenuation'), ('infancy', 'Infancy'), ('infancy_attenuation', 'Attenuation')], rows,
         ['Differences are posterior means in percentage points with equal-tailed 95% credible intervals.',
-         'Attenuation is 100 × [1 − |adjusted posterior mean| / |core posterior mean|]. It is a ratio of means, without a posterior interval. An exactly zero core mean makes attenuation undefined; negative attenuation is retained.'], 2)
+         'Approximate whole-percent attenuation is 100 × [1 − |adjusted posterior mean| / |core posterior mean|]. MCSE is Monte Carlo numerical error, not a credible interval; the displayed conservative bound is in percentage points and must be at most 1 pp. Full-precision estimates and both conservative and independent-error MCSE calculations remain in the aggregate output.',
+         'An exactly zero core mean makes attenuation undefined. Negative attenuation is retained. A sign reversal is explicitly marked and retains the absolute-ratio value, but is not interpreted as ordinary attenuation.'], 2)
 
 
 def _table_s2(registry):
@@ -205,7 +211,10 @@ def _table_s3(registry):
     for number, target, label in specifications:
         if target is None:
             rows.append(_section('section_' + str(number), number, label, 4)); continue
-        cells = [_literal(label, 1), _value(registry, 'sensitivity/table_s3',
+        label_cell = (_value(registry, 'preparation/reporting_context', {'field':'event_end'}, ['value'],
+                            1, style='date', digits=0, prefix=label+' through ')
+                      if target in {'early_core_window','window_ratio_pre','window_ratio_post'} else _literal(label,1))
+        cells = [label_cell, _value(registry, 'sensitivity/table_s3',
             {'target': target, 'contrast': 'First TB <1 year'}, ['target_children', 'target_observations'],
             2, style='count_pair', digits=0)]
         for column, contrast in [(3, 'First TB <1 year'), (4, 'First TB <5 years')]:
@@ -215,7 +224,7 @@ def _table_s3(registry):
     return _table('appendix_table_s3', 'Table S3. Sensitivity to adjustment and observation-window specification', 'appendix', 'T03',
         [('model', 'Model'), ('sample', 'Children / tests'), ('infancy', 'First TB <1 year'), ('before_five', 'First TB <5 years')], rows,
         ['Posterior mean differences in FEV₁/FVC percentage points with equal-tailed 95% credible intervals. Counts refer to the outcome-specific available sample.',
-         'Early-TB models exclude measurements following first TB at age five or older. Expanded models retain those observations. Restricted follow-up changes the observation window and sample composition.',
+         'Early-TB models exclude measurements following first TB at age five or older. Expanded models retain those observations. Restricted follow-up includes observations through '+cell(registry.select('preparation/reporting_context',field='event_end'),['value'],style='date',digits=0)['text']+' (inclusive), as configured in the verified analysis settings, and changes the observation window and sample composition.',
          'Ever-recorded LRTI is exploratory because episode timing is unavailable; it enters nuisance regressions, not the first-TB hazard.'])
 
 

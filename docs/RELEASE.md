@@ -6,6 +6,8 @@ M01–M14 have independent numerical and presentation checks, a completed 868-te
 
 ## Environment and external dependencies
 
+The revised runtime, early thread-control bootstrap and crash recovery protocol are documented in [RUNTIME_RECOVERY.md](RUNTIME_RECOVERY.md). Historical accepted runs retain their original identities.
+
 The scientific reference environment uses Python 3.12.14 on macOS ARM64. `requirements-models.lock.txt` contains 41 exact dependency pins, including the plotting stack. Install it into a local environment and run nonempty synthetic test discovery:
 
 ```sh
@@ -47,7 +49,7 @@ The runner rebuilds preparation, deterministic models, aggregate reporting and a
 
 Under locks, the runner creates identical `full_run_origin.json` records in both roots before calculation. These bind source, authorized inputs, all nine configurations, runtimes, external fonts/references and exact destination paths. Completion verifies the 37 raw posterior receipts, accepted M13 and M14 publications, unchanged source/dependencies and complete payload inventories. It writes `output_directory/full_reconstruction/<fingerprint>/receipt.json` and the private `work_directory/full_current.json` pointer. GitHub delivery remains a separate check.
 
-To resume the same full reconstruction, repeat the identical command with `--resume`. Both origin records must exist, match and retain the original identity. Changed source, inputs, configurations, runtimes or destinations require a new empty pair of roots. Existing analysis caches without a matching full-run origin cannot be adopted. By comparison, `--through M14 --resume` validates an existing cumulative analysis; it does not establish an empty-root origin.
+To resume the same full reconstruction, repeat the identical command with `--resume`. Both origin records must match and retain the original identity; a matching pre-analysis origin journal can safely complete a missing second record. Changed source, inputs, configurations, runtimes or destinations require a new empty pair of roots. Existing analysis caches without a matching full-run origin cannot be adopted. By comparison, `--through M14 --resume` validates an existing cumulative analysis; it does not establish an empty-root origin.
 
 ## Independent reconstruction acceptance
 

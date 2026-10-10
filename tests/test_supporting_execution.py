@@ -95,6 +95,10 @@ class SupportingProtocolTests(unittest.TestCase):
 
 class SupportingExecutionTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.base = Path(self.temporary.name)
@@ -110,7 +114,7 @@ class SupportingExecutionTests(unittest.TestCase):
         self.descriptor = {"sha256": "a" * 64, "preparation_fingerprint": "b" * 64}
         self.settings = deepcopy(SETTINGS)
         rng = np.random.default_rng(81)
-        self.shapes = {name: (4, 1600, 5) if name in {"mechanics", "lci_raw", "lci_process"} else (4, 1600, 4) if name in {"loading_mechanics", "sigma_mechanics"} else (4, 1600, 3) if name == "log_baseline_hazard" else (4, 1600) for name in POSTERIOR_VARIABLES}
+        self.shapes = {name: (4, 1600, 5) if name in {"mechanics", "lci_raw", "lci_process", "target_raw", "target_process"} else (4, 1600, 4) if name in {"loading_mechanics", "sigma_mechanics"} else (4, 1600, 3) if name == "log_baseline_hazard" else (4, 1600) for name in POSTERIOR_VARIABLES}
         self.posterior = {name:rng.normal(size=shape) for name,shape in self.shapes.items()}
         self.stats = {"diverging": np.zeros((4, 1600), dtype=bool),
                       "reached_max_treedepth": np.zeros((4, 1600), dtype=bool),
@@ -161,7 +165,7 @@ class SupportingExecutionTests(unittest.TestCase):
     def test_empty_x6_hazard_table_roundtrips_and_resumes(self):
         self.target = "x6_z_before1"
         rng = np.random.default_rng(99)
-        self.shapes = {name: (4,1600,5) if name == "mechanics" else (4,1600,4) if name in {"loading_mechanics","sigma_mechanics"} else (4,1600,1) if name == "log_baseline_hazard" else (4,1600) for name in x6.POSTERIOR_VARIABLES}
+        self.shapes = {name: (4,1600,5) if name in {"mechanics","target_raw","target_process"} else (4,1600,4) if name in {"loading_mechanics","sigma_mechanics"} else (4,1600,1) if name == "log_baseline_hazard" else (4,1600) for name in x6.POSTERIOR_VARIABLES}
         self.posterior = {name:rng.normal(size=shape) for name,shape in self.shapes.items()}
         self.metadata["posterior_variables"] = list(self.posterior)
         self.result.estimates = self.result.estimates.iloc[:3].copy()
@@ -173,6 +177,36 @@ class SupportingExecutionTests(unittest.TestCase):
         self.assertEqual(list(observed), supporting_results.HAZARD_COLUMNS)
         self.assertTrue(self.run_target(resume=True, compute=lambda *a:self.fail("unexpected resampling"))["validation_reused"])
         self.assert_no_transient_files()
+
+    def test_covariance_failure_retains_raw_fit_and_truthful_diagnostic_status(self):
+        self.covariance.update(status='failed',accepted=False,joint_pass=False)
+        first=self.run_target()
+        self.assertTrue(first['diagnostics_passed'])
+        self.assertFalse(first['covariance_ppc_passed'])
+        self.assertEqual(first['status'],'model_adequacy_failed')
+        raw,validated=self.directories(first)
+        before=(raw/'posterior.npz').read_bytes()
+        self.assertEqual(json.loads((validated/'covariance_ppc.json').read_text()),self.covariance)
+        again=self.run_target(resume=True,compute=lambda *a:self.fail('adequacy failure must not cause an unrequested refit'))
+        self.assertEqual(again['status'],'model_adequacy_failed')
+        self.assertEqual((raw/'posterior.npz').read_bytes(),before)
+
+    def test_unevaluable_covariance_cannot_pass_completion(self):
+        self.covariance.update(status='not_evaluable',accepted=False,joint_pass=False)
+        result=self.run_target()
+        self.assertTrue(result['diagnostics_passed'])
+        self.assertFalse(result['covariance_ppc_passed'])
+        self.assertEqual(result['status'],'model_adequacy_failed')
+
+    def test_repaired_hash_covariance_evidence_is_recomputed_on_resume(self):
+        result=self.run_target();_raw,validated=self.directories(result)
+        path=validated/'covariance_ppc.json'
+        evidence=json.loads(path.read_text());evidence['invented_aggregate']=999
+        write_json(path,evidence)
+        receipt=json.loads((validated/'receipt.json').read_text())
+        receipt['files']['covariance_ppc.json']=file_hash(path)
+        write_json(validated/'receipt.json',receipt)
+        with self.assertRaises(ValidationError):self.run_target(resume=True)
 
     def test_raw_and_validation_roundtrip_and_resume_skip_sampling(self):
         first = self.run_target()
@@ -190,7 +224,7 @@ class SupportingExecutionTests(unittest.TestCase):
         self.assert_no_transient_files()
 
     def test_complete_family_variables_and_child_coordinates_reach_strict_diagnostics(self):
-        self.assertEqual(len(self.posterior), 22)
+        self.assertEqual(len(self.posterior), 25)
         with mock.patch.object(diagnostics, "evaluate_diagnostics", wraps=REAL_DIAGNOSTICS) as checked:
             result = self.run_target()
             self.assertTrue(result["diagnostics_passed"])
@@ -540,6 +574,10 @@ class SupportingExecutionTests(unittest.TestCase):
 
 class SupportingBatchAndCliTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         temporary = tempfile.TemporaryDirectory(); self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name); self.work = self.base / "work"; self.output = self.base / "outputs"
         self.work.mkdir(); self.output.mkdir()
@@ -558,7 +596,7 @@ class SupportingBatchAndCliTests(unittest.TestCase):
         self.factor = {"accepted":True, "status":"accepted", "fitted_models":10, "fingerprint":"d"*64}
 
     def computed(self, root, prep, target, settings, work, output, **kwargs):
-        return {"target":target, "diagnostics_passed":True, "status":"diagnostics_passed",
+        return {"target":target, "diagnostics_passed":True, "covariance_ppc_passed":True, "status":"diagnostics_passed",
                 "fit_fingerprint":"b"*64, "validation_fingerprint":"c"*64, "result_rows":6 if target.startswith("mmef_") else 3}
 
     def batch(self, *, computed=None, preparation=None, factor=None, prior=None, jobs=1):

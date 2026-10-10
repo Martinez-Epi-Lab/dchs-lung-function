@@ -27,8 +27,8 @@ from .wheeze_sampling import resolved_sampling,sample_contract,expected_posterio
 CRITERIA = {'min_chains':4,'min_draws':1600,'max_rhat':1.01,
             'min_bulk_ess':400,'min_tail_ess':400,'min_bfmi':.3,
             'max_divergences':0,'max_treedepth_hits':0}
-COMPUTE_SOURCES = ('models/wheeze.py','wheeze_sampling.py','sampling.py','model_runtime.py')
-VALIDATION_SOURCES = ('wheeze_execution.py','diagnostics.py','execution.py','pipeline.py',
+COMPUTE_SOURCES = ('models/wheeze.py','wheeze_sampling.py','sampling.py','model_runtime.py','runtime_bootstrap.py')
+VALIDATION_SOURCES = ('lifecycle.py','wheeze_execution.py','diagnostics.py','execution.py','pipeline.py',
                       'analysis/wheeze_results.py','analysis/wheeze_standardization.py')
 _LOADED_RUNNER_HASH = file_hash(Path(__file__))
 TABLES = ('effects','contrasts','global_tests','support_counts','posterior_predictive_cells','standardized_rr')

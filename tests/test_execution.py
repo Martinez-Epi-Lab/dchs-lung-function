@@ -210,7 +210,7 @@ class ExecutionTests(unittest.TestCase):
         self.assert_no_completed_or_staged_run()
 
     def test_partial_publication_is_rolled_back(self):
-        original = ex.os.replace
+        original = ex.rename_noreplace
         failed = False
         def replace(source, target):
             nonlocal failed
@@ -219,7 +219,7 @@ class ExecutionTests(unittest.TestCase):
                 failed = True
                 raise OSError("synthetic publication failure")
             return original(source, target)
-        with mock.patch.object(ex.os, "replace", side_effect=replace):
+        with mock.patch.object(ex, "rename_noreplace", side_effect=replace):
             with self.assertRaises(OSError):
                 self.run_preparation()
         self.assertTrue(failed)

@@ -8,6 +8,8 @@ Eligible measurements precede the first TB diagnosis date strictly; same-day and
 
 For the eight measures without applicable reference equations, adverse-oriented values are regressed on scheduled visit, standardized height and sex using eligible pre-TB observations. Residuals are divided by their SD with degrees of freedom equal to the nuisance design column count. The nine frequency-domain outcomes use adverse-oriented South African reference z-scores directly. Higher resistance, resistance differences, within-breath reactance differences, resonant frequency and reactance area are adverse; compliance and the end-expiratory, end-inspiratory and frequency-domain reactances are reversed.
 
+For the residualized outcomes, the Cox fit treats those estimated nuisance coefficients and residual scales as fixed. Reported uncertainty is conditional on that first stage. The omitted uncertainty does not have a proven uniform direction or correction factor across outcomes.
+
 The analysis time scale is attained age. Each measurement contributes until the next eligible measurement of that outcome, two years after measurement, first TB, or the end of observed TB follow-up, whichever occurs first. Gaps after the two-year limit contribute no risk time. Only positive-length intervals are retained. Event assignment requires `start < TB age <= stop`.
 
 The selected PHReg implementation includes intervals with `start <= event age <= stop` in an event-time risk set. Consequently, adjacent intervals can both contribute when their shared boundary equals an event age. This boundary convention is preserved and audited separately from the strictly pre-diagnosis measurement rule and event-assignment rule.
@@ -27,6 +29,8 @@ B @ (U.T @ U) @ B * G/(G-1) * (N-1)/(N-3)
 The target hazard ratio is `exp(beta)`, its 95% interval is `exp(beta ± 1.96 * robust_SE)`, and its two-sided p-value uses the standard normal distribution. Both model and robust covariance matrices, all three coefficients, sample counts and aggregate risk-set support are retained. Benjamini–Hochberg q-values use the selected family of 17 two-year models; raw p-values remain available.
 
 The source's fewer-than-three-event fitting guard is reported explicitly as a source-policy non-estimable status, with all sample and event counts retained. It is not a statement that every such model is mathematically non-identifiable. Numerical failure, singular information, invalid covariance and nonconvergence cannot produce accepted scientific inference. Small aggregate counts are never suppressed.
+
+Above that source guard, a converged three-covariate fit can still have sparse event support. Robust covariance and the finite-sample multiplier do not establish accurate normal-Wald coverage in that setting. Exact event counts, estimates and intervals remain visible; no blanket percentage widening or automatic suppression is applied.
 
 ## Authorized Figure S3 uncertainty correction
 
@@ -51,8 +55,11 @@ Efron-fit/Breslow-score combination, the inclusive entry/stop risk boundaries an
 the source finite-sample convention. It does not claim to replace these with a
 different tie method or establish general small-sample coverage. The original
 M09 archive remains unchanged; corrected Figure S3 rows have an explicit
-`pretb_corrected/estimates` lineage. Numerical, caption, visual and cumulative
-replay validation of the complete M14 publication are required before acceptance.
+`pretb_corrected/estimates` lineage. The corrective revision retains this
+approved score-membership correction, rather than reverting to source
+uncertainty or silently changing the tie/boundary conventions. Numerical,
+caption, visual and cumulative replay validation are bound to each accepted
+publication's private receipts.
 
 ## Execution and validation
 

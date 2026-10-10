@@ -1,8 +1,10 @@
-"""Selected primary spirometry joint model, specification version 1.0.0.
+"""Primary spirometry joint model, specification version 2.0.0.
 
 The six observed processes use the residuals and scales prepared by M03.
 The unit-variance mechanics factor is shared by the four mechanics indicators,
-the spirometry target, and the first-TB hazard. The separate LCI process has no
+the spirometry target, and the first-TB hazard. An independent target child
+intercept represents persistent target variation not shared with mechanics.
+The separate LCI process has no
 loading into either the target or hazard. No data are read or written and no
 sampling occurs here. Child coordinates are positional indices, not identifiers.
 """
@@ -13,7 +15,7 @@ from typing import Any, Mapping
 
 import numpy as np
 
-SPEC_VERSION = '1.0.0'
+SPEC_VERSION = '2.0.0'
 MODEL_ID = 'SPIRO-JOINT-PRIMARY'
 MECHANICS = ('resistance', 'compliance', 'xee', 'ree')
 PROCESSES = (*MECHANICS, 'lci', 'target')
@@ -57,7 +59,7 @@ def fit_spec(target: str) -> dict[str, Any]:
         raise ValueError('Unsupported primary spirometry target.')
     column, multiplier, label, unit, seed = TARGETS[target]
     normal_priors = {
-        'mechanics': [0., 1.], 'lci_raw': [0., 1.],
+        'mechanics': [0., 1.], 'lci_raw': [0., 1.], 'target_raw': [0., 1.],
         'loading_ratio_mechanics': [0., 1.],
         **{name: [0., .75] for name in (
             'shift_mechanics', 'shift_mechanics_infancy', 'shift_mechanics_late',
@@ -72,7 +74,7 @@ def fit_spec(target: str) -> dict[str, Any]:
         'runtime': {'pymc': '5.25.1', 'pytensor': '2.31.7', 'arviz': '0.22.0'},
         'normal_priors_mean_sd': normal_priors,
         'half_normal_prior_sd': {name: 1. for name in (
-            'tau_lci', 'loading_mechanics', 'sigma_mechanics', 'sigma_lci', 'sigma_ratio')},
+            'tau_lci', 'tau_target', 'loading_mechanics', 'sigma_mechanics', 'sigma_lci', 'sigma_ratio')},
         'log_baseline_hazard_prior': {'mean': np.log(BASELINE_HAZARDS).tolist(), 'sd': 1.25},
         'hazard_breaks_years': list(HAZARD_BREAKS),
         'mechanics_indicators': list(MECHANICS),
@@ -82,7 +84,10 @@ def fit_spec(target: str) -> dict[str, Any]:
         'nuisance_training': 'pre/no-TB observations of each process',
         'residual_scale': 'sample SD of training residuals, ddof=nuisance design columns',
         'latent_parameterization': {'mechanics': 'centered Normal(0,1)',
-                                    'lci_process': 'tau_lci*lci_raw; lci_raw Normal(0,1)'},
+                                    'lci_process': 'tau_lci*lci_raw; lci_raw Normal(0,1)',
+                                    'target_process': 'tau_target*target_raw; target_raw Normal(0,1), independent of mechanics and LCI'},
+        'target_child_effect_hazard_coupling': False,
+        'participant_posterior_variables': ['mechanics', 'lci_raw', 'lci_process', 'target_raw', 'target_process'],
         'lci_coupling_to_target_or_hazard': False,
         'post_diagnosis_terms': list(POST_TERMS),
         'contrasts': dict(CONTRASTS),
@@ -95,6 +100,7 @@ def fit_spec(target: str) -> dict[str, Any]:
                           'sigma_ratio': .9} for v in (.25, .35, .45, .55)],
             'progressbar': False,
         },
+        'sampling_authority': 'Historical default controls and initialization provenance; resolved_sampling with the active sampling configuration determines executed controls.',
         'diagnostic_criteria': {'divergences': 0, 'max_rhat': 1.01, 'min_bulk_ess': 400,
                                 'scope': 'all posterior variables including child latent effects'},
         'additional_diagnostics': ['tail_ess', 'bfmi', 'mcse', 'trace_inspection'],
@@ -213,6 +219,9 @@ def build_model(contract: Mapping, target: str):
         lci_raw = pm.Normal('lci_raw', 0., 1., dims='child')
         tau_lci = pm.HalfNormal('tau_lci', 1.)
         lci_process = pm.Deterministic('lci_process', tau_lci*lci_raw, dims='child')
+        target_raw = pm.Normal('target_raw', 0., 1., dims='child')
+        tau_target = pm.HalfNormal('tau_target', 1.)
+        target_process = pm.Deterministic('target_process', tau_target*target_raw, dims='child')
         loading_mechanics = pm.HalfNormal('loading_mechanics', 1., dims='mechanics_indicator')
         sigma_mechanics = pm.HalfNormal('sigma_mechanics', 1., dims='mechanics_indicator')
         sigma_lci = pm.HalfNormal('sigma_lci', 1.)
@@ -246,7 +255,7 @@ def build_model(contract: Mapping, target: str):
         direct_ratio_infancy = pm.Normal('direct_ratio_infancy', 0., .75)
         sigma_ratio = pm.HalfNormal('sigma_ratio', 1.)
         ratio_current_mechanics = mechanics[ratio_idx]+shift_mechanics*ratio_z0+shift_mechanics_infancy*ratio_zinf+shift_mechanics_late*ratio_zlate
-        ratio_mu = loading_ratio_mechanics*ratio_current_mechanics+direct_ratio*ratio_z0+direct_ratio_infancy*ratio_zinf+direct_ratio_late*ratio_zlate
+        ratio_mu = loading_ratio_mechanics*ratio_current_mechanics+target_process[ratio_idx]+direct_ratio*ratio_z0+direct_ratio_infancy*ratio_zinf+direct_ratio_late*ratio_zlate
         pm.Normal('obs_fev1_fvc', mu=ratio_mu, sigma=sigma_ratio, observed=ratio['y_std'].to_numpy(dtype=float))
 
         log_baseline_hazard = pm.Normal('log_baseline_hazard', mu=np.log(np.asarray(BASELINE_HAZARDS)),

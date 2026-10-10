@@ -82,6 +82,10 @@ class PrimaryProtocolTests(unittest.TestCase):
 
 class PrimaryExecutionTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.base = Path(self.temporary.name)
@@ -141,6 +145,36 @@ class PrimaryExecutionTests(unittest.TestCase):
     def assert_no_transient_files(self):
         self.assertEqual(list(self.base.rglob(".staging-*")), [])
         self.assertEqual(list(self.base.rglob(".preparation.lock")), [])
+
+    def test_covariance_failure_retains_raw_fit_and_truthful_diagnostic_status(self):
+        self.covariance.update(status='failed',accepted=False,joint_pass=False)
+        first=self.run_target()
+        self.assertTrue(first['diagnostics_passed'])
+        self.assertFalse(first['covariance_ppc_passed'])
+        self.assertEqual(first['status'],'model_adequacy_failed')
+        raw,validated=self.directories(first)
+        before=(raw/'posterior.npz').read_bytes()
+        self.assertEqual(json.loads((validated/'covariance_ppc.json').read_text()),self.covariance)
+        again=self.run_target(resume=True,compute=lambda *a:self.fail('adequacy failure must not cause an unrequested refit'))
+        self.assertEqual(again['status'],'model_adequacy_failed')
+        self.assertEqual((raw/'posterior.npz').read_bytes(),before)
+
+    def test_unevaluable_covariance_cannot_pass_completion(self):
+        self.covariance.update(status='not_evaluable',accepted=False,joint_pass=False)
+        result=self.run_target()
+        self.assertTrue(result['diagnostics_passed'])
+        self.assertFalse(result['covariance_ppc_passed'])
+        self.assertEqual(result['status'],'model_adequacy_failed')
+
+    def test_repaired_hash_covariance_evidence_is_recomputed_on_resume(self):
+        result=self.run_target();_raw,validated=self.directories(result)
+        path=validated/'covariance_ppc.json'
+        evidence=json.loads(path.read_text());evidence['invented_aggregate']=999
+        write_json(path,evidence)
+        receipt=json.loads((validated/'receipt.json').read_text())
+        receipt['files']['covariance_ppc.json']=file_hash(path)
+        write_json(validated/'receipt.json',receipt)
+        with self.assertRaises(ValidationError):self.run_target(resume=True)
 
     def test_raw_and_validation_roundtrip_and_resume_skip_sampling(self):
         first = self.run_target()
@@ -401,6 +435,10 @@ class PrimaryExecutionTests(unittest.TestCase):
 
 class PrimaryBatchTests(unittest.TestCase):
     def setUp(self):
+        # Runner boundary fixture: numerical PPC is tested independently.
+        self.covariance={'status':'passed','accepted':True,'joint_pass':True}
+        ppc_patch=mock.patch.object(pe,'evaluate_covariance',side_effect=lambda *a,**k:deepcopy(self.covariance))
+        ppc_patch.start();self.addCleanup(ppc_patch.stop)
         self.temporary = tempfile.TemporaryDirectory(); self.addCleanup(self.temporary.cleanup)
         self.base = Path(self.temporary.name)
         self.work, self.output = self.base / "work", self.base / "outputs"
@@ -413,7 +451,7 @@ class PrimaryBatchTests(unittest.TestCase):
         self.prepared = {"fingerprint": "a" * 64}
 
     def computed(self, root, prep, target, settings, work, output, **kwargs):
-        return {"target": target, "diagnostics_passed": True, "status": "diagnostics_passed",
+        return {"target": target, "diagnostics_passed": True, "covariance_ppc_passed": True, "status": "diagnostics_passed",
                 "fit_fingerprint": "b" * 64, "validation_fingerprint": "c" * 64}
 
     def run_batch(self, *, targets=None, jobs=1, computed=None, preparation=None):
@@ -421,6 +459,16 @@ class PrimaryBatchTests(unittest.TestCase):
             with mock.patch.object(pe, "sample_one", side_effect=computed or self.computed):
                 return pe.run_primary(self.base / "source", self.config, self.analysis, self.sampling,
                                       targets=targets, jobs=jobs, resume=True)
+
+    def test_converged_but_inadequate_primary_batch_never_publishes_current_marker(self):
+        def inadequate(*args,**kwargs):
+            result=self.computed(*args,**kwargs)
+            if result['target']=='ratio_pre':result.update(covariance_ppc_passed=False,status='model_adequacy_failed')
+            return result
+        result=self.run_batch(computed=inadequate)
+        self.assertTrue(result['diagnostics_passed']);self.assertFalse(result['covariance_ppc_passed'])
+        self.assertFalse(result['accepted']);self.assertEqual(result['status'],'model_adequacy_failed')
+        self.assertEqual(list(self.work.glob('primary*current.json')),[])
 
     def test_complete_and_selected_batches_publish_distinct_explicit_markers(self):
         all_models = self.run_batch()

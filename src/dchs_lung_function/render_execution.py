@@ -171,8 +171,8 @@ def registry_from_export(exported):
     _object(exported,('schema_version','records','sources','record_count'))
     require(type(exported['schema_version']) is int and exported['schema_version']==1
             and isinstance(exported['records'],list) and type(exported['record_count']) is int
-            and exported['record_count']==len(exported['records'])==3195
-            and isinstance(exported['sources'],list) and len(exported['sources'])==142,
+            and exported['record_count']==len(exported['records'])==3196
+            and isinstance(exported['sources'],list) and len(exported['sources'])==143,
             'requires the complete accepted aggregate registry.')
     registry=ResultRegistry();contract=registry._schema_contract
     require(exported['sources']==sorted(contract['sources']),'aggregate source inventory differs.')

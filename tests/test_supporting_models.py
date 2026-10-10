@@ -26,7 +26,7 @@ def fabricated_pft():
         for j,age in enumerate([.15,.6,1.5,4.,6.,9.]):
             date=dob+pd.Timedelta(days=round(age*365.25));noise=rng.normal()
             row={'pid_child':f'fabricated_{child:02}','child_dob':dob,'male':float(child%2),
-                 'tb_first_dx':dx,'tb_age_first_years':tb_age,'visit_label':f'visit_{j}',
+                 'tb_first_dx':dx,'tb_age_first_years':tb_age,'exit_date':pd.NaT,'visit_label':f'visit_{j}',
                  'height':55+age*7+child*.2+rng.normal(),
                  'date_of_test':date,'date_of_test_ilf1':date,'date_of_test_ilf2':date,
                  'mmef':1.+.1*age+.2*noise,'mmef_post':1.2+.12*age+.3*noise,
@@ -44,7 +44,7 @@ def fabricated_pft():
 def fabricated_contract(target='mmef_unpaired'):
     s=fit_spec(target)
     return joint_inputs(fabricated_pft(), s['column'] if s['family']=='x6' else (s['column'],1.),
-                        family='x6' if s['family']=='x6' else 'early',threshold=s['threshold'])
+                        family='x6' if s['family']=='x6' else 'early',threshold=s['threshold'],event_end='2011-01-01')
 
 
 def normlog(value,mean,sd):
@@ -85,12 +85,12 @@ def independent_factors(contract,target,values):
     f=contract['frames']['target'];current=v['mechanics'][f.child_index]+v['shift_mechanics']*f.post_any
     if s['family']=='mmef':
         current=current+v['shift_mechanics_infancy']*f.post_infancy
-        mu=v['loading_ratio_mechanics']*current+v['direct_ratio']*f.post_any+v['direct_ratio_infancy']*f.post_infancy
+        mu=v['loading_ratio_mechanics']*current+v['tau_target']*v['target_raw'][f.child_index]+v['direct_ratio']*f.post_any+v['direct_ratio_infancy']*f.post_infancy
         expected['obs_fev1_fvc']=float(np.sum(normlog(f.y_std,mu,v['sigma_ratio'])))
         f=contract['frames']['lci'];mu=v['tau_lci']*v['lci_raw'][f.child_index]+v['shift_lci']*f.post_any+v['shift_lci_infancy']*f.post_infancy
         expected['obs_lci']=float(np.sum(normlog(f.y_std,mu,v['sigma_lci'])))
     else:
-        mu=v['loading_target_mechanics']*current+v['direct_target']*f.post_any
+        mu=v['loading_target_mechanics']*current+v['tau_target']*v['target_raw'][f.child_index]+v['direct_target']*f.post_any
         expected['obs_target']=float(np.sum(normlog(f.y_std,mu,v['sigma_target'])))
     loghaz=v['log_baseline_hazard'][None,:]+(v['assoc_mechanics']*v['mechanics']+v['hazard_male']*contract['children'].male.to_numpy())[:,None]
     expected['first_tb_loglik']=float(np.sum(contract['event']['event_interval']*loghaz-contract['event']['exposure']*np.exp(loghaz)))
@@ -191,7 +191,7 @@ class SupportingGraphTests(unittest.TestCase):
         for target,(c,m,v,p,fn) in self.examples.items():
             before=deepcopy(c);spec=fit_spec(target);shapes=expected_posterior_shapes(c,target,4,1600)
             self.assertEqual(set(shapes),set(spec['posterior_variables']))
-            self.assertEqual(len(shapes),22 if spec['family']=='mmef' else 12)
+            self.assertEqual(len(shapes),25 if spec['family']=='mmef' else 15)
             self.assertEqual(shapes['mechanics'],(4,1600,len(c['children'])))
             self.assertEqual(shapes['log_baseline_hazard'],(4,1600,len(spec['hazard_breaks'])-1))
             self.assertEqual(list(m.coords['hazard_interval']),spec['hazard_labels'])
@@ -208,7 +208,7 @@ class SupportingGraphTests(unittest.TestCase):
                 middle=.26;infant=.092;w=c['weights'][0]/sum(c['weights'][:2])
                 expected=[w*infant+(1-w)*middle,infant,middle,infant-middle,.2,-.12]
                 hazards=derive_hazard_draws(posterior,target)
-                np.testing.assert_allclose(hazards['Higher pre-TB mechanics factor'],np.exp(.35),rtol=0,atol=1e-14)
+                np.testing.assert_allclose(hazards['Higher (better) jointly estimated mechanics factor'],np.exp(.35),rtol=0,atol=1e-14)
             else:expected=[.26,.2,.06]
             for value,e in zip(draws.values(),expected):np.testing.assert_allclose(value,e*scale,rtol=0,atol=1e-14)
             result=summarize_supporting(posterior,c,target,compute_mcse=False)

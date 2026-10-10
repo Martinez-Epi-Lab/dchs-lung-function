@@ -1,11 +1,13 @@
 # Publication figures
 
-M14 implements and independently validates all three main and six supplementary
+M14 implements all three main and six supplementary
 figures from verified aggregate results, including the user-authorized correction
-of pre-TB score-residual risk membership for Figure S3. Independent numerical and
-caption checks, all rendered pages, actual-font embedding, the 868-test suite and
-final-source original/copied cumulative replays passed. Private acceptance
-receipts bind that evidence. [M15 release instructions](RELEASE.md) describe clean
+of pre-TB score-residual risk membership for Figure S3. The original M14 baseline
+passed independent numerical/caption checks, rendered-page and actual-font
+inspection, its 868-test suite, and original/copied cumulative replays. Private
+acceptance receipts bind that historical evidence. Corrective figures require
+fresh numerical, layout and actual-font checks against their revised accepted
+aggregates. [M15 release instructions](RELEASE.md) describe clean
 full reconstruction, aggregate-only rendering and separate code-only delivery
 acceptance.
 

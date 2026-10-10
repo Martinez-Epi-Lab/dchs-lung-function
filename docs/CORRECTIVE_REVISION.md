@@ -53,6 +53,25 @@ be compared with the original release, but agreement with a superseded model
 is not an acceptance requirement. No fixed percentage inflation is applied to
 intervals, and no assumed direction of loading bias selects the result.
 
+### Primary diagnostic-remediation amendment
+
+Two primary fits in the initial 1,200-retained-draw reconstruction failed the
+unchanged R-hat limit while passing the other sampler and covariance gates.
+Independent chain reviews found low-frequency location imbalance and no
+demonstrated separate mode in the inspected global projections. These fits
+remain failures; passing predictive checks does not override poor convergence.
+
+A new amendment, specified after those initial results and before further
+sampling, fixes 4,800 retained draws per chain for all twelve primary models.
+The model, 1,600 tuning iterations, seeds, initialization, target acceptance and
+all gates remain unchanged. Preserve the initial failed run, verify every
+1,200-draw posterior and non-timing sampler-statistic prefix exactly, and examine
+later-block stability alongside complete diagnostics and predictive checks.
+There is no interim stopping, early-draw removal, seed selection or further
+automatic primary extension. If acceptance still fails, retain the evidence
+and reassess the cause. This is distinct from the initially prespecified Table
+S1 precision extension below.
+
 ## Attenuation and Monte Carlo precision
 
 Attenuation remains `100 * (1 - abs(adjusted mean) / abs(core mean))`. It is a

@@ -1,12 +1,12 @@
 # Manuscript tables and numerical text
 
-M13 is implemented and independently validated. It assembles the selected
-manuscript tables and numerical prose from verified M01–M12 aggregate results.
-The M13 baseline suite has 802 passing tests, and actual cumulative M01–M13
-execution passes. The published DOCX is identical to the independently
-inspected ten-page document with verified Arial embedding. Final original-source and copied-source cumulative replay against the reviewed
-M13 source manifest passed. Private receipts verify all reporting payloads and
-preservation of prior scientific outputs and raw fits.
+M13 assembles the selected manuscript tables and numerical prose from verified
+M01–M12 aggregate results. The original M13 baseline passed 802 tests, actual
+cumulative execution, and original-source/copied-source replay. Its DOCX matched
+the independently inspected ten-page document with verified Arial embedding;
+private receipts bind those historical outputs and preserved raw fits. Corrective
+publications require their own execution, numerical, document and visual checks
+against the revised source; the original evidence does not certify them.
 
 ## Selected coverage
 
@@ -27,8 +27,11 @@ the complete layouts also preserve labels containing only Unicode subscripts.
 All 42 retained numerical sentences have explicit templates and classifications,
 with 96 result tokens and 52 qualitative evidence bindings. Age thresholds,
 interval coverage, references and contextual dates are distinguished from study
-estimates. The prose file is a generated companion for review; it does not edit
-either selected manuscript. Context-only statements remain classified, and
+estimates. `numerical_text.txt` contains pipeline-verifiable numerical claims
+with result bindings. It is a generated companion for review, not a drop-in
+replacement for the full interpretive manuscript prose: clinical meaning,
+limitations, causal language and synthesis still require author review. It does
+not edit either selected manuscript. Context-only statements remain classified, and
 qualitative statements retain their supporting result selections. An interval
 that no longer supports a null-compatibility statement requires wording review;
 this does not introduce another model-significance or Monte Carlo acceptance
@@ -81,6 +84,16 @@ and sentence wording or contextual numbers can change their numerical order.
 An archived manuscript literal never replaces a computed value. Scientific
 acceptance remains governed by the independently verified upstream definitions,
 diagnostics and frozen numerical/Monte Carlo criteria.
+
+The preserved original-model release comparison is historical evidence, not
+acceptance evidence for the current corrective revision. In that comparison,
+140 of 304 original table cells matched numerically and 164 differed. Matches
+comprised 25/186 estimate cells, 75/75 count cells, 26/26 numeric headers and
+14/17 contextual labels. Of 42 retained sentences, 21/42 had matching numeric
+sequences and 8/42 matched the complete text exactly. These display comparisons
+do not establish that all point estimates or scientific conclusions agreed.
+The corrective release requires its own numerical, diagnostic and reporting
+checks against its frozen source and accepted aggregate outputs.
 
 ## Command and local configuration
 
@@ -142,12 +155,12 @@ Generated tables, text, original reference comparisons, local bindings and
 validation evidence stay outside the code-only repository. Full raw arrays are
 never copied into the reporting artifacts.
 
-The M13 complete test suite, coverage/lineage checks, actual cumulative execution
-and document structure/font and visual checks pass. Final original-source and
-copied-source cumulative execution against the reviewed source manifest also
-passed, preserving prior scientific outputs and raw fits and reproducing the M13
-payloads under recorded identities. These completed outcomes are bound in local
-receipts. Subsequent modules require their own final-source replay evidence.
+The original M13 baseline passed its complete test suite, coverage/lineage checks,
+actual cumulative execution, and document structure/font and visual checks.
+Original-source and copied-source cumulative execution against that reviewed
+manifest also passed, preserving its scientific outputs and raw fits. Local
+receipts bind those historical outcomes. Subsequent modules and the corrective
+revision require their own final-source execution and publication evidence.
 
 Four upstream flow nodes remain unavailable: antenatal enrollment, antenatal
 loss to follow-up, pregnancy loss and exclusion before the child cohort. The

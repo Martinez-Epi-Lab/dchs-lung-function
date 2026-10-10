@@ -71,15 +71,25 @@ factor is applied.
 ## Sampling and acceptance
 
 `config/primary_sampling.json` fixes four chains, 1,600 tuning iterations and
-1,200 retained draws per chain, target acceptance 0.95, maximum tree depth
+4,800 retained draws per chain, target acceptance 0.95, maximum tree depth
 10, and `adapt_diag` initialization. The four positive initial loading
 values are 0.25, 0.35, 0.45 and 0.55; initial target SD is 0.9. The selected
 target seeds are versioned in `fit_spec`; the new-run configuration adds a
 fixed 104729 offset. Reusing a seed does not itself establish biased inference,
 and different seed labels do not establish independence between estimates.
 Sampling controls and
-realized counts are retained with the private draws. Each chain uses one
-BLAS thread; two chains run simultaneously by default.
+realized counts are retained with the private draws. Thread controls request one
+BLAS thread before numerical libraries load; observed library capabilities are
+recorded separately, and Apple Accelerate's actual thread count is not observable
+through threadpoolctl. Two chains run simultaneously by default.
+
+The 4,800-draw setting is a separately recorded diagnostic-remediation amendment
+after two initial 1,200-draw fits exceeded the unchanged R-hat limit. It applies
+to all twelve primary models with the original tuning, seeds and initialization.
+Exact original posterior and non-timing sampler-statistic prefixes must be
+verified; early draws are not discarded. This amendment does not imply that
+longer sampling guarantees convergence, and no further automatic primary
+extension is authorized by this specification.
 
 Acceptance requires zero divergences and zero retained maximum-tree-depth
 hits, rank-normalized R-hat at most 1.01, bulk and tail ESS at least 400, and

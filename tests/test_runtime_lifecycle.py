@@ -79,6 +79,31 @@ with tempfile.TemporaryDirectory() as cache:
         with mock.patch.dict(os.environ,{'CXXFLAGS':'-DTEST_CHANGED'}):
             self.assertNotEqual(first,runtime.model_runtime_identity())
 
+    def test_fresh_runtime_identity_survives_real_pymc_import_and_graph_compilation(self):
+        result=self.script("""from dchs_lung_function.runtime_bootstrap import bootstrap
+bootstrap()
+from dchs_lung_function.model_runtime import model_runtime_identity,configure_runtime
+import tempfile,sys,atexit,shutil
+before=model_runtime_identity()
+assert 'pytensor' not in sys.modules and 'pymc' not in sys.modules
+cache=tempfile.mkdtemp(prefix='dchs-import-regression-')
+atexit.register(shutil.rmtree,cache,ignore_errors=True)
+configure_runtime(cache)
+configured=model_runtime_identity()
+import pymc as pm
+import pytensor
+assert before==configured==model_runtime_identity()
+assert before['pytensor_configuration']['gcc__cxxflags']==pytensor.config.gcc__cxxflags
+with pm.Model() as model:
+ pm.Normal('fabricated_scalar',0,1)
+logp=model.compile_logp()
+assert logp({'fabricated_scalar':0.0})<0
+assert before==model_runtime_identity()
+print('effective-runtime-stable')
+""")
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(result.stdout.strip(),'effective-runtime-stable')
+
     def test_empty_threadpool_report_never_claims_observed_single_thread(self):
         from dchs_lung_function.model_runtime import thread_observations
         with mock.patch('threadpoolctl.threadpool_info',return_value=[]):

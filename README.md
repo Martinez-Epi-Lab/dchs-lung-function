@@ -61,7 +61,7 @@ Only `--resume` may be added. This regenerates editable tables, numerical text, 
 ../dchs-runtime/bin/python -B tests/run_tests.py
 ```
 
-Tests use fabricated data and reject empty discovery. The smaller preparation lock supports `tests/run_tests.py --preparation-only`. Hosted macOS/Linux synthetic checks are separate from confidential-data reconstruction; local acceptance and actual remote CI outcomes have distinct receipts.
+Tests use fabricated data and reject empty discovery. The original M15 release passed 946 tests; the corrective revision adds scientific and recovery regressions, and each run reports its actual discovered count. The smaller preparation lock supports `tests/run_tests.py --preparation-only`. Hosted macOS/Linux synthetic checks are separate from confidential-data reconstruction; local acceptance and actual remote CI outcomes have distinct receipts.
 
 Private work holds typed participant-level intermediates, complete posterior arrays, manifests and pointers. The separate output root holds aggregate results and publications. Full completion is recorded in `full_reconstruction/<fingerprint>/receipt.json`; render-only results use `render_only/<fingerprint>/`. Input/source/runtime hashes, locks, staged writes and complete inventories govern reuse. Independent scientific checks remain additional to command-level diagnostic acceptance.
 

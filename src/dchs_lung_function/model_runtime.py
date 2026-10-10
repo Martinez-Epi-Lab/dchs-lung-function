@@ -25,6 +25,9 @@ def _compiler_settings():
     bootstrap()
     fields = ("cxx", "floatX", "blas__ldflags", "gcc__cxxflags", "openmp", "linker", "mode", "optimizer", "device")
     if "pytensor" in sys.modules:
+        # PyMC adds compiler flags during import. Capture the effective model
+        # runtime, including that initialization, before assigning fit identity.
+        import pymc
         from pytensor.link.c.cmodule import GCC_compiler
         return {**{k:getattr(sys.modules["pytensor"].config,k) for k in fields},
                 "resolved_compiler_arguments":GCC_compiler.compile_args()}
@@ -46,6 +49,7 @@ if sys.platform=='darwin' and pytensor.__version__=='2.31.7':
  from pytensor.link.c.cmodule import GCC_compiler
  original=GCC_compiler.compile_args
  GCC_compiler.compile_args=staticmethod(lambda march_flags=True:[x for x in original(march_flags=march_flags) if x!='-ld64'])
+import pymc
 c=pytensor.config
 from pytensor.link.c.cmodule import GCC_compiler
 print(json.dumps({**{k:getattr(c,k) for k in ('cxx','floatX','blas__ldflags','gcc__cxxflags','openmp','linker','mode','optimizer','device')},'resolved_compiler_arguments':GCC_compiler.compile_args()}))

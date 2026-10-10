@@ -82,6 +82,12 @@ draws is permitted. Seeds, tuning and initialization stay fixed; retained draw
 and non-timing sampler prefixes must reproduce exactly. Further failure remains
 explicit and cannot be resolved by changing seeds or relaxing the gate.
 
+Existing per-target seed assignments are retained, including assignments shared
+by related specifications. Unique seeds are not required for valid marginal
+fits and would not by themselves establish independent Monte Carlo errors.
+The conservative precision bound above allows arbitrary cross-fit correlation;
+same-seed stability across specifications is not used as evidence of precision.
+
 ## Interpretation and release scope
 
 Exact small aggregate counts, estimates and intervals remain available.

@@ -2,7 +2,7 @@
 
 M15 provides separate commands for a complete analytical reconstruction, rendering accepted aggregate results, and exporting reviewed source. Each operation has its own identity and receipt. A successful render or archive check does not establish analytical reproducibility or GitHub delivery. Final validation evidence, source manifests, authorized local configuration and delivery receipts remain private.
 
-M01–M14 have independent numerical and presentation checks, a completed 868-test baseline, and successful final-source original and copied cumulative replays. M15 release acceptance additionally requires the complete current synthetic suite, the clean reconstruction and comparisons below, aggregate-only rendering checks, extracted-package verification, and remote source/hosted-CI verification. The private acceptance receipts establish which release and executions passed these requirements.
+M01–M14 have independent numerical and presentation checks, a completed 868-test baseline, and successful final-source original and copied cumulative replays. The original M15 release passed 946 synthetic tests. Corrective release acceptance additionally requires the complete current synthetic suite, the clean reconstruction and comparisons below, aggregate-only rendering checks, extracted-package verification, and remote source/hosted-CI verification. The private acceptance receipts establish which release and executions passed these requirements.
 
 ## Environment and external dependencies
 
@@ -53,11 +53,13 @@ To resume the same full reconstruction, repeat the identical command with `--res
 
 ## Independent reconstruction acceptance
 
-The accepted 37-fit run is the comparison baseline. The clean full run uses the same recorded seeds and selected controls, so this is a same-seed reconstruction, not an independent random sample. Review complete posterior and non-timing sampler arrays first; timing differences are not scientific differences. If arrays differ, retain the evidence and investigate the runtime and model identity before applying the frozen scientific comparisons.
+For reproduction of the original M15 specification, the accepted 37-fit run is the comparison baseline. That reconstruction used the same recorded seeds and selected controls, so it was a same-seed reconstruction, not an independent random sample. Its review compared complete posterior and non-timing sampler arrays; timing differences were not scientific differences.
 
-All posterior scalars, including child effects and deterministic variables, must pass the existing diagnostic gates: R-hat at most 1.01, bulk and tail effective sample size at least 400, BFMI at least 0.3, and no divergences or maximum-depth hits. The prespecified 924 posterior mean/quantile comparisons retain their four-combined-MCSE rule and quantile-specific MCSEs. Zero combined MCSE requires exact agreement. No threshold widening, seed selection or unplanned sampling extension is permitted to force acceptance.
+All posterior scalars, including child effects and deterministic variables, must pass the existing diagnostic gates: R-hat at most 1.01, bulk and tail effective sample size at least 400, BFMI at least 0.3, and no divergences or maximum-depth hits. The original specification's 924 posterior mean/quantile comparisons used a four-combined-MCSE rule and quantile-specific MCSEs, with exact agreement at zero combined MCSE. Those historical comparisons do not establish acceptance of changed models.
 
-Membership, counts, classifications, sample/design definitions and fit inventories must agree exactly. Deterministic floating-point comparisons retain the previously declared scale-specific tolerances. Full posterior checks and independent scientific comparisons remain distinct from a command's diagnostic acceptance. Record the final source manifest, test receipt, clean origin, full-run receipt, scientific comparisons, render checks and all five review bindings before delivery.
+The [corrective revision](CORRECTIVE_REVISION.md) instead requires a fresh 37-fit reconstruction, all 35 continuous covariance screens, the eight Table S1 precision bounds, and independent comparisons of revised estimates, intervals and null inclusion. Target intercepts, threshold follow-up and the declared S1 draw counts intentionally differ from the original specification. Explain every corresponding sample/design or result change; do not force numerical agreement with the superseded models. Unchanged deterministic analyses and the approved Figure S3 correction retain their exact or previously declared scale-specific comparison requirements. No threshold widening, seed selection or unplanned sampling extension is permitted to force acceptance.
+
+Full posterior checks and independent scientific comparisons remain distinct from a command's diagnostic acceptance. Record the final source manifest, test receipt, clean origin, full-run receipt, scientific comparisons, render checks and all five review bindings before delivery.
 
 ## Render accepted aggregates without refitting
 
